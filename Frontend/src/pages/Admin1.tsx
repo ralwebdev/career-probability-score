@@ -86,6 +86,7 @@ export default function Admin() {
             const data = await adminLogin({ username, password });
             localStorage.setItem("adminToken", data.token);
             setIsAuthenticated(true);
+            fetchData(data.token);
             toast.success("Welcome back, Admin!");
         } catch (error: any) {
             toast.error(error.message || "Invalid credentials");
@@ -232,7 +233,7 @@ export default function Admin() {
                                                 </h3>
                                                 <ResponsiveContainer width="100%" height={300}>
                                                     <BarChart data={dashboardData.popularCareers} layout="vertical">
-                                                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
+                                                        <CartesianGrid strokeDasharray="3 3" stroke="hsla(220, 26%, 93%, 1.00)" />
                                                         <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
                                                         <YAxis dataKey="name" type="category" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} width={100} />
                                                         <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} />
