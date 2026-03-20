@@ -1,6 +1,6 @@
 import { AssessmentData } from "./careerData";
 
-const API_BASE_URL = "http://localhost:5000/api";
+const API_BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
 export type CPSScores = {
   total: number;
@@ -35,7 +35,7 @@ export async function submitAssessment(data: AssessmentData, scores: CPSScores) 
 
 export async function getAssessment(id: string) {
   const response = await fetch(`${API_BASE_URL}/assessments/${id}`);
-  
+
   if (!response.ok) {
     throw new Error("Failed to fetch assessment");
   }
@@ -87,6 +87,23 @@ export async function verifyAdmin(token: string) {
 
   if (!response.ok) {
     throw new Error("Token verification failed");
+  }
+
+  return response.json();
+}
+
+export async function submitCounseling(counselingData: any) {
+  const response = await fetch(`${API_BASE_URL}/counseling`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(counselingData),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to submit counseling request");
   }
 
   return response.json();

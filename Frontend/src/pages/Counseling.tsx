@@ -62,10 +62,13 @@ function convertToLocalLabel(istMinutes: number, countryOffset: number): string 
 
 const IST_SLOTS = generateISTSlots();
 
+import { submitCounseling } from "@/lib/api";
+
 export default function Counseling() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [preferredDate, setPreferredDate] = useState<Date>();
   const [form, setForm] = useState({
     name: "", phone: "", email: "", careerInterest: "",
@@ -74,10 +77,22 @@ export default function Counseling() {
 
   const update = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
-    toast({ title: "Request Submitted!", description: "A counselor will reach out within 24 hours." });
+    setLoading(true);
+    try {
+      await submitCounseling({ ...form, preferredDate });
+      setSubmitted(true);
+      toast({ title: "Request Submitted!", description: "A counselor will reach out within 24 hours." });
+    } catch (error: any) {
+      toast({ 
+        title: "Submission Failed", 
+        description: error.message || "There was an error submitting your request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (submitted) {
@@ -223,7 +238,9 @@ export default function Counseling() {
               </SelectContent>
             </Select>
           </div>
-          <Button type="submit" className="w-full gradient-primary text-primary-foreground mt-4">Submit Request</Button>
+          <Button type="submit" disabled={loading} className="w-full gradient-primary text-primary-foreground mt-4">
+            {loading ? "Submitting..." : "Submit Request"}
+          </Button>
         </form>
       </div>
     </div>

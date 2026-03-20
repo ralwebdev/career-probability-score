@@ -19,12 +19,14 @@ app.use(express.json()); // Parses incoming JSON requests
 const assessmentRoutes = require('./routes/assessmentRoutes');
 const leadRoutes = require('./routes/leadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
+const counselingRoutes = require('./routes/counselingRoutes');
 // const courseRoutes = require('./routes/courseRoutes');
 
 // Mount routers
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/counseling', counselingRoutes);
 // app.use('/api/courses', courseRoutes);
 
 // Error handler
