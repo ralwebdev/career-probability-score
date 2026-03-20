@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Users, BarChart3, Globe, TrendingUp, Award, AlertTriangle, Lock, LogOut } from "lucide-react";
+import { Users, BarChart3, Globe, TrendingUp, Award, AlertTriangle, Lock, LogOut, Mail, Phone, MapPin, GraduationCap, Briefcase, Calendar, Info, ChevronRight } from "lucide-react";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from "recharts";
 import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getLeads, getAssessments } from "@/lib/api";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { format } from "date-fns";
 
 const PIE_COLORS = ["hsl(186, 100%, 50%)", "hsl(186, 80%, 40%)", "hsl(186, 60%, 35%)", "hsl(42, 100%, 50%)", "hsl(42, 80%, 40%)", "hsl(215, 20%, 40%)"];
@@ -40,6 +41,7 @@ export default function Admin() {
     const [assessmentsData, setAssessmentsData] = useState<any[]>([]);
     const [leadsData, setLeadsData] = useState<any[]>([]);
     const [dataLoading, setDataLoading] = useState(false);
+    const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -236,7 +238,7 @@ export default function Admin() {
                                                         <CartesianGrid strokeDasharray="3 3" stroke="hsla(220, 26%, 93%, 1.00)" />
                                                         <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
                                                         <YAxis dataKey="name" type="category" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} width={100} />
-                                                        <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} />
+                                                        <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8, color: "white" }} />
                                                         <Bar dataKey="count" fill="hsl(186, 100%, 50%)" radius={[0, 4, 4, 0]} />
                                                     </BarChart>
                                                 </ResponsiveContainer>
@@ -252,8 +254,8 @@ export default function Admin() {
                                                         <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
                                                         <XAxis dataKey="range" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
                                                         <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
-                                                        <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} />
-                                                        <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                                                        <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8, color: "white" }} />
+                                                        <Bar dataKey="count" fill="hsl(186, 100%, 50%)" radius={[4, 4, 0, 0]}>
                                                             {dashboardData.scoreDistribution.map((entry: any, i: number) => (
                                                                 <Cell key={i} fill={entry.color} />
                                                             ))}
@@ -277,7 +279,7 @@ export default function Admin() {
                                                                     <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                                                                 ))}
                                                             </Pie>
-                                                            <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} />
+                                                            <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8, color: "white" }} />
                                                         </PieChart>
                                                     </ResponsiveContainer>
                                                     <div className="space-y-2 flex-1">
@@ -420,16 +422,23 @@ export default function Admin() {
                                                 </TableRow>
                                             ) : (
                                                 assessmentsData.map((assessment: any) => (
-                                                    <TableRow key={assessment._id}>
+                                                    <TableRow 
+                                                        key={assessment._id} 
+                                                        className="cursor-pointer hover:bg-muted/50 transition-colors group"
+                                                        onClick={() => setSelectedAssessment(assessment)}
+                                                    >
                                                         <TableCell>
-                                                            <div className="font-medium text-xs">{assessment.name}</div>
+                                                            <div className="font-medium text-xs group-hover:text-primary transition-colors">{assessment.name}</div>
                                                             <div className="text-[10px] text-muted-foreground">{assessment.email}</div>
                                                         </TableCell>
                                                         <TableCell className="text-xs">{assessment.city}, {assessment.country}</TableCell>
                                                         <TableCell className="text-xs">{assessment.educationLevel}</TableCell>
                                                         <TableCell className="text-xs font-semibold">{assessment.careerRole}</TableCell>
                                                         <TableCell className="text-xs">
-                                                            {format(new Date(assessment.createdAt), "MMM dd, HH:mm")}
+                                                            <div className="flex items-center justify-between">
+                                                                {format(new Date(assessment.createdAt), "MMM dd, HH:mm")}
+                                                                <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 ))
@@ -485,6 +494,137 @@ export default function Admin() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Assessment Details Dialog */}
+            <Dialog open={!!selectedAssessment} onOpenChange={(open) => !open && setSelectedAssessment(null)}>
+                <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                            Assessment Details
+                            <span className="text-sm font-normal text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                ID: {selectedAssessment?._id?.slice(-6)}
+                            </span>
+                        </DialogTitle>
+                        <DialogDescription>
+                            Full profile and scoring data for {selectedAssessment?.name}
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {selectedAssessment && (
+                        <div className="space-y-8 py-4">
+                            {/* Section: Personal Info */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                                        <Info className="h-4 w-4" /> Personal Information
+                                    </h4>
+                                    <div className="space-y-2">
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <Mail className="h-4 w-4 text-muted-foreground" />
+                                            <span>{selectedAssessment.email}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <Phone className="h-4 w-4 text-muted-foreground" />
+                                            <span>{selectedAssessment.phone}</span>
+                                        </div>
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <MapPin className="h-4 w-4 text-muted-foreground" />
+                                            <span>{selectedAssessment.city}, {selectedAssessment.state}, {selectedAssessment.country}</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                                        <GraduationCap className="h-4 w-4" /> Education & Career
+                                    </h4>
+                                    <div className="space-y-2">
+                                        <div className="text-sm">
+                                            <span className="text-muted-foreground">Education:</span> {selectedAssessment.educationLevel} ({selectedAssessment.fieldOfStudy})
+                                        </div>
+                                        <div className="text-sm">
+                                            <span className="text-muted-foreground">Domain:</span> {selectedAssessment.careerDomain}
+                                        </div>
+                                        <div className="text-sm">
+                                            <span className="text-muted-foreground">Target Role:</span> <span className="font-bold">{selectedAssessment.careerRole}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="h-px bg-border" />
+
+                            {/* Section: Scores */}
+                            <div className="space-y-4">
+                                <h4 className="text-sm font-semibold text-primary flex items-center gap-2">
+                                    <BarChart3 className="h-4 w-4" /> Assessment Scores
+                                </h4>
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                    <div className="rounded-lg border p-3 bg-muted/30">
+                                        <div className="text-[10px] uppercase text-muted-foreground font-bold">Total CPS</div>
+                                        <div className="text-2xl font-mono font-bold text-primary">{selectedAssessment.scores?.total || 0}</div>
+                                    </div>
+                                    <div className="rounded-lg border p-3 bg-muted/30">
+                                        <div className="text-[10px] uppercase text-muted-foreground font-bold">QPI Score</div>
+                                        <div className="text-2xl font-mono font-bold text-primary">{selectedAssessment.scores?.qpi || 0}</div>
+                                    </div>
+                                    <div className="rounded-lg border p-3 bg-muted/30">
+                                        <div className="text-[10px] uppercase text-muted-foreground font-bold">Technical</div>
+                                        <div className="text-2xl font-mono font-bold text-primary">{selectedAssessment.scores?.technical || 0}</div>
+                                    </div>
+                                    <div className="rounded-lg border p-3 bg-muted/30">
+                                        <div className="text-[10px] uppercase text-muted-foreground font-bold">Soft Skills</div>
+                                        <div className="text-2xl font-mono font-bold text-primary">{selectedAssessment.scores?.softSkill || 0}</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Section: Secondary Scores */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
+                                    <span className="text-muted-foreground mb-1">Market Demand</span>
+                                    <span className="font-bold">{selectedAssessment.scores?.marketDemand || 0}%</span>
+                                </div>
+                                <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
+                                    <span className="text-muted-foreground mb-1">Experience</span>
+                                    <span className="font-bold">{selectedAssessment.scores?.experience || 0}</span>
+                                </div>
+                                <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
+                                    <span className="text-muted-foreground mb-1">Portfolio</span>
+                                    <span className="font-bold">{selectedAssessment.scores?.portfolio || 0}</span>
+                                </div>
+                            </div>
+
+                            <div className="h-px bg-border" />
+
+                            {/* Section: Details Table */}
+                            <div className="space-y-3">
+                                <h4 className="text-sm font-semibold text-primary">Skill Input Data</h4>
+                                <div className="rounded-md border overflow-hidden">
+                                    <Table>
+                                        <TableBody>
+                                            <TableRow>
+                                                <TableCell className="text-xs font-medium py-2">Specialization</TableCell>
+                                                <TableCell className="text-xs py-2">{selectedAssessment.specialization || "N/A"}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell className="text-xs font-medium py-2">Portfolio Level</TableCell>
+                                                <TableCell className="text-xs py-2 capitalize">{selectedAssessment.portfolioLevel || "None"}</TableCell>
+                                            </TableRow>
+                                            <TableRow>
+                                                <TableCell className="text-xs font-medium py-2">Completion Date</TableCell>
+                                                <TableCell className="text-xs py-2">
+                                                    {format(new Date(selectedAssessment.createdAt), "PPPP 'at' p")}
+                                                </TableCell>
+                                            </TableRow>
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
