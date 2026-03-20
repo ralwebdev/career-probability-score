@@ -1,14 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const Assessment = require('../models/Assessment');
+const { calculateCPS } = require('../utils/careerData');
 
 // @desc    Create new assessment
 // @route   POST /api/assessments
 router.post('/', async (req, res, next) => {
   try {
-    // You can either compute the CPS score here on the backend 
-    // or accept the frontend's calculation to speed up migration.
-    const assessment = await Assessment.create(req.body);
+    // Calculate CPS score on the backend for data integrity
+    const scores = calculateCPS(req.body);
+    const assessment = await Assessment.create({
+      ...req.body,
+      scores
+    });
     res.status(201).json(assessment);
   } catch (error) {
     res.status(400);

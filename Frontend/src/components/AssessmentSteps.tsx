@@ -286,8 +286,7 @@ export function AssessmentSteps() {
 
   const handleSubmit = async () => {
     try {
-      const scores = calculateCPS(data);
-      const result = await submitAssessment(data, scores);
+      const result = await submitAssessment(data);
       sessionStorage.setItem("cps-assessment", JSON.stringify(data));
       navigate(`/results?id=${result._id}`);
     } catch (error) {

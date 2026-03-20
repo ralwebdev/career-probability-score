@@ -12,7 +12,7 @@ import Counseling from "./pages/Counseling";
 import MarketSignals from "./pages/MarketSignals";
 import Courses from "./pages/Courses";
 import Workshops from "./pages/Workshops";
-import Admin from "./pages/Admin1";
+import Admin from "./pages/Admin/index";
 import CourseLanding from "./pages/CourseLanding";
 import CollegeDashboard from "./pages/CollegeDashboard";
 import NotFound from "./pages/NotFound";

@@ -14,16 +14,13 @@ export type CPSScores = {
   qpi: number;
 };
 
-export async function submitAssessment(data: AssessmentData, scores: CPSScores) {
+export async function submitAssessment(data: AssessmentData) {
   const response = await fetch(`${API_BASE_URL}/assessments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      ...data,
-      scores,
-    }),
+    body: JSON.stringify(data),
   });
 
   if (!response.ok) {
