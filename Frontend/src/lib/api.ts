@@ -108,3 +108,58 @@ export async function submitCounseling(counselingData: any) {
 
   return response.json();
 }
+
+export async function getDashboardStats(token: string) {
+  const response = await fetch(`${API_BASE_URL}/assessments/analytics/stats`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch dashboard stats");
+  }
+
+  return response.json();
+}
+
+export async function getCounselingRequests(token: string) {
+  const response = await fetch(`${API_BASE_URL}/counseling`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch counseling requests");
+  }
+
+  return response.json();
+}
+
+export async function getLeads(token: string) {
+  const response = await fetch(`${API_BASE_URL}/leads`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch leads");
+  }
+
+  return response.json();
+}
+export async function getAssessments(token: string) {
+  const response = await fetch(`${API_BASE_URL}/assessments`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch assessments");
+  }
+
+  return response.json();
+}
