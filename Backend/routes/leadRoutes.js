@@ -1,28 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const Lead = require('../models/Lead');
+const { createLead, getLeads } = require('../controllers/leadController');
 
 // @desc    Capture a new lead
 // @route   POST /api/leads
-router.post('/', async (req, res, next) => {
-  try {
-    const lead = await Lead.create(req.body);
-    res.status(201).json(lead);
-  } catch (error) {
-    res.status(400);
-    next(error);
-  }
-});
+router.post('/', createLead);
 
 // @desc    Get all leads (Admin)
 // @route   GET /api/leads
-router.get('/', async (req, res, next) => {
-  try {
-    const leads = await Lead.find({}).sort({ createdAt: -1 });
-    res.json(leads);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get('/', getLeads);
 
 module.exports = router;
