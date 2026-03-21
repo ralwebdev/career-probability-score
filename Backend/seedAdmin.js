@@ -9,11 +9,11 @@ connectDB();
 
 const seedAdmin = async () => {
   try {
-    await Admin.deleteMany({ username: 'admin' });
-
+    await Admin.deleteMany({ username: process.env.ADMIN_USERNAME });
+    console.log('Admin user deleted successfully');
     const admin = new Admin({
-      username: 'admin',
-      password: 'Ral@12345',
+      username: process.env.ADMIN_USERNAME,
+      password: process.env.ADMIN_PASSWORD,
     });
 
     await admin.save();
