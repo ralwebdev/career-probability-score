@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
-import { getCourseById, getCollegeForCourse } from "@/lib/collegeCourseData";
+import { getCourseById as getMockCourseById, getCollegeForCourse } from "@/lib/collegeCourseData";
+import { getApiCourseById } from "@/lib/api";
 import { calculateCPS, careerRoles, type AssessmentData } from "@/lib/careerData";
 import {
   Target, TrendingUp, AlertTriangle, BookOpen, Wrench, FolderOpen,
@@ -12,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   MicroCommitmentCTA,
   ExitIntentPopup,
@@ -45,12 +46,47 @@ function SectionTitle({ icon, title, subtitle }: { icon: React.ReactNode; title:
 
 export default function CourseLanding() {
   const { courseId } = useParams<{ courseId: string }>();
-  const course = getCourseById(courseId || "");
+  const [course, setCourse] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const college = getCollegeForCourse(courseId || "");
   const [galleryFilter, setGalleryFilter] = useState<string>("all");
 
   const raw = sessionStorage.getItem("cps-assessment");
   const userData: AssessmentData | null = raw ? JSON.parse(raw) : null;
+
+  useEffect(() => {
+    const fetchCourse = async () => {
+      try {
+        if (courseId) {
+          const data = await getApiCourseById(courseId);
+          if (data) {
+            setCourse(data);
+          } else {
+            setCourse(getMockCourseById(courseId));
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch course from API, using mock data", error);
+        if (courseId) {
+          setCourse(getMockCourseById(courseId));
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCourse();
+  }, [courseId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center">
+          <div className="h-12 w-12 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4"></div>
+          <p className="text-muted-foreground">Loading course details...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!course || !college) {
     return (

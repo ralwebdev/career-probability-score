@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { courses, getSegmentedRecommendations, type Course } from "@/lib/courseData";
+import { courses as mockCourses, getSegmentedRecommendations, type Course } from "@/lib/courseData";
+import { getCourses } from "@/lib/api";
 import { type AssessmentData } from "@/lib/careerData";
 import { getSkillsForRole, formatLabel, rolesByDomain } from "@/lib/careerMasterDB";
 import { BookOpen, Star, Clock, Award, ExternalLink, Filter, AlertTriangle, GraduationCap, Target, Layers } from "lucide-react";
@@ -8,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 function CourseCard({ course, matchingSkills, rank }: { course: Course; matchingSkills?: string[]; rank?: number }) {
+  if (!course) return null;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -25,10 +28,10 @@ function CourseCard({ course, matchingSkills, rank }: { course: Course; matching
             {course.providerType === "redapple" ? "⭐ Red Apple Learning" : "External"}
           </Badge>
           <div className="flex items-center gap-1 text-accent text-xs">
-            <Star className="h-3 w-3 fill-accent" />{course.rating}
+            <Star className="h-3 w-3 fill-accent" />{course.rating || 0}
           </div>
         </div>
-        <h3 className="font-semibold text-sm mb-1">{course.title}</h3>
+        <h3 className="font-semibold text-sm mb-1">{course.title || "Untitled Course"}</h3>
         <p className="text-xs text-muted-foreground mb-3">{course.provider}</p>
 
         <div className="flex flex-wrap gap-1 mb-3">
@@ -123,8 +126,42 @@ function CourseGrid({ title, icon, description, courses: courseList, skillGaps, 
 }
 
 export default function Courses() {
+  const [dbCourses, setDbCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  
   const raw = sessionStorage.getItem("cps-assessment");
   const data: AssessmentData | null = raw ? JSON.parse(raw) : null;
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const rawData = await getCourses();
+        if (rawData && rawData.length > 0) {
+          // Map database fields to frontend structure
+          const mappedData = rawData.map((c: any) => ({
+            ...c,
+            skills: c.skillsCovered || c.skills || [],
+            price: c.coursePrice ? `₹${c.coursePrice.toLocaleString()}` : (c.price || "Free"),
+            providerType: c.collegeId === "redapple" ? "redapple" : (c.providerType || "external"),
+            provider: c.collegeId === "redapple" ? "Red Apple Learning" : (c.provider || "Partner"),
+            careers: c.careerRoles || c.careers || [],
+            rating: c.rating || 4.5
+          }));
+          setDbCourses(mappedData);
+        } else {
+          setDbCourses(mockCourses);
+        }
+      } catch (error) {
+        console.error("Failed to fetch courses, using mock data", error);
+        setDbCourses(mockCourses);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchCourses();
+  }, []);
+
+  const coursesToDisplay = dbCourses.length > 0 ? dbCourses : mockCourses;
 
   // Resolve role ID from display name using master DB
   const selectedRoleId = useMemo(() => {
@@ -149,8 +186,8 @@ export default function Courses() {
   // Segmented recommendations
   const { primary, secondary } = useMemo(() => {
     if (!data || roleSkills.length === 0) return { primary: [], secondary: [] };
-    return getSegmentedRecommendations(skillGaps, "", data.careerRole);
-  }, [data, skillGaps, roleSkills]);
+    return getSegmentedRecommendations(skillGaps, "", data.careerRole, coursesToDisplay);
+  }, [data, skillGaps, roleSkills, coursesToDisplay]);
 
   const hasAssessment = !!data?.careerRole;
   const gapCount = skillGaps.length;
@@ -276,7 +313,7 @@ export default function Courses() {
             title="All Available Courses"
             icon={<BookOpen className="h-5 w-5" />}
             description="Take the assessment for personalized recommendations tailored to your career path."
-            courses={courses}
+            courses={coursesToDisplay}
             skillGaps={[]}
             ranked={false}
             accentColor="text-foreground"

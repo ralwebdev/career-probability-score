@@ -829,8 +829,8 @@ export function getRecommendedCourses(skillGaps: string[], domain: string, caree
   return [...primary, ...secondary];
 }
 
-export function getSegmentedRecommendations(skillGaps: string[], domain: string, careerRole?: string): CourseRecommendation {
-  const scored = courses.map(course => {
+export function getSegmentedRecommendations(skillGaps: string[], domain: string, careerRole?: string, availableCourses: Course[] = courses): CourseRecommendation {
+  const scored = availableCourses.map(course => {
     const matchingSkills = course.skills.filter(s => skillGaps.includes(s));
     const skillScore = matchingSkills.length;
     const careerMatch = careerRole && course.careers.includes(careerRole) ? 10 : 0;

@@ -5,13 +5,17 @@ import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getL
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Modular Components
-import { StatsGrid } from "./components/StatCards";
-import { ChartsSection } from "./components/ChartsSection";
-import { CounselingTable, AssessmentsTable, LeadsTable } from "./components/DataTableSection";
-import { AssessmentModal } from "./components/AssessmentModal";
-import { CounselingModal } from "./components/CounselingModal";
-import { LeadsModal } from "./components/LeadsModal";
+import { 
+    AssessmentModal, 
+    CounselingModal, 
+    LeadsModal, 
+    AdminCourseManagement,
+    StatsGrid,
+    ChartsSection,
+    CounselingTable,
+    AssessmentsTable,
+    LeadsTable
+} from "./components";
 
 export default function Admin() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -173,13 +177,14 @@ export default function Admin() {
 
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                             <TabsList className="bg-card/50 border backdrop-blur-sm">
-                                {/* <TabsTrigger value="dashboard">Analytics</TabsTrigger> */}
+                                <TabsTrigger value="dashboard">Analytics</TabsTrigger>
                                 <TabsTrigger value="counseling">Counseling ({counselingData.length})</TabsTrigger>
                                 <TabsTrigger value="assessments">Assessments ({assessmentsData.length})</TabsTrigger>
                                 <TabsTrigger value="leads">Leads ({leadsData.length})</TabsTrigger>
+                                <TabsTrigger value="courses">Courses</TabsTrigger>
                             </TabsList>
 
-                            {/* <TabsContent value="dashboard" className="space-y-8">
+                            <TabsContent value="dashboard" className="space-y-8">
                                 {dataLoading || !dashboardData ? (
                                     <div className="h-[400px] flex items-center justify-center">
                                         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -187,15 +192,15 @@ export default function Admin() {
                                 ) : (
                                     <>
                                         <StatsGrid dashboardData={dashboardData} />
-                                        <ChartsSection 
-                                            dashboardData={dashboardData} 
+                                        <ChartsSection
+                                            dashboardData={dashboardData}
                                             assessmentsCount={assessmentsData.length}
                                             counselingCount={counselingData.length}
                                             leadsCount={leadsData.length}
                                         />
                                     </>
                                 )}
-                            </TabsContent> */}
+                            </TabsContent>
 
                             <TabsContent value="counseling">
                                 <CounselingTable data={counselingData} onRowClick={setSelectedCounseling} />
@@ -207,6 +212,10 @@ export default function Admin() {
 
                             <TabsContent value="leads">
                                 <LeadsTable data={leadsData} onRowClick={setSelectedLead} />
+                            </TabsContent>
+
+                            <TabsContent value="courses">
+                                <AdminCourseManagement token={localStorage.getItem("adminToken") || ""} />
                             </TabsContent>
                         </Tabs>
                     </motion.div>

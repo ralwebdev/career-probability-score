@@ -160,3 +160,62 @@ export async function getAssessments(token: string) {
 
   return response.json();
 }
+
+// Course Management
+export async function getCourses() {
+  const response = await fetch(`${API_BASE_URL}/courses`);
+  if (!response.ok) throw new Error("Failed to fetch courses");
+  return response.json();
+}
+
+export async function getApiCourseById(id: string) {
+  const response = await fetch(`${API_BASE_URL}/courses/${id}`);
+  if (!response.ok) throw new Error("Failed to fetch course details");
+  return response.json();
+}
+
+export async function createCourse(courseData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/courses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(courseData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to create course");
+  }
+  return response.json();
+}
+
+export async function updateCourse(id: string, courseData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/courses/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(courseData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update course");
+  }
+  return response.json();
+}
+
+export async function deleteCourse(id: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/courses/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to delete course");
+  }
+  return response.json();
+}
