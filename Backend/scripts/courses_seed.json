@@ -1,0 +1,147 @@
+[
+  {
+    "id": "ra-uiux",
+    "collegeId": "redapple",
+    "title": "Graphic & UI/UX Designing",
+    "domain": "Design",
+    "description": "Master graphic design fundamentals along with modern UI/UX design principles. Learn Figma, Adobe Suite, wireframing, prototyping, and user research.",
+    "duration": "3 months",
+    "mode": "hybrid",
+    "schedule": "weekday",
+    "marketPrice": 85000,
+    "coursePrice": 45000,
+    "modules": [
+      { "name": "Graphic Design Fundamentals", "topics": ["Typography", "Color Theory", "Layout Design", "Branding"] },
+      { "name": "Adobe Suite Mastery", "topics": ["Photoshop", "Illustrator", "InDesign", "Creative Cloud"] },
+      { "name": "UI Design", "topics": ["Figma", "Design Systems", "Component Libraries", "Responsive Design"] },
+      { "name": "UX Design", "topics": ["User Research", "Wireframing", "Prototyping", "Usability Testing"] }
+    ],
+    "tools": ["Figma", "Photoshop", "Illustrator", "Adobe XD", "InDesign", "Miro"],
+    "projects": ["Brand Identity Design", "Mobile App UI", "E-commerce UX Redesign", "Portfolio Website"],
+    "skillsCovered": ["Figma", "User Research", "Prototyping", "CSS", "Illustrator", "Wireframing", "Adobe XD", "Typography"],
+    "careerRoles": ["UX Designer", "UI Designer", "Product Designer", "UX Researcher", "Interaction Designer"],
+    "careerOutcomes": [
+      { "role": "UI/UX Designer", "salaryRange": "₹4–10 LPA", "growthTrajectory": "Senior Designer in 2-3 years" },
+      { "role": "Product Designer", "salaryRange": "₹8–18 LPA", "growthTrajectory": "Design Lead in 4 years" }
+    ],
+    "nextBatchDate": "April 10, 2026",
+    "seatsLeft": 15,
+    "expectedSalary": "₹4–18 LPA"
+  },
+  {
+    "id": "ra-graphic",
+    "collegeId": "redapple",
+    "title": "Graphic & Motion Graphics",
+    "domain": "Design",
+    "description": "Learn graphic design combined with motion graphics. Master After Effects, Photoshop, Illustrator for stunning animated content.",
+    "duration": "3 months",
+    "mode": "hybrid",
+    "schedule": "weekday",
+    "marketPrice": 85000,
+    "coursePrice": 45000,
+    "modules": [
+      { "name": "Graphic Design", "topics": ["Typography", "Layout", "Branding", "Print Design"] },
+      { "name": "Adobe Mastery", "topics": ["Photoshop Advanced", "Illustrator Pro", "InDesign"] },
+      { "name": "Motion Graphics", "topics": ["After Effects Basics", "Animation Principles", "Kinetic Typography"] },
+      { "name": "Portfolio & Industry", "topics": ["Portfolio Building", "Client Projects", "Industry Standards"] }
+    ],
+    "tools": ["Photoshop", "Illustrator", "After Effects", "InDesign", "Premiere Pro"],
+    "projects": ["Brand Campaign", "Animated Logo", "Social Media Kit", "Motion Reel"],
+    "skillsCovered": ["Photoshop", "Illustrator", "Typography", "Layout", "After Effects", "Branding", "Color Theory"],
+    "careerRoles": ["Graphic Designer", "Motion Graphics Artist", "Brand Designer", "Visual Designer"],
+    "careerOutcomes": [
+      { "role": "Graphic Designer", "salaryRange": "₹3–8 LPA", "growthTrajectory": "Senior in 2 years" },
+      { "role": "Motion Graphics Artist", "salaryRange": "₹5–12 LPA", "growthTrajectory": "Lead in 3 years" }
+    ],
+    "nextBatchDate": "April 15, 2026",
+    "seatsLeft": 20,
+    "expectedSalary": "₹3–12 LPA"
+  },
+  {
+    "id": "ra-frontend",
+    "collegeId": "redapple",
+    "title": "Front End (React.js) Development",
+    "domain": "Technology",
+    "description": "Master modern frontend development with React.js, JavaScript ES6+, and industry best practices.",
+    "duration": "3 months",
+    "mode": "hybrid",
+    "schedule": "weekday",
+    "marketPrice": 85000,
+    "coursePrice": 45000,
+    "modules": [
+      { "name": "JavaScript Mastery", "topics": ["ES6+", "Async/Await", "DOM Manipulation", "Closures"] },
+      { "name": "React Fundamentals", "topics": ["Components", "Props & State", "Hooks", "React Router"] },
+      { "name": "Advanced React", "topics": ["Context API", "Redux Toolkit", "TypeScript", "Testing"] },
+      { "name": "Capstone", "topics": ["Full App Build", "API Integration", "Deployment", "Portfolio"] }
+    ],
+    "tools": ["VS Code", "React", "TypeScript", "Git", "Vercel", "Redux"],
+    "projects": ["E-commerce Frontend", "Dashboard App", "Real-time Chat UI", "Capstone Project"],
+    "skillsCovered": ["React", "JavaScript", "HTML", "CSS", "TypeScript", "Git", "Redux"],
+    "careerRoles": ["Frontend Developer", "React Developer", "UI Engineer", "Fullstack Developer"],
+    "careerOutcomes": [
+      { "role": "React Developer", "salaryRange": "₹4–12 LPA", "growthTrajectory": "Senior in 2-3 years" },
+      { "role": "Frontend Developer", "salaryRange": "₹6–15 LPA", "growthTrajectory": "Lead in 3-4 years" }
+    ],
+    "nextBatchDate": "April 15, 2026",
+    "seatsLeft": 12,
+    "expectedSalary": "₹4–15 LPA"
+  },
+  {
+    "id": "ra-backend",
+    "collegeId": "redapple",
+    "title": "Back End (Node.js) Development",
+    "domain": "Technology",
+    "description": "Build scalable server-side applications with Node.js, Express, MongoDB, and SQL.",
+    "duration": "3 months",
+    "mode": "hybrid",
+    "schedule": "weekday",
+    "marketPrice": 85000,
+    "coursePrice": 45000,
+    "modules": [
+      { "name": "Node.js Core", "topics": ["Node Runtime", "Modules", "File System", "Streams"] },
+      { "name": "Express & APIs", "topics": ["REST Architecture", "Middleware", "Authentication", "JWT"] },
+      { "name": "Databases", "topics": ["MongoDB", "Mongoose", "SQL Basics", "PostgreSQL"] },
+      { "name": "Deployment", "topics": ["Docker Basics", "AWS EC2", "CI/CD", "Production Best Practices"] }
+    ],
+    "tools": ["Node.js", "Express", "MongoDB", "PostgreSQL", "Docker", "Postman"],
+    "projects": ["RESTful API", "Auth System", "E-commerce Backend", "Real-time App"],
+    "skillsCovered": ["Node.js", "Express", "MongoDB", "SQL", "REST APIs", "Docker"],
+    "careerRoles": ["Backend Developer", "API Developer", "Fullstack Developer", "Software Engineer"],
+    "careerOutcomes": [
+      { "role": "Backend Developer", "salaryRange": "₹5–12 LPA", "growthTrajectory": "Senior in 2-3 years" },
+      { "role": "Fullstack Developer", "salaryRange": "₹8–18 LPA", "growthTrajectory": "Lead in 3-4 years" }
+    ],
+    "nextBatchDate": "April 15, 2026",
+    "seatsLeft": 14,
+    "expectedSalary": "₹5–18 LPA"
+  },
+  {
+    "id": "ra-mernstack",
+    "collegeId": "redapple",
+    "title": "MERN Stack Development (Advanced)",
+    "domain": "Technology",
+    "description": "Full-stack web development with MongoDB, Express, React, and Node.js.",
+    "duration": "6 months",
+    "mode": "hybrid",
+    "schedule": "weekday",
+    "marketPrice": 175000,
+    "coursePrice": 90000,
+    "modules": [
+      { "name": "Frontend (React)", "topics": ["React Hooks", "Redux", "TypeScript", "Testing"] },
+      { "name": "Backend (Node/Express)", "topics": ["REST APIs", "Authentication", "Middleware", "Error Handling"] },
+      { "name": "Database (MongoDB)", "topics": ["Mongoose", "Aggregation", "Indexing", "Data Modeling"] },
+      { "name": "Full Stack & Deploy", "topics": ["Full App Build", "Docker", "AWS/Vercel", "CI/CD"] }
+    ],
+    "tools": ["React", "Node.js", "Express", "MongoDB", "TypeScript", "Docker", "Git"],
+    "projects": ["E-commerce Platform", "Social Media App", "Project Management Tool", "Capstone"],
+    "skillsCovered": ["React", "Node.js", "Express", "MongoDB", "TypeScript", "REST APIs", "Docker"],
+    "careerRoles": ["Fullstack Developer", "MERN Developer", "Software Engineer"],
+    "careerOutcomes": [
+      { "role": "MERN Developer", "salaryRange": "₹6–15 LPA", "growthTrajectory": "Senior in 2-3 years" },
+      { "role": "Fullstack Developer", "salaryRange": "₹8–22 LPA", "growthTrajectory": "Lead in 4 years" }
+    ],
+    "nextBatchDate": "April 8, 2026",
+    "seatsLeft": 10,
+    "expectedSalary": "₹6–22 LPA"
+  }
+]

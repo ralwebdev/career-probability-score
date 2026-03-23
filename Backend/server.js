@@ -20,14 +20,14 @@ const assessmentRoutes = require('./routes/assessmentRoutes');
 const leadRoutes = require('./routes/leadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const counselingRoutes = require('./routes/counselingRoutes');
-// const courseRoutes = require('./routes/courseRoutes');
+const courseRoutes = require('./routes/courseRoutes');
 
 // Mount routers
 app.use('/api/assessments', assessmentRoutes);
 app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/counseling', counselingRoutes);
-// app.use('/api/courses', courseRoutes);
+app.use('/api/courses', courseRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
@@ -39,4 +39,4 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => console.log(`Server running on port ${PORT}`));
