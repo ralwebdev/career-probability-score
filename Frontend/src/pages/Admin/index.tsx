@@ -5,10 +5,10 @@ import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getL
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { 
-    AssessmentModal, 
-    CounselingModal, 
-    LeadsModal, 
+import {
+    AssessmentModal,
+    CounselingModal,
+    LeadsModal,
     AdminCourseManagement,
     StatsGrid,
     ChartsSection,
@@ -177,14 +177,14 @@ export default function Admin() {
 
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                             <TabsList className="bg-card/50 border backdrop-blur-sm">
-                                <TabsTrigger value="dashboard">Analytics</TabsTrigger>
+                                {/* <TabsTrigger value="dashboard">Analytics</TabsTrigger> */}
                                 <TabsTrigger value="counseling">Counseling ({counselingData.length})</TabsTrigger>
                                 <TabsTrigger value="assessments">Assessments ({assessmentsData.length})</TabsTrigger>
                                 <TabsTrigger value="leads">Leads ({leadsData.length})</TabsTrigger>
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                             </TabsList>
 
-                            <TabsContent value="dashboard" className="space-y-8">
+                            {/* <TabsContent value="dashboard" className="space-y-8">
                                 {dataLoading || !dashboardData ? (
                                     <div className="h-[400px] flex items-center justify-center">
                                         <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
@@ -200,7 +200,7 @@ export default function Admin() {
                                         />
                                     </>
                                 )}
-                            </TabsContent>
+                            </TabsContent> */}
 
                             <TabsContent value="counseling">
                                 <CounselingTable data={counselingData} onRowClick={setSelectedCounseling} />
