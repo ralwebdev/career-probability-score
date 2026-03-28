@@ -8,7 +8,7 @@ const links = [
   { to: "/", label: "Home" },
   { to: "/assessment", label: "Assessment" },
   { to: "/results", label: "Results" },
-  { to: "/market-signals", label: "Market Signals" },
+  // { to: "/market-signals", label: "Market Signals" },
   { to: "/courses", label: "Courses" },
   { to: "/workshops", label: "Workshops" },
   { to: "/counseling", label: "Counseling" },
@@ -56,9 +56,9 @@ export function Navbar() {
 
         <div className="hidden md:flex items-center gap-1">
           <Link to="/college-dashboard">
-            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
+            {/* <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
               College Dashboard
-            </Button>
+            </Button> */}
           </Link>
           <Link to="/admin">
             <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
@@ -96,9 +96,9 @@ export function Navbar() {
                   {l.label}
                 </Link>
               ))}
-              <Link to="/college-dashboard" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
+              {/* <Link to="/college-dashboard" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
                 College Dashboard
-              </Link>
+              </Link> */}
               <Link to="/admin" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
                 Admin
               </Link>
