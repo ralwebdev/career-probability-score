@@ -219,3 +219,40 @@ export async function deleteCourse(id: string, token: string) {
   }
   return response.json();
 }
+
+// Webinar Management
+export async function getWebinars() {
+  const response = await fetch(`${API_BASE_URL}/webinars`);
+  if (!response.ok) throw new Error("Failed to fetch webinars");
+  return response.json();
+}
+
+export async function createWebinar(webinarData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/webinars`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(webinarData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to create webinar");
+  }
+  return response.json();
+}
+
+export async function deleteWebinar(id: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/webinars/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to delete webinar");
+  }
+  return response.json();
+}

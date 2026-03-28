@@ -5,3 +5,4 @@ export { CounselingModal } from './CounselingModal';
 export { CounselingTable, AssessmentsTable, LeadsTable } from './DataTableSection';
 export { LeadsModal } from './LeadsModal';
 export { StatsGrid } from './StatCards';
+export { default as AdminWebinarManagement } from './AdminWebinarManagement';

@@ -10,6 +10,7 @@ import {
     CounselingModal,
     LeadsModal,
     AdminCourseManagement,
+    AdminWebinarManagement,
     StatsGrid,
     ChartsSection,
     CounselingTable,
@@ -182,6 +183,7 @@ export default function Admin() {
                                 <TabsTrigger value="assessments">Assessments ({assessmentsData.length})</TabsTrigger>
                                 <TabsTrigger value="leads">Leads ({leadsData.length})</TabsTrigger>
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
+                                <TabsTrigger value="webinars">Webinars</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="dashboard" className="space-y-8">
@@ -216,6 +218,10 @@ export default function Admin() {
 
                             <TabsContent value="courses">
                                 <AdminCourseManagement token={localStorage.getItem("adminToken") || ""} />
+                            </TabsContent>
+
+                            <TabsContent value="webinars">
+                                <AdminWebinarManagement token={localStorage.getItem("adminToken") || ""} />
                             </TabsContent>
                         </Tabs>
                     </motion.div>

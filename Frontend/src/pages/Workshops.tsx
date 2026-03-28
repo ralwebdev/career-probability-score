@@ -1,22 +1,46 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Calendar, Users, MessageCircle, ExternalLink, Video, Megaphone, Bell } from "lucide-react";
+import { Calendar, Users, MessageCircle, ExternalLink, Video, Megaphone, Bell, Loader2 } from "lucide-react";
+import { getWebinars } from "@/lib/api";
 
-const upcomingWebinars = [
-  { title: "How to Build a Job-Ready Portfolio in 30 Days", date: "Mar 22, 2026", time: "6:00 PM IST", speaker: "Ankit Sharma, Red Apple Learning" },
-  { title: "Cracking Product Interviews: Strategy & Frameworks", date: "Mar 29, 2026", time: "7:00 PM IST", speaker: "Priya Mehta, Ex-Google PM" },
-  { title: "AI/ML Career Roadmap 2026", date: "Apr 5, 2026", time: "5:30 PM IST", speaker: "Dr. Ravi Kumar, IIT Delhi" },
-  { title: "From Fresher to Frontend Developer in 6 Months", date: "Apr 12, 2026", time: "6:00 PM IST", speaker: "Sneha Reddy, Red Apple Learning" },
-];
-
-const communityBenefits = [
-  { icon: Megaphone, title: "Job Alerts", desc: "Daily curated job openings matching your skill profile" },
-  { icon: Video, title: "Free Webinars", desc: "Weekly expert sessions on career growth & skill building" },
-  { icon: Bell, title: "Career Updates", desc: "Industry trends, salary reports, and hiring insights" },
-  { icon: Users, title: "Peer Network", desc: "Connect with 5,000+ job seekers and professionals" },
-];
+interface Webinar {
+  _id: string;
+  title: string;
+  speaker: string;
+  date: string;
+  time: string;
+  registrationLink: string;
+}
 
 export default function Workshops() {
+  const [webinars, setWebinars] = useState<Webinar[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchWebinars = async () => {
+      try {
+        const data = await getWebinars();
+        setWebinars(data);
+      } catch (error) {
+        console.error("Failed to fetch webinars:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchWebinars();
+  }, []);
+
+  const displayWebinars = webinars.length > 0 ? webinars : [
+    { title: "No upcoming webinars scheduled", speaker: "Check back later!", date: "-", time: "-", registrationLink: "#" }
+  ];
+
+  const communityBenefits = [
+    { icon: Megaphone, title: "Job Alerts", desc: "Daily curated job openings matching your skill profile" },
+    { icon: Video, title: "Free Webinars", desc: "Weekly expert sessions on career growth & skill building" },
+    { icon: Bell, title: "Career Updates", desc: "Industry trends, salary reports, and hiring insights" },
+    { icon: Users, title: "Peer Network", desc: "Connect with 5,000+ job seekers and professionals" },
+  ];
   return (
     <div className="min-h-screen px-4 py-8">
       <div className="mx-auto max-w-5xl">
@@ -67,33 +91,48 @@ export default function Workshops() {
           ))}
         </div>
 
-        {/* Upcoming Webinars */}
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" /> Upcoming Webinars
         </h2>
-        <div className="space-y-3 mb-12">
-          {upcomingWebinars.map((w, i) => (
-            <motion.div
-              key={w.title}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 0.1 }}
-              className="rounded-xl border bg-card/50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
-            >
-              <div>
-                <h3 className="font-semibold text-sm">{w.title}</h3>
-                <p className="text-xs text-muted-foreground mt-1">{w.speaker}</p>
-              </div>
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <div className="text-xs font-medium text-primary">{w.date}</div>
-                  <div className="text-[10px] text-muted-foreground">{w.time}</div>
+        
+        {isLoading ? (
+          <div className="flex h-32 items-center justify-center border rounded-xl bg-card/50 mb-12">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="space-y-3 mb-12">
+            {displayWebinars.map((w, i) => (
+              <motion.div
+                key={w.title + i}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className="rounded-xl border bg-card/50 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div>
+                  <h3 className="font-semibold text-sm">{w.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{w.speaker}</p>
                 </div>
-                <Button size="sm" variant="outline" className="text-xs shrink-0">Register Free</Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-primary">{w.date}</div>
+                    <div className="text-[10px] text-muted-foreground">{w.time}</div>
+                  </div>
+                  {w.date !== "-" && (
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="text-xs shrink-0"
+                      onClick={() => w.registrationLink && w.registrationLink !== "#" && window.open(w.registrationLink, "_blank")}
+                    >
+                      Register Free
+                    </Button>
+                  )}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         {/* Social Unlock */}
         <div className="rounded-2xl border border-accent/30 bg-accent/5 p-8 text-center">

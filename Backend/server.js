@@ -21,6 +21,7 @@ const leadRoutes = require('./routes/leadRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const counselingRoutes = require('./routes/counselingRoutes');
 const courseRoutes = require('./routes/courseRoutes');
+const webinarRoutes = require('./routes/webinarRoutes');
 
 // Mount routers
 app.use('/api/assessments', assessmentRoutes);
@@ -28,6 +29,7 @@ app.use('/api/leads', leadRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/counseling', counselingRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api/webinars', webinarRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
