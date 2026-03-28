@@ -227,6 +227,7 @@ export function ExitIntentPopup({
   const [show, setShow] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
   const triggered = useRef(false);
 
   useEffect(() => {
@@ -252,9 +253,9 @@ export function ExitIntentPopup({
   }, []);
 
   const handleSubmit = async () => {
-    if (phone.length >= 10) {
+    if (name.trim() && phone.length >= 10) {
       try {
-        const leadData = { phone, courseTitle, source: "exit-intent" };
+        const leadData = { name, phone, courseTitle, source: "exit-intent" };
         await submitLead(leadData);
         const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
         leads.push({ ...leadData, timestamp: Date.now() });
@@ -292,7 +293,15 @@ export function ExitIntentPopup({
             </div>
 
             {/* Minimal form — just phone (lowest friction) */}
-            <div className="flex gap-2">
+
+            <div className="flex gap-2 flex-col">
+              <Input
+                placeholder="Your Full Name"
+                type="te t"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-11 flex-1"
+              />
               <Input
                 placeholder="Your phone number"
                 type="tel"
@@ -300,7 +309,7 @@ export function ExitIntentPopup({
                 onChange={(e) => setPhone(e.target.value)}
                 className="h-11 flex-1"
               />
-              <Button onClick={handleSubmit} disabled={phone.length < 10} className="gradient-primary text-primary-foreground h-11 gap-1">
+              <Button onClick={handleSubmit} disabled={!name.trim() || phone.length < 10} className="gradient-primary text-primary-foreground h-11 gap-1">
                 <Phone className="h-4 w-4" /> Call Me
               </Button>
             </div>
@@ -379,12 +388,13 @@ export function ScrollNudge({ courseTitle, seatsLeft }: { courseTitle: string; s
 // ─── 5. INLINE LEAD CAPTURE (Lightweight — after career diagnosis section) ───
 export function InlineLeadCapture({ careerRole }: { careerRole: string }) {
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
   const [captured, setCaptured] = useState(false);
 
   const handleSubmit = async () => {
-    if (phone.length >= 10) {
+    if (name.trim() && phone.length >= 10) {
       try {
-        const leadData = { phone, interest: careerRole, source: "inline-diagnosis" };
+        const leadData = { name, phone, courseTitle: careerRole, source: "inline-diagnosis" };
         await submitLead(leadData);
         const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
         leads.push({ ...leadData, timestamp: Date.now() });
@@ -411,15 +421,21 @@ export function InlineLeadCapture({ careerRole }: { careerRole: string }) {
       <p className="text-sm font-medium mb-3">
         📞 Want an expert to walk you through your skill gaps? <span className="text-accent font-semibold">Free 15-min call</span>
       </p>
-      <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Input
-          placeholder="Your phone number"
+          placeholder="Your Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="h-9 flex-1 text-sm font-medium"
+        />
+        <Input
+          placeholder="Phone Number"
           type="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           className="h-9 flex-1 text-sm"
         />
-        <Button size="sm" onClick={handleSubmit} disabled={phone.length < 10} className="gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
+        <Button size="sm" onClick={handleSubmit} disabled={!name.trim() || phone.length < 10} className="gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
           <Phone className="h-3 w-3" /> Call Me
         </Button>
       </div>
@@ -439,12 +455,13 @@ export function FloatingCTABar({
 }) {
   const [showQuickForm, setShowQuickForm] = useState(false);
   const [phone, setPhone] = useState("");
+  const [name, setName] = useState("");
   const [captured, setCaptured] = useState(false);
 
   const handleSubmit = async () => {
-    if (phone.length >= 10) {
+    if (name.trim() && phone.length >= 10) {
       try {
-        const leadData = { phone, courseTitle, source: "floating-bar" };
+        const leadData = { name, phone, courseTitle, source: "floating-bar" };
         await submitLead(leadData);
         const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
         leads.push({ ...leadData, timestamp: Date.now() });
@@ -470,14 +487,20 @@ export function FloatingCTABar({
           >
             <div className="mx-auto max-w-5xl px-4 py-3 flex items-center gap-3">
               <Input
-                placeholder="Enter your phone number"
+                placeholder="Full Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="h-9 max-w-[180px] text-sm"
+                autoFocus
+              />
+              <Input
+                placeholder="Phone Number"
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="h-9 max-w-xs text-sm"
-                autoFocus
+                className="h-9 max-w-[180px] text-sm"
               />
-              <Button size="sm" onClick={handleSubmit} disabled={phone.length < 10} className="gradient-primary text-primary-foreground gap-1 text-xs">
+              <Button size="sm" onClick={handleSubmit} disabled={!name.trim() || phone.length < 10} className="gradient-primary text-primary-foreground gap-1 text-xs">
                 <Phone className="h-3 w-3" /> Get Callback
               </Button>
               <button onClick={() => setShowQuickForm(false)} className="text-muted-foreground hover:text-foreground ml-auto"><X className="h-4 w-4" /></button>

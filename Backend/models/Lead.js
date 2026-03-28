@@ -8,7 +8,7 @@ const leadSchema = new mongoose.Schema({
   courseTitle: { type: String, required: true },
   source: { 
     type: String, 
-    enum: ['micro-commitment', 'exit-intent', 'scroll-nudge', 'inline', 'floating-cta'],
+    enum: ['micro-commitment', 'exit-intent', 'scroll-nudge', 'inline-diagnosis', 'floating-bar'],
     required: true 
   }
 }, { timestamps: true });
