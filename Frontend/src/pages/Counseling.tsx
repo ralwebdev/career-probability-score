@@ -69,16 +69,45 @@ export default function Counseling() {
   const { toast } = useToast();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [preferredDate, setPreferredDate] = useState<Date>();
   const [form, setForm] = useState({
     name: "", phone: "", email: "", careerInterest: "",
     budget: "", time: "", mode: "", schedule: "", country: "India", preferredTime: "",
   });
 
-  const update = (k: string, v: string) => setForm(prev => ({ ...prev, [k]: v }));
+  const update = (k: string, v: string) => {
+    setForm(prev => ({ ...prev, [k]: v }));
+    if (errors[k]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[k];
+        return next;
+      });
+    }
+  };
+
+  const validate = () => {
+    const newErrors: Record<string, string> = {};
+    if (!form.name.trim()) newErrors.name = "Name is required";
+    if (!/^[6789]\d{9}$/.test(form.phone)) {
+      newErrors.phone = "Enter a valid 10-digit number starting with 6-9";
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = "Invalid email format";
+    }
+    return newErrors;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const stepErrors = validate();
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setLoading(true);
     try {
       await submitCounseling({ ...form, preferredDate });
@@ -123,9 +152,21 @@ export default function Counseling() {
           <p className="text-muted-foreground mt-2">Get personalized guidance from experts</p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div><Label>Name</Label><Input value={form.name} onChange={e => update("name", e.target.value)} required /></div>
-          <div><Label>Phone</Label><Input value={form.phone} onChange={e => update("phone", e.target.value)} required /></div>
-          <div><Label>Email</Label><Input type="email" value={form.email} onChange={e => update("email", e.target.value)} required /></div>
+          <div>
+            <Label>Name *</Label>
+            <Input value={form.name} onChange={e => update("name", e.target.value)} className={errors.name ? "border-destructive ring-destructive/50" : ""} />
+            {errors.name && <p className="text-[10px] text-destructive mt-1 font-medium">{errors.name}</p>}
+          </div>
+          <div>
+            <Label>Phone *</Label>
+            <Input value={form.phone} onChange={e => update("phone", e.target.value)} className={errors.phone ? "border-destructive ring-destructive/50" : ""} />
+            {errors.phone && <p className="text-[10px] text-destructive mt-1 font-medium">{errors.phone}</p>}
+          </div>
+          <div>
+            <Label>Email *</Label>
+            <Input type="email" value={form.email} onChange={e => update("email", e.target.value)} className={errors.email ? "border-destructive ring-destructive/50" : ""} />
+            {errors.email && <p className="text-[10px] text-destructive mt-1 font-medium">{errors.email}</p>}
+          </div>
           <div><Label>Career Interest</Label><Input value={form.careerInterest} onChange={e => update("careerInterest", e.target.value)} placeholder="e.g. UI Design, Data Science" /></div>
           <div>
             <Label>Budget</Label>

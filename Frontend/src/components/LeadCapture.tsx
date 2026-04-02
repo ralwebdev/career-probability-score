@@ -47,18 +47,29 @@ export function MicroCommitmentCTA({
   const [formData, setFormData] = useState<LeadFormData>({ name: "", phone: "", email: "", interest: careerRole });
 
   const handleSubmit = async () => {
-    if (formData.name && formData.phone) {
-      try {
-        const leadData = { ...formData, courseTitle, source: "micro-commitment" };
-        await submitLead(leadData);
-        const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
-        leads.push({ ...leadData, timestamp: Date.now() });
-        localStorage.setItem("course-leads", JSON.stringify(leads));
-        setStep("success");
-      } catch (error) {
-        console.error("Lead submission failed:", error);
-        toast.error("Failed to submit lead. Please try again.");
-      }
+    if (!formData.name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!/^[6789]\d{9}$/.test(formData.phone)) {
+      toast.error("Enter a valid 10-digit number starting with 6-9");
+      return;
+    }
+    if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    try {
+      const leadData = { ...formData, courseTitle, source: "micro-commitment" };
+      await submitLead(leadData);
+      const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
+      leads.push({ ...leadData, timestamp: Date.now() });
+      localStorage.setItem("course-leads", JSON.stringify(leads));
+      setStep("success");
+    } catch (error) {
+      console.error("Lead submission failed:", error);
+      toast.error("Failed to submit lead. Please try again.");
     }
   };
 
@@ -148,7 +159,7 @@ export function MicroCommitmentCTA({
                 onChange={(e) => setFormData(p => ({ ...p, email: e.target.value }))}
                 className="h-11"
               />
-              <Button onClick={handleSubmit} disabled={!formData.name || !formData.phone} className="w-full gradient-primary text-primary-foreground gap-2 h-11">
+              <Button onClick={handleSubmit} className="w-full gradient-primary text-primary-foreground gap-2 h-11">
                 <Gift className="h-4 w-4" /> Get My Free Career Report
               </Button>
               <div className="flex items-center justify-center gap-4 text-[10px] text-muted-foreground">
@@ -253,19 +264,26 @@ export function ExitIntentPopup({
   }, []);
 
   const handleSubmit = async () => {
-    if (name.trim() && phone.length >= 10) {
-      try {
-        const leadData = { name, phone, courseTitle, source: "exit-intent" };
-        await submitLead(leadData);
-        const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
-        leads.push({ ...leadData, timestamp: Date.now() });
-        localStorage.setItem("course-leads", JSON.stringify(leads));
-        localStorage.setItem("exit-lead-captured", "true");
-        setSubmitted(true);
-      } catch (error) {
-        console.error("Exit lead submission failed:", error);
-        toast.error("Something went wrong. Please try again.");
-      }
+    if (!name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!/^[6789]\d{9}$/.test(phone)) {
+      toast.error("Enter a valid 10-digit number starting with 6-9");
+      return;
+    }
+
+    try {
+      const leadData = { name, phone, courseTitle, source: "exit-intent" };
+      await submitLead(leadData);
+      const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
+      leads.push({ ...leadData, timestamp: Date.now() });
+      localStorage.setItem("course-leads", JSON.stringify(leads));
+      localStorage.setItem("exit-lead-captured", "true");
+      setSubmitted(true);
+    } catch (error) {
+      console.error("Exit lead submission failed:", error);
+      toast.error("Something went wrong. Please try again.");
     }
   };
 
@@ -309,7 +327,7 @@ export function ExitIntentPopup({
                 onChange={(e) => setPhone(e.target.value)}
                 className="h-11 flex-1"
               />
-              <Button onClick={handleSubmit} disabled={!name.trim() || phone.length < 10} className="gradient-primary text-primary-foreground h-11 gap-1">
+              <Button onClick={handleSubmit} className="gradient-primary text-primary-foreground h-11 gap-1">
                 <Phone className="h-4 w-4" /> Call Me
               </Button>
             </div>
@@ -392,18 +410,25 @@ export function InlineLeadCapture({ careerRole }: { careerRole: string }) {
   const [captured, setCaptured] = useState(false);
 
   const handleSubmit = async () => {
-    if (name.trim() && phone.length >= 10) {
-      try {
-        const leadData = { name, phone, courseTitle: careerRole, source: "inline-diagnosis" };
-        await submitLead(leadData);
-        const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
-        leads.push({ ...leadData, timestamp: Date.now() });
-        localStorage.setItem("course-leads", JSON.stringify(leads));
-        setCaptured(true);
-      } catch (error) {
-        console.error("Inline lead submission failed:", error);
-        // Fallback or error message
-      }
+    if (!name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!/^[6789]\d{9}$/.test(phone)) {
+      toast.error("Enter a valid 10-digit number starting with 6-9");
+      return;
+    }
+
+    try {
+      const leadData = { name, phone, courseTitle: careerRole, source: "inline-diagnosis" };
+      await submitLead(leadData);
+      const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
+      leads.push({ ...leadData, timestamp: Date.now() });
+      localStorage.setItem("course-leads", JSON.stringify(leads));
+      setCaptured(true);
+    } catch (error) {
+      console.error("Inline lead submission failed:", error);
+      toast.error("Failed to submit request.");
     }
   };
 
@@ -435,7 +460,7 @@ export function InlineLeadCapture({ careerRole }: { careerRole: string }) {
           onChange={(e) => setPhone(e.target.value)}
           className="h-9 flex-1 text-sm"
         />
-        <Button size="sm" onClick={handleSubmit} disabled={!name.trim() || phone.length < 10} className="gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
+        <Button size="sm" onClick={handleSubmit} className="gap-1 bg-accent text-accent-foreground hover:bg-accent/90">
           <Phone className="h-3 w-3" /> Call Me
         </Button>
       </div>
@@ -459,19 +484,26 @@ export function FloatingCTABar({
   const [captured, setCaptured] = useState(false);
 
   const handleSubmit = async () => {
-    if (name.trim() && phone.length >= 10) {
-      try {
-        const leadData = { name, phone, courseTitle, source: "floating-bar" };
-        await submitLead(leadData);
-        const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
-        leads.push({ ...leadData, timestamp: Date.now() });
-        localStorage.setItem("course-leads", JSON.stringify(leads));
-        setCaptured(true);
-        setTimeout(() => { setShowQuickForm(false); setCaptured(false); }, 3000);
-      } catch (error) {
-        console.error("Floating lead submission failed:", error);
-        toast.error("Failed to submit request.");
-      }
+    if (!name.trim()) {
+      toast.error("Please enter your name");
+      return;
+    }
+    if (!/^[6789]\d{9}$/.test(phone)) {
+      toast.error("Enter a valid 10-digit number starting with 6-9");
+      return;
+    }
+
+    try {
+      const leadData = { name, phone, courseTitle, source: "floating-bar" };
+      await submitLead(leadData);
+      const leads = JSON.parse(localStorage.getItem("course-leads") || "[]");
+      leads.push({ ...leadData, timestamp: Date.now() });
+      localStorage.setItem("course-leads", JSON.stringify(leads));
+      setCaptured(true);
+      setTimeout(() => { setShowQuickForm(false); setCaptured(false); }, 3000);
+    } catch (error) {
+      console.error("Floating lead submission failed:", error);
+      toast.error("Failed to submit request.");
     }
   };
 
@@ -500,7 +532,7 @@ export function FloatingCTABar({
                 onChange={(e) => setPhone(e.target.value)}
                 className="h-9 max-w-[180px] text-sm"
               />
-              <Button size="sm" onClick={handleSubmit} disabled={!name.trim() || phone.length < 10} className="gradient-primary text-primary-foreground gap-1 text-xs">
+              <Button size="sm" onClick={handleSubmit} className="gradient-primary text-primary-foreground gap-1 text-xs">
                 <Phone className="h-3 w-3" /> Get Callback
               </Button>
               <button onClick={() => setShowQuickForm(false)} className="text-muted-foreground hover:text-foreground ml-auto"><X className="h-4 w-4" /></button>

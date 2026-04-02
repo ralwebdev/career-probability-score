@@ -179,6 +179,7 @@ export function AssessmentSteps() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [data, setData] = useState<AssessmentData>({
     name: "", email: "", phone: "", city: "", state: "", country: "India",
     educationLevel: "", fieldOfStudy: "",
@@ -188,18 +189,88 @@ export function AssessmentSteps() {
     experience: {}, portfolioLevel: "none"
   });
 
-  const update = (partial: Partial<AssessmentData>) => setData(prev => ({ ...prev, ...partial }));
+  const update = (partial: Partial<AssessmentData>) => {
+    setData(prev => ({ ...prev, ...partial }));
+    // Clear error for updated field
+    const updatedField = Object.keys(partial)[0];
+    if (errors[updatedField]) {
+      setErrors(prev => {
+        const next = { ...prev };
+        delete next[updatedField];
+        return next;
+      });
+    }
+  };
   const progress = getProgress(step);
   const StepIcon = stepMeta[step].icon;
 
+  const validateStep = (currentStep: number) => {
+    const newErrors: Record<string, string> = {};
+
+    if (currentStep === 0) {
+      if (!data.name.trim()) newErrors.name = "Name is required";
+      if (!data.email.trim()) {
+        newErrors.email = "Email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+        newErrors.email = "Invalid email format";
+      }
+      if (!data.phone.trim()) {
+        newErrors.phone = "Phone is required";
+      } else if (!/^[6789]\d{9}$/.test(data.phone)) {
+        newErrors.phone = "Enter a valid 10-digit number starting with 6-9";
+      }
+      if (!data.country) newErrors.country = "Country is required";
+      if (!data.state) newErrors.state = "State is required";
+      if (!data.city) newErrors.city = "City is required";
+    }
+
+    if (currentStep === 1) {
+      if (!data.educationLevel) newErrors.educationLevel = "Education level is required";
+      if (!data.fieldOfStudy) newErrors.fieldOfStudy = "Field of study is required";
+      
+      if (data.educationLevel && data.fieldOfStudy) {
+        if (availableDomains.length === 0) {
+          newErrors.fieldOfStudy = "This field has no mapped career domains yet. Please choose another.";
+        } else {
+          if (!data.careerDomain) newErrors.careerDomain = "Please select a domain";
+          if (needsSpecialization && !data.specialization) newErrors.specialization = "Specialization is required";
+          if (!data.careerRole) newErrors.careerRole = "Please select a career role";
+        }
+      }
+    }
+
+    if (currentStep === 2) {
+      const ratedCount = Object.values(data.technicalSkills).filter(v => v > 0).length;
+      if (ratedCount < 3 && selectedRoleSkills.length >= 3) {
+        newErrors.technicalSkills = `Please rate at least 3 skills (you've rated ${ratedCount})`;
+      }
+    }
+
+    return newErrors;
+  };
+
+  const canNext = () => {
+    const stepErrors = validateStep(step);
+    return Object.keys(stepErrors).length === 0;
+  };
+
   // Celebration on step advance
   const advanceStep = useCallback(() => {
+    const stepErrors = validateStep(step);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      // Scroll to top of form to see errors if needed
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
     setCelebrating(true);
     setTimeout(() => {
       setCelebrating(false);
       setStep(s => s + 1);
+      setErrors({}); // Clear errors for next step
     }, 400);
-  }, []);
+  }, [step, data, validateStep]);
 
   // ============================================================================
   // NEW CASCADING LOGIC: Education → Field → Domain → Specialization → Role
@@ -269,24 +340,14 @@ export function AssessmentSteps() {
     { group: "Emotional Intelligence", items: [...eiSkills] },
   ];
 
-  const canNext = () => {
-    switch (step) {
-      case 0: return data.name && data.email && data.phone && data.country && data.state && data.city;
-      case 1: {
-        if (!data.educationLevel || !data.fieldOfStudy || !data.careerRole) return false;
-        // Must have a domain selected if domains are available
-        if (availableDomains.length > 0 && !data.careerDomain) return false;
-        // Must have specialization if the domain requires it
-        if (needsSpecialization && !data.specialization) return false;
-        // If no domains available at all, can't proceed (bad field choice)
-        if (availableDomains.length === 0) return false;
-        return true;
-      }
-      default: return true;
-    }
-  };
 
   const handleSubmit = async () => {
+    const stepErrors = validateStep(step);
+    if (Object.keys(stepErrors).length > 0) {
+      setErrors(stepErrors);
+      return;
+    }
+
     try {
       const result = await submitAssessment(data);
       sessionStorage.setItem("cps-assessment", JSON.stringify(data));
@@ -315,39 +376,45 @@ export function AssessmentSteps() {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Full Name *</Label>
-          <Input value={data.name} onChange={e => update({ name: e.target.value })} placeholder="Your name" className="h-11" />
+          <Input value={data.name} onChange={e => update({ name: e.target.value })} placeholder="Your name" className={`h-11 ${errors.name ? "border-destructive ring-1 ring-destructive/50" : ""}`} />
+          {errors.name && <p className="text-[10px] font-medium text-destructive">{errors.name}</p>}
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Email *</Label>
-          <Input type="email" value={data.email} onChange={e => update({ email: e.target.value })} placeholder="you@email.com" className="h-11" />
+          <Input type="email" value={data.email} onChange={e => update({ email: e.target.value })} placeholder="you@email.com" className={`h-11 ${errors.email ? "border-destructive ring-1 ring-destructive/50" : ""}`} />
+          {errors.email && <p className="text-[10px] font-medium text-destructive">{errors.email}</p>}
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Phone *</Label>
-          <Input value={data.phone} onChange={e => update({ phone: e.target.value })} placeholder="+91 ..." className="h-11" />
+          <Input value={data.phone} onChange={e => update({ phone: e.target.value })} placeholder="10-digit mobile number" className={`h-11 ${errors.phone ? "border-destructive ring-1 ring-destructive/50" : ""}`} />
+          {errors.phone && <p className="text-[10px] font-medium text-destructive">{errors.phone}</p>}
         </div>
         <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Country *</Label>
           <Select value={data.country} onValueChange={v => update({ country: v, state: "", city: "" })}>
-            <SelectTrigger className="h-11"><SelectValue placeholder="Select" /></SelectTrigger>
+            <SelectTrigger className={`h-11 ${errors.country ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent className="max-h-60">{countries.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>
+          {errors.country && <p className="text-[10px] font-medium text-destructive">{errors.country}</p>}
         </div>
         {data.country && (
           <>
             <div className="space-y-1.5">
               <Label className="text-xs uppercase tracking-wider text-muted-foreground">State *</Label>
               <Select value={data.state} onValueChange={v => update({ state: v, city: "" })}>
-                <SelectTrigger className="h-11"><SelectValue placeholder="Select" /></SelectTrigger>
+                <SelectTrigger className={`h-11 ${errors.state ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select" /></SelectTrigger>
                 <SelectContent>{getStatesForCountry(data.country).map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}</SelectContent>
               </Select>
+              {errors.state && <p className="text-[10px] font-medium text-destructive">{errors.state}</p>}
             </div>
             {data.state && (
               <div className="space-y-1.5">
                 <Label className="text-xs uppercase tracking-wider text-muted-foreground">City *</Label>
                 <Select value={data.city} onValueChange={v => update({ city: v })}>
-                  <SelectTrigger className="h-11"><SelectValue placeholder="Select" /></SelectTrigger>
+                  <SelectTrigger className={`h-11 ${errors.city ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select" /></SelectTrigger>
                   <SelectContent>{getCitiesForState(data.country, data.state).map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
+                {errors.city && <p className="text-[10px] font-medium text-destructive">{errors.city}</p>}
               </div>
             )}
           </>
@@ -361,17 +428,19 @@ export function AssessmentSteps() {
          <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Education Level *</Label>
           <Select value={data.educationLevel} onValueChange={v => update({ educationLevel: v, fieldOfStudy: "", careerRole: "", careerDomain: "", specialization: "" })}>
-            <SelectTrigger className="h-11"><SelectValue placeholder="Select level" /></SelectTrigger>
+            <SelectTrigger className={`h-11 ${errors.educationLevel ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select level" /></SelectTrigger>
             <SelectContent>{masterEducationLevels.map(id => <SelectItem key={id} value={formatLabel(id)}>{formatLabel(id)}</SelectItem>)}</SelectContent>
           </Select>
+          {errors.educationLevel && <p className="text-[10px] font-medium text-destructive">{errors.educationLevel}</p>}
         </div>
         {data.educationLevel && availableFields.length > 0 && (
           <div className="space-y-1.5">
             <Label className="text-xs uppercase tracking-wider text-muted-foreground">Field of Study *</Label>
             <Select value={data.fieldOfStudy} onValueChange={v => update({ fieldOfStudy: v, careerRole: "", careerDomain: "", specialization: "" })}>
-              <SelectTrigger className="h-11"><SelectValue placeholder="Select field" /></SelectTrigger>
+              <SelectTrigger className={`h-11 ${errors.fieldOfStudy ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select field" /></SelectTrigger>
               <SelectContent>{availableFields.map(f => <SelectItem key={f} value={f}>{formatLabel(f)}</SelectItem>)}</SelectContent>
             </Select>
+            {errors.fieldOfStudy && <p className="text-[10px] font-medium text-destructive">{errors.fieldOfStudy}</p>}
           </div>
         )}
       </div>
@@ -384,11 +453,12 @@ export function AssessmentSteps() {
               Career Domain * <span className="normal-case font-normal text-muted-foreground">({availableDomains.length} available)</span>
             </Label>
             <Select value={data.careerDomain} onValueChange={v => update({ careerDomain: v, careerRole: "", specialization: "" })}>
-              <SelectTrigger className="h-11"><SelectValue placeholder="Select domain" /></SelectTrigger>
+              <SelectTrigger className={`h-11 ${errors.careerDomain ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select domain" /></SelectTrigger>
               <SelectContent>
                 {availableDomains.map(d => <SelectItem key={d} value={d}>{formatLabel(d)}</SelectItem>)}
               </SelectContent>
             </Select>
+            {errors.careerDomain && <p className="text-[10px] font-medium text-destructive">{errors.careerDomain}</p>}
           </div>
         </motion.div>
       )}
@@ -400,11 +470,12 @@ export function AssessmentSteps() {
             Specialization * <span className="normal-case font-normal text-muted-foreground">({availableSpecializations.length} available)</span>
           </Label>
           <Select value={data.specialization} onValueChange={v => update({ specialization: v, careerRole: "" })}>
-            <SelectTrigger className="h-11"><SelectValue placeholder="Select specialization" /></SelectTrigger>
+            <SelectTrigger className={`h-11 ${errors.specialization ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select specialization" /></SelectTrigger>
             <SelectContent>
               {availableSpecializations.map(s => <SelectItem key={s} value={s}>{formatLabel(s)}</SelectItem>)}
             </SelectContent>
           </Select>
+          {errors.specialization && <p className="text-[10px] font-medium text-destructive">{errors.specialization}</p>}
         </motion.div>
       )}
 
@@ -416,7 +487,7 @@ export function AssessmentSteps() {
             Career Role * <span className="normal-case font-normal text-muted-foreground">({availableRoleIds.length} available)</span>
           </Label>
           <Select value={data.careerRole} onValueChange={v => update({ careerRole: v, technicalSkills: {} })}>
-            <SelectTrigger className="h-11"><SelectValue placeholder="Select career" /></SelectTrigger>
+            <SelectTrigger className={`h-11 ${errors.careerRole ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select career" /></SelectTrigger>
             <SelectContent>
               {availableRoleIds.map(roleId => (
                 <SelectItem key={roleId} value={formatLabel(roleId)}>
@@ -425,6 +496,7 @@ export function AssessmentSteps() {
               ))}
             </SelectContent>
           </Select>
+          {errors.careerRole && <p className="text-[10px] font-medium text-destructive">{errors.careerRole}</p>}
           {data.careerRole && (
             <motion.div
               initial={{ opacity: 0, scale: 0.97 }}
@@ -619,7 +691,10 @@ export function AssessmentSteps() {
         <p className="text-sm text-muted-foreground">
           Rate yourself for <span className="text-primary font-semibold">{data.careerRole || "your career"}</span>
         </p>
-        <CompletionChip filled={techRated} total={techTotal} />
+        <div className="flex flex-col items-end gap-1">
+          <CompletionChip filled={techRated} total={techTotal} />
+          {errors.technicalSkills && <p className="text-[10px] font-medium text-destructive animate-pulse">{errors.technicalSkills}</p>}
+        </div>
       </div>
       <div className="space-y-2">
         {selectedRoleSkills.map(skill => (
@@ -821,7 +896,6 @@ export function AssessmentSteps() {
           {step < TOTAL_STEPS - 1 ? (
             <Button
               onClick={advanceStep}
-              disabled={!canNext()}
               className="gradient-primary text-primary-foreground gap-2 px-6"
             >
               Continue <ArrowRight className="h-4 w-4" />
