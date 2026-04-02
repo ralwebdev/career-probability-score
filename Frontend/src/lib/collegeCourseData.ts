@@ -42,6 +42,7 @@ export type CourseDetail = {
   nextBatchDate: string;
   seatsLeft: number;
   expectedSalary: string;
+  url?: string;
 };
 
 // Mock colleges
@@ -164,6 +165,7 @@ export const courseDetails: CourseDetail[] = [
       { name: "Riya Mukherjee", feedback: "Best design course in Kolkata. Placement support was excellent.", rating: 5, image: "" },
     ],
     nextBatchDate: "April 10, 2026", seatsLeft: 15, expectedSalary: "₹4–18 LPA",
+    url: "#",
   },
   {
     id: "ra-graphic", collegeId: "redapple", title: "Certificate in Graphic & Motion Graphics", domain: "Design",
@@ -772,6 +774,7 @@ export function getCourseById(id: string): CourseDetail | undefined {
     careerOutcomes: baseCourse.careers.slice(0, 3).map(role => ({ role, salaryRange: "₹4–15 LPA", growthTrajectory: "Growth in 2-3 years" })),
     testimonials: [{ name: "Student", feedback: "Great learning experience with practical projects.", rating: 5, image: "" }],
     nextBatchDate: "April 2026", seatsLeft: 20, expectedSalary: "₹4–15 LPA",
+    url: baseCourse.url,
   };
 }
 

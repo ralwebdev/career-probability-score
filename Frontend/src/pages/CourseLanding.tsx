@@ -103,6 +103,7 @@ export default function CourseLanding() {
   // Use the SAME calculateCPS function as Results page for consistency
   const scores = userData ? calculateCPS(userData) : null;
   const role = userData ? careerRoles.find(r => r.name === userData.careerRole) : null;
+  const isRedApple = college?.id === "redapple" || (course && course.providerType === "redapple");
 
   const userName = userData?.careerRole ? "You" : "Student";
   const careerRole = userData?.careerRole || course.careerRoles[0];
@@ -137,10 +138,10 @@ export default function CourseLanding() {
   return (
     <div className="min-h-screen pb-16">
       {/* ===== BEHAVIORAL: Exit-Intent Popup ===== */}
-      <ExitIntentPopup courseTitle={course.title} coursePrice={course.coursePrice} careerRole={careerRole} />
+      {isRedApple && <ExitIntentPopup courseTitle={course.title} coursePrice={course.coursePrice} careerRole={careerRole} />}
 
       {/* ===== BEHAVIORAL: Scroll-triggered nudge ===== */}
-      <ScrollNudge courseTitle={course.title} seatsLeft={course.seatsLeft} />
+      {isRedApple && <ScrollNudge courseTitle={course.title} seatsLeft={course.seatsLeft} />}
 
       {/* ===== SECTION 1: HERO ===== */}
       <section className="gradient-hero py-12 sm:py-16 px-4">
@@ -195,14 +196,24 @@ export default function CourseLanding() {
             )}
 
             <div className="flex flex-wrap gap-3">
-              <Button size="lg" className="gradient-primary text-primary-foreground gap-2"
-                onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
-                <Target className="h-4 w-4" /> Get Personalized Career Plan
-              </Button>
-              <Button size="lg" variant="outline" className="gap-2"
-                onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
-                <Phone className="h-4 w-4" /> Talk to Senior Counselor
-              </Button>
+              {isRedApple ? (
+                <>
+                  <Button size="lg" className="gradient-primary text-primary-foreground gap-2"
+                    onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
+                    <Target className="h-4 w-4" /> Get Personalized Career Plan
+                  </Button>
+                  <Button size="lg" variant="outline" className="gap-2"
+                    onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
+                    <Phone className="h-4 w-4" /> Talk to Senior Counselor
+                  </Button>
+                </>
+              ) : (
+                <Button size="lg" className="gradient-primary text-primary-foreground gap-2" asChild>
+                  <a href={course.url} target="_blank" rel="noopener noreferrer">
+                    <Target className="h-4 w-4" /> Visit Course Website <ArrowRight className="h-4 w-4" />
+                  </a>
+                </Button>
+              )}
             </div>
           </motion.div>
         </div>
@@ -236,7 +247,7 @@ export default function CourseLanding() {
           </div>
 
           {/* ===== BEHAVIORAL: Inline lead capture after diagnosis (reciprocity) ===== */}
-          <InlineLeadCapture careerRole={careerRole} />
+          {isRedApple && <InlineLeadCapture careerRole={careerRole} />}
         </Section>
 
         {/* ===== SECTION 3: WHY THIS COURSE ===== */}
@@ -319,21 +330,23 @@ export default function CourseLanding() {
         </Section>
 
         {/* ===== BEHAVIORAL: MAIN LEAD CAPTURE (Micro-commitment ladder) ===== */}
-        <div id="lead-capture-main">
-          <Section id="get-started">
-            <SectionTitle icon={<Target className="h-5 w-5 text-primary" />} title="Get Your Free Career Report" subtitle="Takes 30 seconds — unlock your personalized roadmap" />
-            <MicroCommitmentCTA
-              courseTitle={course.title}
-              careerRole={careerRole}
-              currentCPS={currentCPS}
-              projectedCPS={projectedCPS}
-            />
-          </Section>
-        </div>
+        {isRedApple && (
+          <div id="lead-capture-main">
+            <Section id="get-started">
+              <SectionTitle icon={<Target className="h-5 w-5 text-primary" />} title="Get Your Free Career Report" subtitle="Takes 30 seconds — unlock your personalized roadmap" />
+              <MicroCommitmentCTA
+                courseTitle={course.title}
+                careerRole={careerRole}
+                currentCPS={currentCPS}
+                projectedCPS={projectedCPS}
+              />
+            </Section>
+          </div>
+        )}
 
         {/* ===== SECTION 5: PRICE COMPARISON ===== */}
         <Section id="pricing">
-          <SectionTitle icon={<IndianRupee className="h-5 w-5 text-primary" />} title="Investment & ROI" subtitle="Transparent pricing with guaranteed value" />
+          <SectionTitle icon={<IndianRupee className="h-5 w-5 text-primary" />} title="Expected Investment & ROI" subtitle="Transparent pricing with guaranteed value" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <div className="rounded-xl border bg-card p-5 text-center">
               <p className="text-xs text-muted-foreground mb-1">Market Average</p>
@@ -368,7 +381,7 @@ export default function CourseLanding() {
         </Section>
 
         {/* ===== SECTION 6: COLLEGE PROFILE ===== */}
-        <Section id="college-profile">
+        {/* <Section id="college-profile">
           <SectionTitle icon={<Building2 className="h-5 w-5 text-primary" />} title={college.name} subtitle={college.location} />
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
             <div className="rounded-lg border bg-card p-3 text-center">
@@ -398,19 +411,18 @@ export default function CourseLanding() {
               </div>
             ))}
           </div>
-        </Section>
+        </Section> */}
 
         {/* ===== SECTION 7: GALLERY ===== */}
-        <Section id="gallery">
+        {/* <Section id="gallery">
           <SectionTitle icon={<ImageIcon className="h-5 w-5 text-primary" />} title="Campus Gallery" />
           <div className="flex gap-2 mb-4">
             {["all", "campus", "classrooms", "labs", "events"].map(cat => (
               <button
                 key={cat}
                 onClick={() => setGalleryFilter(cat)}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all capitalize ${
-                  galleryFilter === cat ? "gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
-                }`}
+                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all capitalize ${galleryFilter === cat ? "gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground hover:text-foreground"
+                  }`}
               >
                 {cat}
               </button>
@@ -423,10 +435,10 @@ export default function CourseLanding() {
               </div>
             ))}
           </div>
-        </Section>
+        </Section> */}
 
         {/* ===== SECTION 8: ABOUT INSTITUTE ===== */}
-        <Section id="about">
+        {/* <Section id="about">
           <SectionTitle icon={<Info className="h-5 w-5 text-primary" />} title="About the Institute" />
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="rounded-xl border bg-card p-5">
@@ -457,7 +469,7 @@ export default function CourseLanding() {
               ))}
             </div>
           </div>
-        </Section>
+        </Section> */}
 
         {/* ===== SECTION 9: CAREER OUTCOMES ===== */}
         <Section id="outcomes">
@@ -563,28 +575,30 @@ export default function CourseLanding() {
         </Section>
 
         {/* ===== SECTION 13: URGENCY ===== */}
-        <Section id="urgency">
-          <div className="rounded-xl border-2 border-accent/30 bg-accent/5 p-6 text-center">
-            <Timer className="h-8 w-8 text-accent mx-auto mb-3" />
-            <h3 className="text-xl font-bold mb-2">Don't Miss Out!</h3>
-            <div className="flex items-center justify-center gap-8 mb-4">
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Next Batch</p>
-                <p className="text-lg font-bold font-mono-data">{course.nextBatchDate}</p>
+        {isRedApple && (
+          <Section id="urgency">
+            <div className="rounded-xl border-2 border-accent/30 bg-accent/5 p-6 text-center">
+              <Timer className="h-8 w-8 text-accent mx-auto mb-3" />
+              <h3 className="text-xl font-bold mb-2">Don't Miss Out!</h3>
+              <div className="flex items-center justify-center gap-8 mb-4">
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Next Batch</p>
+                  <p className="text-lg font-bold font-mono-data">{course.nextBatchDate}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Seats Left</p>
+                  <p className="text-lg font-bold font-mono-data text-destructive">{course.seatsLeft} only</p>
+                </div>
               </div>
-              <div>
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Seats Left</p>
-                <p className="text-lg font-bold font-mono-data text-destructive">{course.seatsLeft} only</p>
-              </div>
+              <Progress value={((30 - course.seatsLeft) / 30) * 100} className="h-2 max-w-xs mx-auto mb-4" />
+              <p className="text-xs text-muted-foreground mb-4">Filling fast — {Math.round(((30 - course.seatsLeft) / 30) * 100)}% seats taken</p>
+              <Button className="gradient-primary text-primary-foreground gap-2"
+                onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
+                <ArrowRight className="h-4 w-4" /> Reserve My Seat Now
+              </Button>
             </div>
-            <Progress value={((30 - course.seatsLeft) / 30) * 100} className="h-2 max-w-xs mx-auto mb-4" />
-            <p className="text-xs text-muted-foreground mb-4">Filling fast — {Math.round(((30 - course.seatsLeft) / 30) * 100)}% seats taken</p>
-            <Button className="gradient-primary text-primary-foreground gap-2"
-              onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
-              <ArrowRight className="h-4 w-4" /> Reserve My Seat Now
-            </Button>
-          </div>
-        </Section>
+          </Section>
+        )}
 
         {/* ===== SECTION 14: FINAL ROI ===== */}
         <Section id="roi">
@@ -608,44 +622,57 @@ export default function CourseLanding() {
           </div>
         </Section>
 
-        {/* ===== SECTION 15: FINAL CTA ===== */}
         <Section id="final-cta">
           <div className="rounded-xl gradient-primary p-8 text-center text-primary-foreground">
             <h2 className="text-2xl sm:text-3xl font-bold mb-3">Ready to Transform Your Career?</h2>
             <p className="text-primary-foreground/80 mb-6 max-w-lg mx-auto">
-              Join {30 - course.seatsLeft} students already enrolled. Your career as a {careerRole} starts here.
+              {isRedApple
+                ? `Join ${30 - course.seatsLeft} students already enrolled. Your career as a ${careerRole} starts here.`
+                : `Take the next step in your career. Your path to becoming a ${careerRole} starts here.`}
             </p>
             <div className="flex flex-wrap justify-center gap-3">
-              <Button size="lg" variant="secondary" className="gap-2"
-                onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
-                <Phone className="h-4 w-4" /> Talk to Counselor
-              </Button>
-              <Button size="lg" variant="secondary" className="gap-2"
-                onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
-                <Target className="h-4 w-4" /> Get Career Roadmap
-              </Button>
-              <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2"
-                onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
-                <ArrowRight className="h-4 w-4" /> Apply Now
-              </Button>
+              {isRedApple ? (
+                <>
+                  <Button size="lg" variant="secondary" className="gap-2"
+                    onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
+                    <Phone className="h-4 w-4" /> Talk to Counselor
+                  </Button>
+                  <Button size="lg" variant="secondary" className="gap-2"
+                    onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
+                    <Target className="h-4 w-4" /> Get Career Roadmap
+                  </Button>
+                  <Button size="lg" className="bg-accent text-accent-foreground hover:bg-accent/90 gap-2"
+                    onClick={() => document.getElementById("lead-capture-main")?.scrollIntoView({ behavior: "smooth" })}>
+                    <ArrowRight className="h-4 w-4" /> Apply Now
+                  </Button>
+                </>
+              ) : (
+                <Button size="lg" variant="secondary" className="gap-2" asChild>
+                  <a href={course.url} target="_blank" rel="noopener noreferrer">
+                    <ArrowRight className="h-4 w-4" /> View Course on {college?.name || "Partner Site"}
+                  </a>
+                </Button>
+              )}
             </div>
           </div>
         </Section>
       </div>
 
       {/* ===== WhatsApp Button ===== */}
-      <a
-        href={`https://wa.me/919999999999?text=${encodeURIComponent(`Hi, I'm interested in the ${course.title} course`)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-full bg-[hsl(142,70%,45%)] text-white px-4 py-3 shadow-lg hover:scale-105 transition-transform"
-      >
-        <MessageCircle className="h-5 w-5" />
-        <span className="text-sm font-medium hidden sm:inline">Chat on WhatsApp</span>
-      </a>
+      {isRedApple && (
+        <a
+          href={`https://wa.me/919999999999?text=${encodeURIComponent(`Hi, I'm interested in the ${course.title} course`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="fixed bottom-20 right-4 z-50 flex items-center gap-2 rounded-full bg-[hsl(142,70%,45%)] text-white px-4 py-3 shadow-lg hover:scale-105 transition-transform"
+        >
+          <MessageCircle className="h-5 w-5" />
+          <span className="text-sm font-medium hidden sm:inline">Chat on WhatsApp</span>
+        </a>
+      )}
 
       {/* ===== BEHAVIORAL: Enhanced Floating CTA Bar ===== */}
-      <FloatingCTABar courseTitle={course.title} coursePrice={course.coursePrice} seatsLeft={course.seatsLeft} />
+      {isRedApple && <FloatingCTABar courseTitle={course.title} coursePrice={course.coursePrice} seatsLeft={course.seatsLeft} />}
     </div>
   );
 }

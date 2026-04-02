@@ -24,7 +24,11 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
                             <CartesianGrid strokeDasharray="3 3" stroke="hsla(220, 26%, 93%, 1.00)" />
                             <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
                             <YAxis dataKey="name" type="category" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} width={100} />
-                            <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8, color: "white" }} />
+                            <Tooltip 
+                                contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} 
+                                itemStyle={{ color: "white" }}
+                                labelStyle={{ color: "white" }}
+                            />
                             <Bar dataKey="count" fill="hsl(186, 100%, 50%)" radius={[0, 4, 4, 0]} />
                         </BarChart>
                     </ResponsiveContainer>
@@ -40,7 +44,11 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
                             <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
                             <XAxis dataKey="range" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
                             <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
-                            <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8, color: "white" }} />
+                            <Tooltip 
+                                contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} 
+                                itemStyle={{ color: "white" }}
+                                labelStyle={{ color: "white" }}
+                            />
                             <Bar dataKey="count" fill="hsl(186, 100%, 50%)" radius={[4, 4, 0, 0]}>
                                 {dashboardData.scoreDistribution.map((entry: any, i: number) => (
                                     <Cell key={i} fill={entry.color} />
@@ -65,7 +73,11 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
                                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                                     ))}
                                 </Pie>
-                                <Tooltip contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8, color: "white" }} />
+                                <Tooltip 
+                                    contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} 
+                                    itemStyle={{ color: "white" }}
+                                    labelStyle={{ color: "white" }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
                         <div className="space-y-2 flex-1">
@@ -87,7 +99,7 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
                     </h3>
                     <div className="space-y-4">
                         <div className="rounded-lg bg-accent/10 p-4 border border-accent/20">
-                            <p className="text-sm text-accent-foreground font-medium">Growth Tip</p>
+                            <p className="text-sm text-accent font-semibold">Growth Tip</p>
                             <p className="text-xs text-muted-foreground mt-1">
                                 Career interests in {dashboardData.popularCareers[0]?.name || "Tech"} are trending up this week.
                             </p>
