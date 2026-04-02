@@ -3,7 +3,8 @@
 
 export const educationLevels = [
   "Class 12 - Science", "Class 12 - Commerce", "Class 12 - Arts",
-  "Undergraduate", "Graduate", "Postgraduate", "Bootcamp", "Self-Taught"
+  "Diploma", "Undergraduate", "Graduate", "Postgraduate", "PhD",
+  "Bootcamp", "Self-Taught"
 ] as const;
 
 export const fieldsOfStudy = [
@@ -1550,13 +1551,180 @@ const masterDBRoles: CareerRole[] = [
   },
 ];
 
-// Combined career roles — all Class 12 pathways + advanced + master DB roles
+// ============================================================================
+// LIFE SCIENCE & PHYSICAL SCIENCE ROLES
+// ============================================================================
+const lifeScienceRoles: CareerRole[] = [
+  {
+    name: "Zoologist", domain: "Agriculture & AgriTech", subdomain: "Wildlife Research", stream: "Science",
+    fieldsOfStudy: ["Science", "Biotechnology", "Environmental Science"],
+    skills: ["Zoology", "Field Research", "Animal Taxonomy", "Ecology", "Scientific Writing"],
+    skillWeights: [8, 7, 7, 6, 6], tools: ["SPSS", "GIS", "Field Equipment"],
+    demandScore: 5, topRecruiters: ["Wildlife Institute of India", "WWF", "ZSI", "National Parks"],
+    portfolioRequirement: "Field research reports", typicalExperience: "1 fieldwork; 2 research papers",
+    avgCost: "₹2-6 Lakh (B.Sc + M.Sc)", avgTimeToJob: "5-6 years",
+    sector: ["Public", "Private"], trend: "Stable", remoteEligibility: "Low",
+  },
+  {
+    name: "Wildlife Biologist", domain: "Agriculture & AgriTech", subdomain: "Wildlife Research", stream: "Science",
+    fieldsOfStudy: ["Science", "Environmental Science", "Biotechnology"],
+    skills: ["Wildlife Biology", "Field Research", "GIS", "Data Analysis", "Conservation"],
+    skillWeights: [8, 7, 7, 6, 6], tools: ["ArcGIS", "Camera Traps", "R"],
+    demandScore: 6, topRecruiters: ["WII", "BNHS", "WWF India", "UNDP"],
+    portfolioRequirement: "Wildlife surveys", typicalExperience: "1 internship; 2 field studies",
+    avgCost: "₹2-8 Lakh (M.Sc Wildlife)", avgTimeToJob: "5-6 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Low",
+  },
+  {
+    name: "Marine Biologist", domain: "Agriculture & AgriTech", subdomain: "Marine Biology", stream: "Science",
+    fieldsOfStudy: ["Science", "Environmental Science"],
+    skills: ["Marine Biology", "Field Research", "Ecology", "Data Analysis", "Diving Skills"],
+    skillWeights: [8, 7, 6, 6, 5], tools: ["Lab Equipment", "GIS", "R"],
+    demandScore: 5, topRecruiters: ["NIO", "CMFRI", "NIOT", "WWF"],
+    portfolioRequirement: "Marine research reports", typicalExperience: "1 fieldwork; 1 dive log",
+    avgCost: "₹2-8 Lakh (M.Sc Marine Biology)", avgTimeToJob: "5-7 years",
+    sector: ["Public", "Private"], trend: "Stable", remoteEligibility: "Low",
+  },
+  {
+    name: "Clinical Microbiologist", domain: "Healthcare", subdomain: "Microbiology", stream: "Science",
+    fieldsOfStudy: ["Science", "Healthcare", "Biotechnology"],
+    skills: ["Clinical Microbiology", "Lab Techniques", "Infection Control", "Diagnostics", "Quality Control"],
+    skillWeights: [8, 8, 7, 7, 6], tools: ["Microscope", "VITEK", "Lab Equipment"],
+    demandScore: 7, topRecruiters: ["AIIMS", "Apollo", "Fortis", "Metropolis"],
+    portfolioRequirement: "Lab reports", typicalExperience: "1 internship; Hospital lab placement",
+    avgCost: "₹2-8 Lakh (M.Sc Microbiology)", avgTimeToJob: "5-6 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Low",
+  },
+  {
+    name: "Virologist", domain: "Biotechnology & Pharma", subdomain: "Virology", stream: "Science",
+    fieldsOfStudy: ["Science", "Biotechnology", "Healthcare"],
+    skills: ["Virology", "Lab Techniques", "Molecular Biology", "PCR", "Scientific Writing"],
+    skillWeights: [8, 8, 7, 7, 6], tools: ["BSL Labs", "PCR Machines", "Bioinformatics Tools"],
+    demandScore: 8, topRecruiters: ["ICMR", "NIV Pune", "Bharat Biotech", "Serum Institute"],
+    portfolioRequirement: "Research papers", typicalExperience: "1 internship; 2 lab projects",
+    avgCost: "₹3-12 Lakh (M.Sc/PhD)", avgTimeToJob: "6-8 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Low",
+  },
+  {
+    name: "Immunologist", domain: "Biotechnology & Pharma", subdomain: "Immunology", stream: "Science",
+    fieldsOfStudy: ["Science", "Biotechnology", "Healthcare"],
+    skills: ["Immunology", "Lab Techniques", "Flow Cytometry", "Research Methods", "Scientific Writing"],
+    skillWeights: [8, 7, 7, 6, 6], tools: ["Flow Cytometer", "ELISA", "Lab Equipment"],
+    demandScore: 7, topRecruiters: ["ICMR", "Biocon", "Serum Institute", "AIIMS"],
+    portfolioRequirement: "Research publications", typicalExperience: "1 internship; 3 lab projects",
+    avgCost: "₹3-12 Lakh (M.Sc/PhD)", avgTimeToJob: "6-8 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Low",
+  },
+  {
+    name: "Vaccine Researcher", domain: "Biotechnology & Pharma", subdomain: "Vaccine Development", stream: "Science",
+    fieldsOfStudy: ["Science", "Biotechnology", "Healthcare"],
+    skills: ["Vaccine Development", "Immunology", "Clinical Trials", "Lab Techniques", "Regulatory Knowledge"],
+    skillWeights: [9, 8, 7, 7, 6], tools: ["BSL Labs", "Clinical Trial Software", "Lab Equipment"],
+    demandScore: 9, topRecruiters: ["Bharat Biotech", "Serum Institute", "Biological E", "Panacea Biotec"],
+    portfolioRequirement: "Clinical trial reports", typicalExperience: "2 internships; 2 research papers",
+    avgCost: "₹5-15 Lakh (PhD)", avgTimeToJob: "7-9 years",
+    sector: ["Private", "Public"], trend: "Rising", remoteEligibility: "Low",
+  },
+  {
+    name: "Geneticist", domain: "Biotechnology & Pharma", subdomain: "Genetics", stream: "Science",
+    fieldsOfStudy: ["Science", "Biotechnology"],
+    skills: ["Genetics", "Bioinformatics", "Molecular Biology", "Statistics", "Lab Techniques"],
+    skillWeights: [9, 7, 7, 6, 7], tools: ["BLAST", "R", "Lab Equipment"],
+    demandScore: 7, topRecruiters: ["CCMB", "IISc", "Biocon", "Strand Life Sciences"],
+    portfolioRequirement: "Research papers", typicalExperience: "1 internship; 3 projects",
+    avgCost: "₹3-12 Lakh (M.Sc/PhD)", avgTimeToJob: "6-8 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Medium",
+  },
+  {
+    name: "Pharmacologist", domain: "Healthcare", subdomain: "Pharmacology", stream: "Science",
+    fieldsOfStudy: ["Science", "Healthcare", "Pharmacy"],
+    skills: ["Pharmacology", "Drug Interactions", "Lab Techniques", "Research", "Toxicology"],
+    skillWeights: [8, 7, 7, 7, 6], tools: ["Lab Equipment", "SPSS", "Drug Databases"],
+    demandScore: 7, topRecruiters: ["Cipla", "Sun Pharma", "Dr. Reddy's", "Lupin"],
+    portfolioRequirement: "Research reports", typicalExperience: "1 internship; 2 projects",
+    avgCost: "₹3-10 Lakh (M.Pharm)", avgTimeToJob: "5-6 years",
+    sector: ["Private", "Public"], trend: "Stable", remoteEligibility: "Low",
+  },
+  {
+    name: "Botanist", domain: "Agriculture & AgriTech", subdomain: "Plant Research", stream: "Science",
+    fieldsOfStudy: ["Science", "Agriculture"],
+    skills: ["Botany", "Plant Taxonomy", "Field Research", "Lab Techniques", "Scientific Writing"],
+    skillWeights: [8, 7, 7, 6, 6], tools: ["Herbarium Tools", "Microscope", "GIS"],
+    demandScore: 5, topRecruiters: ["BSI", "NBPGR", "IARI", "CSIR"],
+    portfolioRequirement: "Plant surveys", typicalExperience: "1 fieldwork; 2 projects",
+    avgCost: "₹2-6 Lakh (M.Sc Botany)", avgTimeToJob: "5-7 years",
+    sector: ["Public", "Private"], trend: "Stable", remoteEligibility: "Low",
+  },
+  {
+    name: "Neuroscientist", domain: "Healthcare", subdomain: "Neuroscience", stream: "Science",
+    fieldsOfStudy: ["Science", "Healthcare", "Psychology"],
+    skills: ["Neuroscience", "Brain Imaging", "Statistics", "Lab Techniques", "Research Methods"],
+    skillWeights: [9, 7, 7, 7, 6], tools: ["fMRI", "EEG", "MATLAB", "SPSS"],
+    demandScore: 7, topRecruiters: ["NIMHANS", "IISc", "NBRC", "AIIMS"],
+    portfolioRequirement: "Research publications", typicalExperience: "1 internship; 3 projects",
+    avgCost: "₹5-15 Lakh (PhD)", avgTimeToJob: "7-9 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Medium",
+  },
+  {
+    name: "Nanotech Engineer", domain: "Engineering", subdomain: "Nanotechnology", stream: "Science",
+    fieldsOfStudy: ["Science", "Engineering"],
+    skills: ["Nanotechnology", "Materials Science", "Characterization Techniques", "Research", "Lab Techniques"],
+    skillWeights: [8, 7, 7, 7, 6], tools: ["SEM", "TEM", "XRD", "AFM"],
+    demandScore: 6, topRecruiters: ["IIT", "DRDO", "CSIR", "Tata Steel"],
+    portfolioRequirement: "Research papers", typicalExperience: "1 internship; 2 projects",
+    avgCost: "₹5-15 Lakh (M.Tech/PhD)", avgTimeToJob: "6-8 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "Low",
+  },
+  {
+    name: "Physicist", domain: "Technology", subdomain: "Research", stream: "Science",
+    fieldsOfStudy: ["Science", "Mathematics"],
+    skills: ["Physics", "Mathematics", "MATLAB", "Research Methods", "Data Analysis"],
+    skillWeights: [9, 8, 7, 7, 6], tools: ["MATLAB", "Python", "Lab Equipment"],
+    demandScore: 6, topRecruiters: ["ISRO", "BARC", "DRDO", "TIFR"],
+    portfolioRequirement: "Research papers", typicalExperience: "1 internship; 3 experiments",
+    avgCost: "₹3-12 Lakh (M.Sc/PhD)", avgTimeToJob: "6-9 years",
+    sector: ["Public", "Private"], trend: "Stable", remoteEligibility: "Medium",
+  },
+  {
+    name: "Chemist", domain: "Healthcare", subdomain: "Chemistry", stream: "Science",
+    fieldsOfStudy: ["Science"],
+    skills: ["Chemistry", "Lab Techniques", "Analytical Chemistry", "Instrumentation", "Research"],
+    skillWeights: [9, 8, 7, 7, 6], tools: ["HPLC", "GC-MS", "NMR", "Lab Equipment"],
+    demandScore: 6, topRecruiters: ["Cipla", "Reliance", "CSIR", "Dr. Reddy's"],
+    portfolioRequirement: "Lab reports", typicalExperience: "1 internship; 2 projects",
+    avgCost: "₹2-8 Lakh (M.Sc Chemistry)", avgTimeToJob: "5-7 years",
+    sector: ["Private", "Public"], trend: "Stable", remoteEligibility: "Low",
+  },
+  {
+    name: "Statistician", domain: "Data/AI", subdomain: "Data Science", stream: "Science",
+    fieldsOfStudy: ["Mathematics", "Statistics", "Science"],
+    skills: ["Statistics", "R/Python", "Data Analysis", "Probability", "Research Methods"],
+    skillWeights: [9, 8, 7, 7, 6], tools: ["R", "Python", "SAS", "SPSS"],
+    demandScore: 7, topRecruiters: ["RBI", "NSSO", "ISI", "McKinsey"],
+    portfolioRequirement: "Statistical analyses", typicalExperience: "1 internship; 3 projects",
+    avgCost: "₹2-8 Lakh (M.Sc Statistics)", avgTimeToJob: "5-6 years",
+    sector: ["Public", "Private"], trend: "Rising", remoteEligibility: "High",
+  },
+  {
+    name: "Genetic Counselor", domain: "Healthcare", subdomain: "Genetics", stream: "Science",
+    fieldsOfStudy: ["Science", "Healthcare", "Biotechnology"],
+    skills: ["Genetic Counseling", "Medical Genetics", "Patient Communication", "Ethics", "Pedigree Analysis"],
+    skillWeights: [8, 7, 7, 7, 6], tools: ["Genetic Databases", "Patient Management Software"],
+    demandScore: 7, topRecruiters: ["Medgenome", "Strand Life Sciences", "Apollo", "AIIMS"],
+    portfolioRequirement: "Case studies", typicalExperience: "1 clinical placement",
+    avgCost: "₹3-10 Lakh (M.Sc Genetics)", avgTimeToJob: "5-6 years",
+    sector: ["Private", "Public"], trend: "Rising", remoteEligibility: "Medium",
+  },
+];
+
+// Combined career roles — all Class 12 pathways + advanced + master DB roles + life science
 export const careerRoles: CareerRole[] = [
   ...scienceCareers,
   ...commerceCareers,
   ...artsCareers,
   ...advancedCareers,
   ...masterDBRoles,
+  ...lifeScienceRoles,
 ];
 
 // Deduplicate by name (keep first occurrence)
@@ -1583,18 +1751,95 @@ export const educationFieldMapping: Record<string, string[]> = {
   "Class 12 - Science": ["Science", "Mathematics", "Healthcare"],
   "Class 12 - Commerce": ["Commerce", "Business", "Mathematics"],
   "Class 12 - Arts": ["Arts", "Design", "Media", "Education", "Psychology"],
+  "Diploma": ["Science", "Engineering", "Computer Science", "Design", "Healthcare", "Hospitality"],
   "Undergraduate": [...fieldsOfStudy],
   "Graduate": [...fieldsOfStudy],
   "Postgraduate": [...fieldsOfStudy],
+  "PhD": [...fieldsOfStudy],
   "Bootcamp": ["Computer Science", "Design", "Business", "Media"],
   "Self-Taught": ["Computer Science", "Design", "Business", "Media", "Arts"],
 };
 
-// Diploma-eligible roles (kept for legacy compatibility)
+// Diploma-eligible roles
 export const diplomaEligibleDomains = [
   "Technology", "Design", "Engineering", "Healthcare", "Hospitality",
-  "Business", "Agriculture & AgriTech",
+  "Business", "Agriculture & AgriTech", "Animation & VFX",
 ] as const;
+
+// ============================================================================
+// CPS-BASED ROLE RECOMMENDATION HELPERS
+// ============================================================================
+
+export type CPSBand = "beginner" | "growth" | "advanced";
+
+export function getCPSBand(cpsScore: number): CPSBand {
+  if (cpsScore < 40) return "beginner";
+  if (cpsScore <= 70) return "growth";
+  return "advanced";
+}
+
+/**
+ * Filter career roles based on CPS band.
+ * < 40: beginner-friendly roles (demand ≤ 7, simpler skill requirements)
+ * 40-70: growth roles (mid-demand, skill upgrades recommended)
+ * > 70: specialized / high-paying roles (demand ≥ 7)
+ */
+export function getRecommendedRolesByBand(band: CPSBand, domain?: string): CareerRole[] {
+  let filtered = careerRoles;
+  if (domain) {
+    filtered = filtered.filter(r => r.domain === domain);
+  }
+  switch (band) {
+    case "beginner":
+      return filtered.filter(r => r.demandScore <= 7 && r.skills.length <= 5);
+    case "growth":
+      return filtered.filter(r => r.demandScore >= 5 && r.demandScore <= 9);
+    case "advanced":
+      return filtered.filter(r => r.demandScore >= 7);
+    default:
+      return filtered;
+  }
+}
+
+/**
+ * Get cross-domain career suggestions based on field of study.
+ * Returns alternative career paths for students who want to explore.
+ */
+export function getCrossDomainSuggestions(fieldOfStudy: string, currentRole: string): CareerRole[] {
+  const crossMap: Record<string, string[]> = {
+    "Microbiology": ["Data Scientist", "Biotech Research Scientist", "Clinical Research Associate", "Data Analyst"],
+    "Psychology": ["UX Researcher", "UX/UI Designer", "HR Manager", "Clinical Psychologist"],
+    "Commerce": ["Digital Marketer", "Business Analyst", "Product Manager", "Data Analyst"],
+    "Zoology": ["Data Analyst", "Environmental Data Analyst", "Wildlife Biologist", "Sustainability Consultant"],
+    "Botany": ["Agricultural Scientist", "Environmental Data Analyst", "Sustainability Consultant"],
+    "Biotechnology": ["Data Scientist", "Biotech Research Scientist", "Geneticist", "Clinical Research Associate"],
+    "Arts": ["UX/UI Designer", "Content Writer", "Digital Marketer", "Graphic Designer"],
+  };
+  const suggestions = crossMap[fieldOfStudy] ?? [];
+  return careerRoles.filter(r => suggestions.includes(r.name) && r.name !== currentRole).slice(0, 5);
+}
+
+/**
+ * Calculate skill gap with severity levels.
+ */
+export function calculateSkillGaps(
+  requiredSkills: string[],
+  userSkills: Record<string, number>
+): { skill: string; gap: number; severity: "critical" | "moderate" | "minor" }[] {
+  return requiredSkills
+    .map(skill => {
+      const userLevel = userSkills[skill] ?? 0;
+      const requiredLevel = 3; // Expert level
+      const gap = requiredLevel - userLevel;
+      return {
+        skill,
+        gap,
+        severity: (userLevel === 0 ? "critical" : userLevel === 1 ? "moderate" : "minor") as "critical" | "moderate" | "minor",
+      };
+    })
+    .filter(s => s.gap > 0)
+    .sort((a, b) => b.gap - a.gap);
+}
 
 export const softSkills = [
   "Communication", "Leadership", "Teamwork", "Problem Solving", "Adaptability", "Decision Making"

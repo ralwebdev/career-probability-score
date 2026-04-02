@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { RadarChart } from "./RadarChart";
-import { calculateCPS, careerRoles, type AssessmentData } from "@/lib/careerData";
+import { calculateCPS, careerRoles, type AssessmentData, getCPSBand, calculateSkillGaps } from "@/lib/careerData";
 import { getAssessment, type CPSScores } from "@/lib/api";
 import { ArrowLeft, TrendingUp, AlertTriangle, Building2, BookOpen, Share2, Wrench } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
@@ -57,8 +57,8 @@ export function ResultsDashboard() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const assessmentId = searchParams.get("id");
-  
-  const [backendData, setBackendData] = useState<{data: AssessmentData, scores: CPSScores} | null>(null);
+
+  const [backendData, setBackendData] = useState<{ data: AssessmentData, scores: CPSScores } | null>(null);
   const [loading, setLoading] = useState(!!assessmentId);
 
   const raw = sessionStorage.getItem("cps-assessment");
@@ -105,7 +105,8 @@ export function ResultsDashboard() {
   }
 
   const role = careerRoles.find(r => r.name === data.careerRole);
-  const missingSkills = (role?.skills ?? []).filter(s => (data.technicalSkills[s] ?? 0) < 2);
+  const skillGaps = role ? calculateSkillGaps(role.skills, data.technicalSkills) : [];
+  const cpsBand = getCPSBand(scores.total);
   const trajectoryData = [
     { month: "Now", score: scores.total },
     { month: "+2 Skills", score: Math.min(100, scores.total + 10 + simBoost) },
@@ -146,8 +147,15 @@ export function ResultsDashboard() {
           <p className="text-muted-foreground mb-2">Your probability of getting hired as</p>
           <h1 className="text-3xl sm:text-4xl font-bold text-primary text-glow">{data.careerRole}</h1>
           {role && <p className="text-sm text-muted-foreground mt-1">{role.domain} · {role.subdomain}</p>}
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex justify-center flex-col items-center gap-3">
             <ScoreRing score={scores.total} label={verdict} />
+            <div className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+              cpsBand === "advanced" ? "bg-success/20 text-success border border-success/30" :
+              cpsBand === "growth" ? "bg-accent/20 text-accent border border-accent/30" :
+              "bg-muted text-muted-foreground border border-border"
+            }`}>
+              {cpsBand} Band
+            </div>
           </div>
           <p className={`mt-4 text-lg font-semibold ${verdictColor}`}>{verdict}</p>
         </motion.div>
@@ -184,16 +192,25 @@ export function ResultsDashboard() {
         </div>
 
         {/* Skill Gap */}
-        {missingSkills.length > 0 && (
+        {skillGaps.length > 0 && (
           <div className="mb-10">
             <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
               <BookOpen className="h-5 w-5 text-primary" /> Skill Gap Analysis
             </h3>
             <div className="rounded-xl border bg-card/50 p-6">
-              <p className="text-sm text-muted-foreground mb-4">Skills you need to improve for <span className="text-primary">{data.careerRole}</span>:</p>
-              <div className="flex flex-wrap gap-2">
-                {missingSkills.map(s => (
-                  <span key={s} className="rounded-full border border-destructive/30 bg-destructive/10 px-3 py-1 text-xs font-medium text-destructive">{s}</span>
+              <p className="text-sm text-muted-foreground mb-4">Priority skills to improve for <span className="text-primary">{data.careerRole}</span>:</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {skillGaps.map(gap => (
+                  <div key={gap.skill} className="flex items-center justify-between p-3 rounded-lg border bg-background/50">
+                    <span className="text-sm font-medium">{gap.skill}</span>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                      gap.severity === "critical" ? "bg-destructive/20 text-destructive" :
+                      gap.severity === "moderate" ? "bg-orange-500/20 text-orange-600" :
+                      "bg-yellow-500/20 text-yellow-600"
+                    }`}>
+                      {gap.severity}
+                    </span>
+                  </div>
                 ))}
               </div>
               <div className="mt-4 pt-4 border-t">
@@ -248,9 +265,8 @@ export function ResultsDashboard() {
                 <button
                   key={opt.label}
                   onClick={() => setSimBoost(opt.val)}
-                  className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all ${
-                    simBoost === opt.val ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                  }`}
+                  className={`rounded-md px-4 py-1.5 text-sm font-medium transition-all ${simBoost === opt.val ? "gradient-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                    }`}
                 >{opt.label}</button>
               ))}
             </div>
@@ -297,9 +313,9 @@ export function ResultsDashboard() {
           <Button onClick={() => navigate("/report")} variant="outline" className="gap-2 px-8">
             <Share2 className="h-4 w-4" /> View Full Report
           </Button>
-          <Button onClick={() => navigate("/courses")} className="gradient-primary text-primary-foreground gap-2 px-8">
+          {/* <Button onClick={() => navigate("/courses")} className="gradient-primary text-primary-foreground gap-2 px-8">
             <BookOpen className="h-4 w-4" /> View Recommended Courses
-          </Button>
+          </Button> */}
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ const links = [
   { to: "/assessment", label: "Assessment" },
   { to: "/results", label: "Results" },
   // { to: "/market-signals", label: "Market Signals" },
-  { to: "/courses", label: "Courses" },
+  // { to: "/courses", label: "Courses" },
   { to: "/workshops", label: "Workshops" },
   { to: "/counseling", label: "Counseling" },
 ];

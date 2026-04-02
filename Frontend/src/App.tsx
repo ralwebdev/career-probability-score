@@ -33,11 +33,11 @@ const App = () => (
             <Route path="/report" element={<Report />} />
             <Route path="/counseling" element={<Counseling />} />
             <Route path="/market-signals" element={<MarketSignals />} />
-            <Route path="/courses" element={<Courses />} />
+            {/* <Route path="/courses" element={<Courses />} /> */}
             <Route path="/workshops" element={<Workshops />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/course/:courseId" element={<CourseLanding />} />
-            <Route path="/college-dashboard" element={<CollegeDashboard />} />
+            {/* <Route path="/college-dashboard" element={<CollegeDashboard />} /> */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Layout>

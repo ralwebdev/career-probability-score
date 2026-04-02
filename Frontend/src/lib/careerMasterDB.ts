@@ -99,7 +99,95 @@ const specialLabels: Record<string, string> = {
   "luxury_management": "Luxury Management",
   "hotel_operations": "Hotel Operations",
   "data_analytics": "Data Analytics",
+  // New fields
+  "zoology": "Zoology",
+  "botany": "Botany",
+  "microbiology": "Microbiology",
+  "genetics": "Genetics",
+  "molecular_biology": "Molecular Biology",
+  "marine_biology_domain": "Marine Biology",
+  "immunology_domain": "Immunology",
+  "virology_domain": "Virology",
+  "neuroscience": "Neuroscience",
+  "nanotechnology": "Nanotechnology",
+  "nanotechnology_domain": "Nanotechnology",
+  "mathematics_stats": "Mathematics & Statistics",
+  "business_analytics": "Business Analytics",
+  "taxation": "Taxation",
+  "mass_comm_arts": "Mass Communication",
+  "english_literature": "English Literature",
+  "wildlife_research": "Wildlife Research",
+  "animal_behavior": "Animal Behavior",
+  "plant_research": "Plant Research",
+  "horticulture": "Horticulture",
+  "forest_management": "Forest Management",
+  "clinical_microbiology": "Clinical Microbiology",
+  "industrial_microbiology": "Industrial Microbiology",
+  "genetic_research": "Genetic Research",
+  "neuroscience_research": "Neuroscience Research",
+  "materials_science": "Materials Science",
+  "astrophysics": "Astrophysics",
+  "bsc_zoology": "B.Sc Zoology",
+  "bsc_botany": "B.Sc Botany",
+  "bsc_microbiology": "B.Sc Microbiology",
+  "bsc_biotechnology": "B.Sc Biotechnology",
+  "bsc_chemistry": "B.Sc Chemistry",
+  "bsc_physics": "B.Sc Physics",
+  "bsc_mathematics": "B.Sc Mathematics",
+  "bsc_psychology": "B.Sc Psychology",
+  "bsc_agriculture": "B.Sc Agriculture",
+  "bsc_food_technology": "B.Sc Food Technology",
+  "bsc_environmental_science": "B.Sc Environmental Science",
+  "msc_zoology": "M.Sc Zoology",
+  "msc_botany": "M.Sc Botany",
+  "msc_microbiology": "M.Sc Microbiology",
+  "msc_biotechnology": "M.Sc Biotechnology",
+  "msc_chemistry": "M.Sc Chemistry",
+  "msc_physics": "M.Sc Physics",
+  "msc_mathematics": "M.Sc Mathematics",
+  "msc_psychology": "M.Sc Psychology",
+  "msc_data_science": "M.Sc Data Science",
+  "msc_environmental_science": "M.Sc Environmental Science",
+  "phd_sciences": "PhD Sciences",
+  "phd_engineering": "PhD Engineering",
+  "phd_arts": "PhD Arts",
+  "phd_commerce": "PhD Commerce",
+  "phd_life_sciences": "PhD Life Sciences",
+  "phd_social_sciences": "PhD Social Sciences",
+  "phd_computer_science": "PhD Computer Science",
+  "diploma": "Diploma",
+  "phd": "PhD",
   // Roles
+  "zoologist": "Zoologist",
+  "wildlife_biologist": "Wildlife Biologist",
+  "conservation_biologist": "Conservation Biologist",
+  "marine_biologist": "Marine Biologist",
+  "oceanographer": "Oceanographer",
+  "botanist": "Botanist",
+  "plant_geneticist": "Plant Geneticist",
+  "horticulturist": "Horticulturist",
+  "landscape_designer": "Landscape Designer",
+  "forest_officer": "Forest Officer",
+  "clinical_microbiologist": "Clinical Microbiologist",
+  "industrial_microbiologist": "Industrial Microbiologist",
+  "fermentation_technologist": "Fermentation Technologist",
+  "virologist": "Virologist",
+  "vaccine_researcher": "Vaccine Researcher",
+  "immunologist": "Immunologist",
+  "geneticist": "Geneticist",
+  "genetic_counselor": "Genetic Counselor",
+  "nanotech_engineer": "Nanotech Engineer",
+  "nanotech_researcher": "Nanotech Researcher",
+  "materials_scientist": "Materials Scientist",
+  "astrophysicist": "Astrophysicist",
+  "neuroscientist": "Neuroscientist",
+  "cognitive_scientist": "Cognitive Scientist",
+  "pharmacologist": "Pharmacologist",
+  "physicist": "Physicist",
+  "chemist": "Chemist",
+  "statistician": "Statistician",
+  "animal_behaviorist": "Animal Behaviorist",
+  // Existing roles
   "frontend_developer": "Frontend Developer",
   "react_developer": "React Developer",
   "ui_engineer": "UI Engineer",
@@ -179,9 +267,11 @@ export const masterEducationLevels = [
   "12_science",
   "12_commerce",
   "12_arts",
+  "diploma",
   "undergraduate",
   "graduate",
   "postgraduate",
+  "phd",
   "bootcamp",
   "self_taught",
 ] as const;
@@ -195,31 +285,56 @@ export const fieldsByEducation: Record<string, string[]> = {
     "data_science_ai", "biotechnology", "pharmacy", "paramedical",
     "architecture", "aviation", "defence", "environmental_science",
     "forensic_science", "agriculture", "food_technology", "sports_science",
+    "zoology", "botany", "microbiology", "genetics", "physics", "chemistry",
+    "mathematics_stats", "nanotechnology", "neuroscience",
   ],
   "12_commerce": [
     "accounting_finance", "business_management", "economics", "banking",
     "marketing", "entrepreneurship", "law", "supply_chain",
     "retail_management", "insurance", "international_business", "ecommerce",
+    "business_analytics", "taxation",
   ],
   "12_arts": [
     "design", "media_communication", "psychology", "law", "fine_arts",
     "performing_arts", "social_sciences", "languages", "education_teaching",
     "philosophy", "history", "political_science",
+    "journalism", "mass_comm_arts", "english_literature",
+  ],
+  diploma: [
+    "engineering", "computer_science", "design", "hotel_management",
+    "pharmacy", "paramedical", "animation_multimedia", "fashion_design",
+    "interior_design", "agriculture", "food_technology",
+    "web_development", "digital_marketing", "video_editing",
+    "graphic_design", "game_development", "cybersecurity",
+    "biotechnology", "environmental_science",
   ],
   undergraduate: [
     "btech", "bca", "bba", "bcom", "ba", "bsc", "bdes", "bpharma",
     "nursing", "hotel_management", "mass_communication", "law_llb",
     "animation_multimedia", "game_design", "fashion_design", "interior_design",
+    "bsc_zoology", "bsc_botany", "bsc_microbiology", "bsc_biotechnology",
+    "bsc_chemistry", "bsc_physics", "bsc_mathematics", "bsc_psychology",
+    "bsc_agriculture", "bsc_food_technology", "bsc_environmental_science",
   ],
   graduate: [
     "btech", "bca", "bba", "bcom", "ba", "bsc", "bdes", "bpharma",
     "nursing", "hotel_management", "mass_communication", "law_llb",
     "animation_multimedia", "game_design", "fashion_design", "interior_design",
+    "bsc_zoology", "bsc_botany", "bsc_microbiology", "bsc_biotechnology",
+    "bsc_chemistry", "bsc_physics", "bsc_mathematics", "bsc_psychology",
+    "bsc_agriculture", "bsc_food_technology", "bsc_environmental_science",
   ],
   postgraduate: [
     "btech", "bca", "bba", "bcom", "ba", "bsc", "bdes", "bpharma",
     "nursing", "hotel_management", "mass_communication", "law_llb",
     "animation_multimedia", "game_design", "fashion_design", "interior_design",
+    "msc_zoology", "msc_botany", "msc_microbiology", "msc_biotechnology",
+    "msc_chemistry", "msc_physics", "msc_mathematics", "msc_psychology",
+    "mba", "mca", "msc_data_science", "msc_environmental_science",
+  ],
+  phd: [
+    "phd_sciences", "phd_engineering", "phd_arts", "phd_commerce",
+    "phd_life_sciences", "phd_social_sciences", "phd_computer_science",
   ],
   bootcamp: [
     "web_development", "data_science", "uiux_design", "graphic_design",
@@ -260,6 +375,26 @@ export const domainsByField: Record<string, string[]> = {
   agriculture: ["agri_science", "agri_business", "food_technology"],
   food_technology: ["food_processing", "quality_assurance", "food_safety"],
   sports_science: ["sports_coaching", "sports_management", "fitness"],
+
+  // --- New life science fields (12_science) ---
+  zoology: ["wildlife_research", "conservation", "animal_behavior", "marine_biology_domain"],
+  botany: ["plant_research", "horticulture", "forest_management", "agri_science"],
+  microbiology: ["clinical_microbiology", "industrial_microbiology", "virology_domain", "immunology_domain"],
+  genetics: ["genetic_research", "bioinformatics", "biotech_research", "pharma_rd"],
+  physics: ["research", "academics", "nanotechnology_domain", "astrophysics"],
+  chemistry: ["research", "pharma_rd", "materials_science", "quality_assurance"],
+  mathematics_stats: ["data_analytics", "research", "actuarial", "machine_learning"],
+  nanotechnology: ["nanotechnology_domain", "materials_science", "research"],
+  neuroscience: ["neuroscience_research", "clinical_research", "pharma_rd"],
+
+  // --- New commerce fields ---
+  business_analytics: ["data_analytics", "business_intelligence", "machine_learning"],
+  taxation: ["taxation", "audit", "accounting"],
+
+  // --- New arts fields ---
+  journalism: ["journalism", "content_creation", "broadcasting"],
+  mass_comm_arts: ["journalism", "video_production", "content_creation", "broadcasting"],
+  english_literature: ["content_creation", "copywriting", "academics", "translation"],
 
   // --- 12_commerce fields ---
   accounting_finance: [
@@ -328,6 +463,42 @@ export const domainsByField: Record<string, string[]> = {
   game_design: ["game_programming", "game_art", "level_design", "ar_vr", "game_testing"],
   fashion_design: ["fashion_styling", "textile_design", "fashion_merchandising"],
   interior_design: ["interior_styling", "space_planning", "architectural_design"],
+
+  // --- New BSc-specific undergraduate fields ---
+  bsc_zoology: ["wildlife_research", "conservation", "animal_behavior", "marine_biology_domain"],
+  bsc_botany: ["plant_research", "horticulture", "forest_management", "agri_science"],
+  bsc_microbiology: ["clinical_microbiology", "industrial_microbiology", "virology_domain", "immunology_domain", "pharma_rd", "data_analytics"],
+  bsc_biotechnology: ["biotech_research", "bioinformatics", "pharma_rd", "genetic_research"],
+  bsc_chemistry: ["research", "pharma_rd", "materials_science", "quality_assurance"],
+  bsc_physics: ["research", "academics", "nanotechnology_domain", "astrophysics"],
+  bsc_mathematics: ["data_analytics", "machine_learning", "actuarial", "research"],
+  bsc_psychology: ["clinical_psychology", "counseling", "organizational_psychology", "uiux"],
+  bsc_agriculture: ["agri_science", "agri_business", "food_technology"],
+  bsc_food_technology: ["food_processing", "quality_assurance", "food_safety"],
+  bsc_environmental_science: ["environmental_consulting", "sustainability", "conservation"],
+
+  // --- MSc postgraduate fields ---
+  msc_zoology: ["wildlife_research", "conservation", "research", "academics"],
+  msc_botany: ["plant_research", "research", "academics", "forest_management"],
+  msc_microbiology: ["clinical_microbiology", "industrial_microbiology", "pharma_rd", "virology_domain"],
+  msc_biotechnology: ["biotech_research", "bioinformatics", "genetic_research", "pharma_rd"],
+  msc_chemistry: ["research", "pharma_rd", "materials_science"],
+  msc_physics: ["research", "nanotechnology_domain", "astrophysics", "academics"],
+  msc_mathematics: ["data_analytics", "machine_learning", "actuarial", "ai_research"],
+  msc_psychology: ["clinical_psychology", "counseling", "organizational_psychology"],
+  mba: ["marketing", "accounting_finance", "human_resources", "operations", "strategy", "product_management"],
+  mca: ["software_engineering", "data_science_ai", "cybersecurity"],
+  msc_data_science: ["data_analytics", "machine_learning", "deep_learning", "big_data", "ai_research"],
+  msc_environmental_science: ["environmental_consulting", "sustainability", "conservation"],
+
+  // --- PhD fields ---
+  phd_sciences: ["research", "academics", "ai_research"],
+  phd_engineering: ["research", "academics", "robotics"],
+  phd_arts: ["academics", "social_research", "policy_analysis"],
+  phd_commerce: ["academics", "economic_research", "policy_analysis"],
+  phd_life_sciences: ["research", "biotech_research", "pharma_rd", "genetic_research"],
+  phd_social_sciences: ["academics", "social_research", "policy_analysis"],
+  phd_computer_science: ["ai_research", "research", "machine_learning", "deep_learning"],
 
   // --- Bootcamp fields ---
   web_development: [
@@ -625,6 +796,23 @@ export const rolesByDomain: Record<string, string[]> = {
   diagnostics: ["diagnostic_technician", "medical_lab_technician"],
   rehabilitation: ["physiotherapist", "occupational_therapist"],
   startup_ops: ["startup_founder", "coo"],
+
+  // ============ NEW LIFE SCIENCE DOMAINS ============
+  wildlife_research: ["zoologist", "wildlife_biologist", "conservation_biologist"],
+  animal_behavior: ["animal_behaviorist", "zoologist"],
+  marine_biology_domain: ["marine_biologist", "oceanographer"],
+  plant_research: ["botanist", "plant_geneticist", "horticulturist"],
+  horticulture: ["horticulturist", "landscape_designer"],
+  forest_management: ["forest_officer", "environmental_consultant"],
+  clinical_microbiology: ["clinical_microbiologist", "diagnostic_technician"],
+  industrial_microbiology: ["industrial_microbiologist", "fermentation_technologist"],
+  virology_domain: ["virologist", "vaccine_researcher"],
+  immunology_domain: ["immunologist", "vaccine_researcher"],
+  genetic_research: ["geneticist", "genetic_counselor", "genetic_engineer"],
+  nanotechnology_domain: ["nanotech_engineer", "nanotech_researcher"],
+  materials_science: ["materials_scientist", "nanotech_researcher"],
+  astrophysics: ["astrophysicist", "research_scientist"],
+  neuroscience_research: ["neuroscientist", "cognitive_scientist"],
 };
 
 // ============================================================================
@@ -634,7 +822,16 @@ export const crossDomainRules = [
   { if: ["12_arts"], allow: ["uiux", "graphic_design", "content_creation", "frontend"] },
   { if: ["12_commerce"], allow: ["digital_marketing", "data_analytics", "product_management"] },
   { if: ["12_science"], allow: ["design", "animation_multimedia", "game_development"] },
+  { if: ["diploma"], allow: ["frontend", "graphic_design", "digital_marketing", "uiux", "content_creation"] },
   { if: ["any"], allow: ["freelancing", "content_creation", "entrepreneurship"] },
+  // Cross-domain transitions
+  { if: ["bsc_microbiology"], allow: ["data_analytics", "pharma_rd", "bioinformatics", "machine_learning"] },
+  { if: ["bsc_psychology"], allow: ["uiux", "counseling", "organizational_psychology", "human_resources"] },
+  { if: ["bcom"], allow: ["digital_marketing", "data_analytics", "product_management", "startup_ops"] },
+  { if: ["bsc_zoology"], allow: ["data_analytics", "environmental_consulting", "research"] },
+  { if: ["bsc_botany"], allow: ["agri_science", "research", "environmental_consulting"] },
+  { if: ["bsc_biotechnology"], allow: ["data_analytics", "pharma_rd", "machine_learning"] },
+  { if: ["ba"], allow: ["uiux", "digital_marketing", "content_creation", "frontend"] },
 ];
 
 // ============================================================================
@@ -683,16 +880,17 @@ export function domainLeadsToRoles(domainId: string): boolean {
 }
 
 /**
- * Get cross-domain allowed domains for a given education level.
- * Cross-domain rules only apply to Class 12 levels (12_science, 12_commerce, 12_arts).
+ * Get cross-domain allowed domains for a given education level and optionally field.
+ * Now supports field-level cross-domain rules in addition to education-level rules.
  */
-export function getCrossDomainDomains(educationId: string): string[] {
-  const crossDomainEligible = ["12_science", "12_commerce", "12_arts"];
-  if (!crossDomainEligible.includes(educationId)) return [];
-
+export function getCrossDomainDomains(educationId: string, fieldId?: string): string[] {
   const allowed: string[] = [];
   for (const rule of crossDomainRules) {
-    if (rule.if.includes(educationId) || rule.if.includes("any")) {
+    if (
+      rule.if.includes(educationId) ||
+      rule.if.includes("any") ||
+      (fieldId && rule.if.includes(fieldId))
+    ) {
       allowed.push(...rule.allow);
     }
   }
@@ -705,7 +903,7 @@ export function getCrossDomainDomains(educationId: string): string[] {
  */
 export function getAllDomainsForFieldAndEducation(fieldId: string, educationId: string): string[] {
   const directDomains = domainsByField[fieldId] ?? [];
-  const crossDomains = getCrossDomainDomains(educationId);
+  const crossDomains = getCrossDomainDomains(educationId, fieldId);
   return [...new Set([...directDomains, ...crossDomains])].filter(d => domainLeadsToRoles(d));
 }
 
@@ -1118,6 +1316,36 @@ export const skillsByRole: Record<string, string[]> = {
   occupational_therapist: ["Occupational Therapy", "Patient Assessment", "Rehabilitation", "Activity Analysis", "Adaptive Equipment"],
   startup_founder: ["Business Strategy", "Fundraising", "Product Development", "Leadership", "Market Research"],
   coo: ["Operations Management", "Strategy", "Leadership", "Process Improvement", "Financial Management"],
+
+  // ============ NEW LIFE SCIENCE & PHYSICAL SCIENCE ROLES ============
+  zoologist: ["Zoology", "Field Research", "Animal Taxonomy", "Ecology", "Scientific Writing"],
+  conservation_biologist: ["Conservation Biology", "Field Research", "GIS", "Data Analysis", "Grant Writing"],
+  animal_behaviorist: ["Animal Behavior", "Research Methods", "Statistics", "Observation", "Scientific Writing"],
+  marine_biologist: ["Marine Biology", "Field Research", "Ecology", "Data Analysis", "Diving Skills"],
+  oceanographer: ["Oceanography", "Data Analysis", "Remote Sensing", "Climate Science", "Research"],
+  botanist: ["Botany", "Plant Taxonomy", "Field Research", "Lab Techniques", "Scientific Writing"],
+  plant_geneticist: ["Plant Genetics", "Molecular Biology", "Bioinformatics", "Lab Techniques", "Data Analysis"],
+  horticulturist: ["Horticulture", "Plant Science", "Landscape Design", "Soil Science", "Pest Management"],
+  landscape_designer: ["Landscape Design", "AutoCAD", "Plant Knowledge", "Sustainability", "Client Management"],
+  forest_officer: ["Forest Management", "Conservation", "GIS", "Policy", "Field Research"],
+  clinical_microbiologist: ["Clinical Microbiology", "Lab Techniques", "Infection Control", "Diagnostics", "Quality Control"],
+  industrial_microbiologist: ["Industrial Microbiology", "Fermentation Technology", "Quality Control", "Lab Techniques", "Process Development"],
+  fermentation_technologist: ["Fermentation Science", "Bioprocessing", "Quality Control", "Scale-up", "Microbiology"],
+  virologist: ["Virology", "Lab Techniques", "Molecular Biology", "PCR", "Scientific Writing"],
+  vaccine_researcher: ["Vaccine Development", "Immunology", "Clinical Trials", "Lab Techniques", "Regulatory Knowledge"],
+  immunologist: ["Immunology", "Lab Techniques", "Flow Cytometry", "Research Methods", "Scientific Writing"],
+  geneticist: ["Genetics", "Bioinformatics", "Molecular Biology", "Statistics", "Lab Techniques"],
+  genetic_counselor: ["Genetic Counseling", "Medical Genetics", "Patient Communication", "Ethics", "Pedigree Analysis"],
+  nanotech_engineer: ["Nanotechnology", "Materials Science", "Characterization Techniques", "Research", "Lab Techniques"],
+  nanotech_researcher: ["Nanomaterials", "Characterization", "Electron Microscopy", "Research Methods", "Scientific Writing"],
+  materials_scientist: ["Materials Science", "Characterization", "Lab Techniques", "Data Analysis", "Research"],
+  astrophysicist: ["Astrophysics", "Python", "Data Analysis", "Mathematics", "Scientific Writing"],
+  neuroscientist: ["Neuroscience", "Brain Imaging", "Statistics", "Lab Techniques", "Research Methods"],
+  cognitive_scientist: ["Cognitive Science", "Research Methods", "Statistics", "Experimental Design", "Scientific Writing"],
+  pharmacologist: ["Pharmacology", "Drug Interactions", "Lab Techniques", "Research", "Toxicology"],
+  physicist: ["Physics", "Mathematics", "MATLAB", "Research Methods", "Data Analysis"],
+  chemist: ["Chemistry", "Lab Techniques", "Analytical Chemistry", "Instrumentation", "Research"],
+  statistician: ["Statistics", "R/Python", "Data Analysis", "Probability", "Research Methods"],
 };
 
 /** Get technical skills for a role ID */

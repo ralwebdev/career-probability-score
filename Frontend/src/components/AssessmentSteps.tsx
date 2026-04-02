@@ -211,9 +211,11 @@ export function AssessmentSteps() {
     "Class 12 - Science": "12_science",
     "Class 12 - Commerce": "12_commerce",
     "Class 12 - Arts": "12_arts",
+    "Diploma": "diploma",
     "Undergraduate": "undergraduate",
     "Graduate": "graduate",
     "Postgraduate": "postgraduate",
+    "PhD": "phd",
     "Bootcamp": "bootcamp",
     "Self-Taught": "self_taught",
   };
