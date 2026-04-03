@@ -762,7 +762,7 @@ export const courses: Course[] = [
   // DEFENCE & SECURITY
   // ============================
   {
-    id: "ext-defence", title: "Defence Studies & Strategic Analysis", provider: "Partner-Institute",
+    id: "ext-defence", title: "Defence Studies & Strategic Analysis", provider: "Partner Institute",
     providerType: "external", skills: ["Strategic Analysis", "Geopolitics", "Security Studies", "Leadership"],
     careers: ["Defence Officer", "Military Strategist", "Defence Analyst", "Security Consultant"],
     domain: "Defence", duration: "Self-paced", price: "₹2,499", mode: "online", url: "https://udemy.com", rating: 4.2,

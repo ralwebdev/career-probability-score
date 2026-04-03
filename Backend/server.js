@@ -13,11 +13,16 @@ const app = express();
 
 // Middleware
 const corsOptions = {
-  origin: ['https://cps-web-app-e7c18.web.app', 'http://localhost:5173', 'http://localhost:8080'],
+  origin: [
+    'https://cps-web-app-e7c18.web.app',
+    'https://cps-web-app-e7c18.firebaseapp.com',
+    'http://localhost:5173',
+    'http://localhost:8080'
+  ],
   credentials: true,
   optionsSuccessStatus: 200
 };
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(express.json()); // Parses incoming JSON requests
 
 // Route imports
