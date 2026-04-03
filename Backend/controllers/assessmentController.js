@@ -109,6 +109,50 @@ const getAnalytics = async (req, res, next) => {
   }
 };
 
+// @desc    Get detailed score stats grouped by career role
+// @route   GET /api/assessments/stats/course-scores
+const getCourseScoreStats = async (req, res, next) => {
+  try {
+    const stats = await Assessment.aggregate([
+      {
+        $group: {
+          _id: "$careerRole",
+          avgTotal: { $avg: "$scores.total" },
+          avgTechnical: { $avg: "$scores.technical" },
+          avgSoftSkill: { $avg: "$scores.softSkill" },
+          avgCommunication: { $avg: "$scores.communication" },
+          avgEi: { $avg: "$scores.ei" },
+          avgExperience: { $avg: "$scores.experience" },
+          avgPortfolio: { $avg: "$scores.portfolio" },
+          avgMarketDemand: { $avg: "$scores.marketDemand" },
+          avgQpi: { $avg: "$scores.qpi" },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $project: {
+          role: "$_id",
+          total: { $round: ["$avgTotal", 1] },
+          technical: { $round: ["$avgTechnical", 1] },
+          softSkill: { $round: ["$avgSoftSkill", 1] },
+          communication: { $round: ["$avgCommunication", 1] },
+          ei: { $round: ["$avgEi", 1] },
+          experience: { $round: ["$avgExperience", 1] },
+          portfolio: { $round: ["$avgPortfolio", 1] },
+          marketDemand: { $round: ["$avgMarketDemand", 1] },
+          qpi: { $round: ["$avgQpi", 1] },
+          count: 1,
+          _id: 0
+        }
+      },
+      { $sort: { count: -1 } }
+    ]);
+    res.json(stats);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // @desc    Get all assessments
 // @route   GET /api/assessments
 const getAssessments = async (req, res, next) => {
@@ -139,5 +183,6 @@ module.exports = {
   createAssessment,
   getAnalytics,
   getAssessments,
-  getAssessmentById
+  getAssessmentById,
+  getCourseScoreStats
 };

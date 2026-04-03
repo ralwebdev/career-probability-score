@@ -4,7 +4,8 @@ const {
   createAssessment,
   getAnalytics,
   getAssessments,
-  getAssessmentById
+  getAssessmentById,
+  getCourseScoreStats
 } = require('../controllers/assessmentController');
 
 // @desc    Create new assessment
@@ -14,6 +15,10 @@ router.post('/', createAssessment);
 // @desc    Get analytics for admin dashboard
 // @route   GET /api/assessments/analytics/stats
 router.get('/analytics/stats', getAnalytics);
+
+// @desc    Get detailed score stats grouped by career role
+// @route   GET /api/assessments/stats/course-scores
+router.get('/stats/course-scores', getCourseScoreStats);
 
 // @desc    Get all assessments
 // @route   GET /api/assessments
