@@ -9,7 +9,7 @@ interface Webinar {
   _id: string;
   title: string;
   speaker: string;
-  date: string;
+  date: string | Date;
   time: string;
   registrationLink: string;
 }
@@ -70,6 +70,35 @@ export default function AdminWebinarManagement({ token }: { token: string }) {
     }
   };
 
+  const formatDate = (dateValue: string | Date) => {
+    if (!dateValue || dateValue === "-") return "-";
+    try {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(new Date(dateValue));
+    } catch (e) {
+      return String(dateValue);
+    }
+  };
+
+  const formatTime = (timeStr: string) => {
+    if (!timeStr || timeStr === "-") return "-";
+    try {
+      const [hours, minutes] = timeStr.split(":");
+      const date = new Date();
+      date.setHours(parseInt(hours), parseInt(minutes));
+      return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }).format(date);
+    } catch (e) {
+      return timeStr;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -118,23 +147,23 @@ export default function AdminWebinarManagement({ token }: { token: string }) {
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Date</label>
+                  <label className="text-sm font-medium text-foreground/80">Date</label>
                   <input
+                    type="date"
                     required
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                    className="w-full rounded-lg border bg-background px-4 py-2 outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="e.g. Mar 22, 2026"
+                    className="w-full rounded-lg border bg-background px-4 py-2 outline-none focus:ring-2 focus:ring-primary/50 text-sm h-10"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Time</label>
+                  <label className="text-sm font-medium text-foreground/80">Time</label>
                   <input
+                    type="time"
                     required
                     value={formData.time}
                     onChange={(e) => setFormData({ ...formData, time: e.target.value })}
-                    className="w-full rounded-lg border bg-background px-4 py-2 outline-none focus:ring-2 focus:ring-primary/50"
-                    placeholder="e.g. 6:00 PM IST"
+                    className="w-full rounded-lg border bg-background px-4 py-2 outline-none focus:ring-2 focus:ring-primary/50 text-sm h-10"
                   />
                 </div>
                 <div className="col-span-1 md:col-span-2 space-y-2">
@@ -167,8 +196,8 @@ export default function AdminWebinarManagement({ token }: { token: string }) {
                 <h3 className="font-bold">{webinar.title}</h3>
                 <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1"><User className="h-3 w-3" /> {webinar.speaker}</span>
-                  <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {webinar.date}</span>
-                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {webinar.time}</span>
+                  <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {formatDate(webinar.date)}</span>
+                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {formatTime(webinar.time)}</span>
                 </div>
               </div>
               <div className="flex items-center gap-3">

@@ -8,7 +8,7 @@ interface Webinar {
   _id: string;
   title: string;
   speaker: string;
-  date: string;
+  date: string | Date;
   time: string;
   registrationLink: string;
 }
@@ -30,6 +30,35 @@ export default function Workshops() {
     };
     fetchWebinars();
   }, []);
+
+  const formatDate = (dateValue: string | Date) => {
+    if (!dateValue || dateValue === "-") return "-";
+    try {
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric"
+      }).format(new Date(dateValue));
+    } catch (e) {
+      return String(dateValue);
+    }
+  };
+
+  const formatTime = (timeStr: string) => {
+    if (!timeStr || timeStr === "-") return "-";
+    try {
+      const [hours, minutes] = timeStr.split(":");
+      const date = new Date();
+      date.setHours(parseInt(hours), parseInt(minutes));
+      return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true
+      }).format(date);
+    } catch (e) {
+      return timeStr;
+    }
+  };
 
   const displayWebinars = webinars.length > 0 ? webinars : [
     { title: "No upcoming webinars scheduled", speaker: "Check back later!", date: "-", time: "-", registrationLink: "#" }
@@ -115,8 +144,8 @@ export default function Workshops() {
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <div className="text-xs font-medium text-primary">{w.date}</div>
-                    <div className="text-[10px] text-muted-foreground">{w.time}</div>
+                    <div className="text-xs font-medium text-primary">{formatDate(w.date)}</div>
+                    <div className="text-[10px] text-muted-foreground">{formatTime(w.time)}</div>
                   </div>
                   {w.date !== "-" && (
                     <Button 

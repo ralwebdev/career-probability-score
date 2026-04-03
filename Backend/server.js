@@ -12,7 +12,12 @@ connectDB();
 const app = express();
 
 // Middleware
-app.use(cors());
+const corsOptions = {
+  origin: ['https://cps-web-app-e7c18.web.app', 'http://localhost:5173', 'http://localhost:8080'],
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+app.use(cors(corsOptions));
 app.use(express.json()); // Parses incoming JSON requests
 
 // Route imports
