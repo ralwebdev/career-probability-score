@@ -161,6 +161,20 @@ export async function getAssessments(token: string) {
   return response.json();
 }
 
+export async function getAssessmentStats(token: string) {
+  const response = await fetch(`${API_BASE_URL}/assessments/stats/course-scores`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch assessment statistics");
+  }
+
+  return response.json();
+}
+
 // Course Management
 export async function getCourses() {
   const response = await fetch(`${API_BASE_URL}/courses`);

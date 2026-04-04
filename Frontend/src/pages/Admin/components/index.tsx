@@ -6,3 +6,4 @@ export { CounselingTable, AssessmentsTable, LeadsTable } from './DataTableSectio
 export { LeadsModal } from './LeadsModal';
 export { StatsGrid } from './StatCards';
 export { default as AdminWebinarManagement } from './AdminWebinarManagement';
+export { AssessmentStats } from './AssessmentStats';

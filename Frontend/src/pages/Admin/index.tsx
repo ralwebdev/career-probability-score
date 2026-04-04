@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, LogOut } from "lucide-react";
-import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getLeads, getAssessments } from "@/lib/api";
+import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getLeads, getAssessments, getAssessmentStats } from "@/lib/api";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -15,7 +15,8 @@ import {
     ChartsSection,
     CounselingTable,
     AssessmentsTable,
-    LeadsTable
+    LeadsTable,
+    AssessmentStats
 } from "./components";
 
 export default function Admin() {
@@ -30,6 +31,7 @@ export default function Admin() {
     const [counselingData, setCounselingData] = useState<any[]>([]);
     const [assessmentsData, setAssessmentsData] = useState<any[]>([]);
     const [leadsData, setLeadsData] = useState<any[]>([]);
+    const [assessmentStats, setAssessmentStats] = useState<any[]>([]);
     const [dataLoading, setDataLoading] = useState(false);
     const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
     const [selectedCounseling, setSelectedCounseling] = useState<any>(null);
@@ -56,16 +58,18 @@ export default function Admin() {
     const fetchData = async (token: string) => {
         setDataLoading(true);
         try {
-            const [stats, counseling, assessments, leads] = await Promise.all([
+            const [stats, counseling, assessments, leads, aStats] = await Promise.all([
                 getDashboardStats(token),
                 getCounselingRequests(token),
                 getAssessments(token),
-                getLeads(token)
+                getLeads(token),
+                getAssessmentStats(token)
             ]);
             setDashboardData(stats);
             setCounselingData(counseling.data || counseling);
             setAssessmentsData(assessments.data || assessments);
             setLeadsData(leads.data || leads);
+            setAssessmentStats(aStats);
         } catch (error: any) {
             toast.error("Failed to fetch dashboard data");
         } finally {
@@ -179,6 +183,7 @@ export default function Admin() {
                         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
                             <TabsList className="bg-card/50 border backdrop-blur-sm">
                                 <TabsTrigger value="dashboard">Analytics</TabsTrigger>
+                                <TabsTrigger value="assessment-stats">Assessment Stats</TabsTrigger>
                                 <TabsTrigger value="counseling">Counseling ({counselingData.length})</TabsTrigger>
                                 <TabsTrigger value="assessments">Assessments ({assessmentsData.length})</TabsTrigger>
                                 <TabsTrigger value="leads">Leads ({leadsData.length})</TabsTrigger>
@@ -202,6 +207,10 @@ export default function Admin() {
                                         />
                                     </>
                                 )}
+                            </TabsContent>
+
+                            <TabsContent value="assessment-stats">
+                                <AssessmentStats data={assessmentStats} />
                             </TabsContent>
 
                             <TabsContent value="counseling">
