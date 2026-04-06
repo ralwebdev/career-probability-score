@@ -250,6 +250,24 @@ const specialLabels: Record<string, string> = {
   "ground_staff": "Ground Staff",
   "digital_marketer": "Digital Marketer",
   "aviation_service": "Aviation Service",
+  // Language domains
+  "english_domain": "English",
+  "bengali_domain": "Bengali",
+  "hindi_domain": "Hindi",
+  "sanskrit_domain": "Sanskrit",
+  "regional_languages_domain": "Regional Languages",
+  // Geography
+  "geography_domain": "Geography",
+  // General Pass
+  "general_pass": "General (Pass)",
+  // New roles
+  "gis_analyst": "GIS Analyst",
+  "customer_service_exec": "Customer Service Executive",
+  "content_strategist_role": "Content Strategist",
+  "upsc_aspirant_coach": "UPSC Coaching Mentor",
+  "historian": "Historian",
+  "geographer": "Geographer",
+  "bibliographer": "Bibliographer",
 };
 
 export function formatLabel(id: string): string {
@@ -444,9 +462,53 @@ export const domainsByField: Record<string, string[]> = {
   ],
   bca: ["software_engineering", "data_science_ai", "cybersecurity", "game_development"],
   bba: ["marketing", "accounting_finance", "human_resources", "operations"],
-  bcom: ["accounting_finance", "banking", "taxation", "fintech"],
-  ba: ["media_communication", "psychology", "social_research", "content_creation"],
-  bsc: ["data_science_ai", "research", "laboratory", "environmental_consulting"],
+  bcom: [
+    // Core
+    "accounting", "taxation", "audit",
+    // Finance
+    "investment", "risk_management", "financial_planning", "fintech",
+    // Banking
+    "retail_banking",
+    // Business
+    "marketing", "operations", "human_resources", "strategy",
+    // Modern
+    "data_analytics", "business_intelligence", "digital_marketing", "ecommerce_ops", "product_management",
+    // General
+    "general_pass",
+  ],
+  ba: [
+    // Language domains
+    "english_domain", "bengali_domain", "hindi_domain", "sanskrit_domain", "regional_languages_domain",
+    // Humanities
+    "academics", "policy_analysis", "social_research", "archival_studies", "museum_curation",
+    "public_administration", "diplomacy", "geography_domain",
+    // Psychology
+    "clinical_psychology", "counseling", "organizational_psychology",
+    // Media / Creative
+    "journalism", "content_creation", "video_production", "broadcasting",
+    // Fine / Performing Arts
+    "painting", "sculpture", "theatre", "dance", "music_performance",
+    // Cross-domain
+    "uiux", "digital_marketing",
+    // General
+    "general_pass",
+  ],
+  bsc: [
+    // Life Sciences
+    "wildlife_research", "animal_behavior", "marine_biology_domain",
+    "plant_research", "horticulture", "forest_management",
+    "clinical_microbiology", "industrial_microbiology", "virology_domain", "immunology_domain",
+    "genetic_research", "bioinformatics", "biotech_research",
+    // Physical Sciences
+    "research", "academics", "nanotechnology_domain", "astrophysics", "materials_science",
+    "neuroscience_research", "pharma_rd", "quality_assurance", "laboratory",
+    // Math / Stats
+    "data_analytics", "machine_learning", "actuarial",
+    // Applied / Environment
+    "environmental_consulting", "sustainability", "conservation",
+    // General
+    "general_pass",
+  ],
   bdes: ["design"],
   bpharma: ["pharma_rd", "clinical_research", "regulatory"],
   nursing: ["healthcare", "clinical_research", "public_health"],
@@ -813,6 +875,22 @@ export const rolesByDomain: Record<string, string[]> = {
   materials_science: ["materials_scientist", "nanotech_researcher"],
   astrophysics: ["astrophysicist", "research_scientist"],
   neuroscience_research: ["neuroscientist", "cognitive_scientist"],
+
+  // ============ LANGUAGE DOMAINS (BA) ============
+  english_domain: ["content_writer", "journalist", "editor", "translator", "professor", "lecturer", "copywriter"],
+  bengali_domain: ["translator", "content_writer", "journalist", "professor", "lecturer"],
+  hindi_domain: ["translator", "content_writer", "journalist", "professor", "lecturer"],
+  sanskrit_domain: ["translator", "professor", "lecturer", "academic_researcher"],
+  regional_languages_domain: ["translator", "interpreter", "content_writer", "professor", "lecturer"],
+
+  // ============ GEOGRAPHY DOMAIN (BA) ============
+  geography_domain: ["urban_planner", "environmental_consultant", "gis_analyst", "research_scientist"],
+
+  // ============ GENERAL (PASS) DOMAIN ============
+  general_pass: [
+    "content_writer", "digital_marketer", "data_analyst", "social_media_manager",
+    "hr_manager", "customer_service_exec", "community_organizer",
+  ],
 };
 
 // ============================================================================
@@ -1346,7 +1424,69 @@ export const skillsByRole: Record<string, string[]> = {
   physicist: ["Physics", "Mathematics", "MATLAB", "Research Methods", "Data Analysis"],
   chemist: ["Chemistry", "Lab Techniques", "Analytical Chemistry", "Instrumentation", "Research"],
   statistician: ["Statistics", "R/Python", "Data Analysis", "Probability", "Research Methods"],
+
+  // ============ NEW ROLES ============
+  gis_analyst: ["GIS", "Remote Sensing", "Spatial Analysis", "Data Analysis", "QGIS/ArcGIS"],
+  customer_service_exec: ["Communication", "Problem Solving", "CRM Tools", "Patience", "Conflict Resolution"],
 };
+
+// ============================================================================
+// STREAM-WISE CPS WEIGHTS
+// ============================================================================
+export type StreamCPSWeights = {
+  technical: number;
+  logical: number;
+  communication: number;
+  emotional_intelligence: number;
+};
+
+export function getStreamCPSWeights(fieldOfStudy: string): StreamCPSWeights {
+  // BA (Arts) streams
+  const artsDomains = ["ba", "english_domain", "bengali_domain", "hindi_domain", "sanskrit_domain",
+    "regional_languages_domain", "geography_domain", "journalism", "mass_comm_arts", "english_literature",
+    "philosophy", "history", "political_science", "psychology", "fine_arts", "performing_arts",
+    "social_sciences", "languages", "education_teaching"];
+  if (artsDomains.includes(fieldOfStudy)) {
+    return { technical: 0.20, logical: 0.20, communication: 0.35, emotional_intelligence: 0.25 };
+  }
+
+  // BCom (Commerce) streams
+  const commerceDomains = ["bcom", "accounting_finance", "business_management", "economics", "banking",
+    "marketing", "entrepreneurship", "taxation", "business_analytics", "supply_chain",
+    "retail_management", "insurance", "international_business", "ecommerce"];
+  if (commerceDomains.includes(fieldOfStudy)) {
+    return { technical: 0.25, logical: 0.35, communication: 0.20, emotional_intelligence: 0.20 };
+  }
+
+  // BSc (Science) default
+  return { technical: 0.45, logical: 0.25, communication: 0.15, emotional_intelligence: 0.15 };
+}
+
+// Domain-specific CPS modifiers
+export function getDomainCPSModifier(domain: string): Partial<StreamCPSWeights> {
+  const modifiers: Record<string, Partial<StreamCPSWeights>> = {
+    research: { technical: 0.05 },
+    academics: { technical: 0.05 },
+    journalism: { communication: 0.05 },
+    broadcasting: { communication: 0.05 },
+    content_creation: { communication: 0.05 },
+    investment: { logical: 0.05 },
+    accounting: { logical: 0.05 },
+    audit: { logical: 0.05 },
+    clinical_psychology: { emotional_intelligence: 0.05 },
+    counseling: { emotional_intelligence: 0.05 },
+  };
+  return modifiers[domain] ?? {};
+}
+
+// General Pass penalty
+export function isGeneralPass(domain: string): boolean {
+  return domain === "general_pass";
+}
+
+export function getGeneralPassPenalty(): { cpsPenalty: number; qpiPenalty: number } {
+  return { cpsPenalty: 0.75, qpiPenalty: 0.70 }; // 25% CPS reduction, 30% QPi reduction
+}
 
 /** Get technical skills for a role ID */
 export function getSkillsForRole(roleId: string): string[] {

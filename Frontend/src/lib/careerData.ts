@@ -1,5 +1,6 @@
 // Career data aligned with Career Master Database JSON
 // Education levels from master DB (no Diploma, added Graduate)
+import { getStreamCPSWeights, getDomainCPSModifier, isGeneralPass as checkGeneralPass, getGeneralPassPenalty } from "@/lib/careerMasterDB";
 
 export const educationLevels = [
   "Class 12 - Science", "Class 12 - Commerce", "Class 12 - Arts",
@@ -1807,13 +1808,20 @@ export function getRecommendedRolesByBand(band: CPSBand, domain?: string): Caree
  */
 export function getCrossDomainSuggestions(fieldOfStudy: string, currentRole: string): CareerRole[] {
   const crossMap: Record<string, string[]> = {
-    "Microbiology": ["Data Scientist", "Biotech Research Scientist", "Clinical Research Associate", "Data Analyst"],
-    "Psychology": ["UX Researcher", "UX/UI Designer", "HR Manager", "Clinical Psychologist"],
-    "Commerce": ["Digital Marketer", "Business Analyst", "Product Manager", "Data Analyst"],
+    "Microbiology": ["Data Scientist", "Biotech Research Scientist", "Clinical Research Associate", "Data Analyst", "Bioinformatics Analyst"],
+    "Psychology": ["UX Researcher", "UX/UI Designer", "HR Manager", "Clinical Psychologist", "Organizational Psychologist"],
+    "Commerce": ["Digital Marketer", "Business Analyst", "Product Manager", "Data Analyst", "Fintech Product Analyst"],
     "Zoology": ["Data Analyst", "Environmental Data Analyst", "Wildlife Biologist", "Sustainability Consultant"],
     "Botany": ["Agricultural Scientist", "Environmental Data Analyst", "Sustainability Consultant"],
     "Biotechnology": ["Data Scientist", "Biotech Research Scientist", "Geneticist", "Clinical Research Associate"],
-    "Arts": ["UX/UI Designer", "Content Writer", "Digital Marketer", "Graphic Designer"],
+    "Arts": ["UX/UI Designer", "Content Writer", "Digital Marketer", "Graphic Designer", "Content Creator"],
+    // New cross-domain maps
+    "History": ["Content Writer", "Public Policy Analyst", "Journalist", "Teacher", "Museum Curator"],
+    "English": ["Content Writer", "Journalist", "Copywriter", "UX Researcher", "SEO Specialist"],
+    "Bengali": ["Translator", "Content Writer", "Journalist", "Teacher"],
+    "Hindi": ["Translator", "Content Writer", "Journalist", "Teacher"],
+    "Geography": ["Urban Planner", "Environmental Data Analyst", "GIS Analyst", "Sustainability Consultant"],
+    "General": ["Digital Marketer", "Content Writer", "Data Analyst", "Social Media Manager", "HR Manager"],
   };
   const suggestions = crossMap[fieldOfStudy] ?? [];
   return careerRoles.filter(r => suggestions.includes(r.name) && r.name !== currentRole).slice(0, 5);
@@ -1887,8 +1895,20 @@ export function calculateCPS(data: AssessmentData): {
   portfolio: number;
   marketDemand: number;
   qpi: number;
+  isGeneralPass: boolean;
+  streamWeights: { technical: number; logical: number; communication: number; emotional_intelligence: number };
 } {
   const role = careerRoles.find(r => r.name === data.careerRole);
+  const streamWeights = getStreamCPSWeights(data.fieldOfStudy);
+  const domainMod = getDomainCPSModifier(data.careerDomain);
+  const generalPass = checkGeneralPass(data.careerDomain);
+
+  // Apply domain modifiers to stream weights
+  const effectiveWeights = { ...streamWeights };
+  if (domainMod.technical) effectiveWeights.technical += domainMod.technical;
+  if (domainMod.logical) effectiveWeights.logical += domainMod.logical;
+  if (domainMod.communication) effectiveWeights.communication += domainMod.communication;
+  if (domainMod.emotional_intelligence) effectiveWeights.emotional_intelligence += domainMod.emotional_intelligence;
 
   // Technical (max 30) - weighted by skill importance per PDF formula
   const techSkills = role?.skills ?? [];
@@ -1921,7 +1941,7 @@ export function calculateCPS(data: AssessmentData): {
   const eiSum = eiValues.reduce((a, b) => a + b, 0);
   const ei = eiMax > 0 ? Math.round((eiSum / eiMax) * 10) : 0;
 
-  // Experience (max 15) - PDF: +5 per internship, +3 per project
+  // Experience (max 15)
   const internships = data.experience["Internships"] ?? 0;
   const projects = data.experience["Projects"] ?? 0;
   const freelance = data.experience["Freelance Work"] ?? 0;
@@ -1935,12 +1955,24 @@ export function calculateCPS(data: AssessmentData): {
   // Market Demand (max 10)
   const marketDemand = role?.demandScore ?? 5;
 
-  const total = technical + softSkill + communication + ei + experience + portfolio + marketDemand;
+  let total = technical + softSkill + communication + ei + experience + portfolio + marketDemand;
+
+  // General Pass penalty: reduce CPS by 25%
+  if (generalPass) {
+    const penalty = getGeneralPassPenalty();
+    total = Math.round(total * penalty.cpsPenalty);
+  }
 
   // QPi per PDF: 0.4*(CPS/100) + 0.3*(DemandScore/10) + 0.15*(PortfolioScore/15) + 0.15*(SkillScore/30)
-  const qpi = Math.round(
+  let qpi = Math.round(
     (0.4 * (total / 100) + 0.3 * (marketDemand / 10) + 0.15 * (portfolio / 15) + 0.15 * (technical / 30)) * 100
   );
 
-  return { total, technical, softSkill, communication, ei, experience, portfolio, marketDemand, qpi };
+  // General Pass QPi penalty: reduce by 30%
+  if (generalPass) {
+    const penalty = getGeneralPassPenalty();
+    qpi = Math.round(qpi * penalty.qpiPenalty);
+  }
+
+  return { total, technical, softSkill, communication, ei, experience, portfolio, marketDemand, qpi, isGeneralPass: generalPass, streamWeights: effectiveWeights };
 }
