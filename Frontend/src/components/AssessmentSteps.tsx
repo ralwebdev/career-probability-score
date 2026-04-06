@@ -5,6 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue
 } from "@/components/ui/select";
 import {
@@ -104,22 +109,27 @@ function SkillPill({ label, value, onChange, compact }: { label: string; value: 
       <span className={`font-medium ${compact ? "text-xs" : "text-sm"} truncate max-w-[160px]`}>{label}</span>
       <div className="flex gap-1">
         {[0, 1, 2, 3].map(level => (
-          <motion.button
-            key={level}
-            type="button"
-            onClick={() => onChange(level)}
-            whileTap={{ scale: 0.85 }}
-            whileHover={{ scale: 1.15 }}
-            className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
-              value === level
-                ? "gradient-primary text-primary-foreground shadow-sm"
-                : "bg-muted/50 text-muted-foreground hover:bg-secondary"
-            }`}
-            title={ratingLabels[level]}
-          >
-            <SkillLevelBar level={level} active={value === level} />
-            {!compact && <span className="hidden sm:inline">{ratingLabels[level]}</span>}
-          </motion.button>
+          <Tooltip key={level}>
+            <TooltipTrigger asChild>
+              <motion.button
+                type="button"
+                onClick={() => onChange(level)}
+                whileTap={{ scale: 0.85 }}
+                whileHover={{ scale: 1.15 }}
+                className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
+                  value === level
+                    ? "gradient-primary text-primary-foreground shadow-sm"
+                    : "bg-muted/50 text-muted-foreground hover:bg-secondary"
+                }`}
+              >
+                <SkillLevelBar level={level} active={value === level} />
+                {!compact && <span className="hidden sm:inline">{ratingLabels[level]}</span>}
+              </motion.button>
+            </TooltipTrigger>
+            <TooltipContent className="bg-slate-900 text-white border-slate-800">
+              <p>{ratingLabels[level]}</p>
+            </TooltipContent>
+          </Tooltip>
         ))}
       </div>
     </motion.div>

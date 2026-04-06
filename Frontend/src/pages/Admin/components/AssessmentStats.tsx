@@ -32,7 +32,7 @@ export function AssessmentStats({ data }: { data: any[] }) {
     { subject: "Technical", value: roleData.technical },
     { subject: "Soft Skills", value: roleData.softSkill },
     { subject: "Communication", value: roleData.communication },
-    { subject: "EI", value: roleData.ei },
+    { subject: "Emotional Intelligence", value: roleData.ei },
     { subject: "Experience", value: roleData.experience },
     { subject: "Portfolio", value: roleData.portfolio },
     { subject: "Market Demand", value: roleData.marketDemand },
@@ -114,6 +114,7 @@ export function AssessmentStats({ data }: { data: any[] }) {
                       color: '#fff',
                       boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)'
                     }}
+                    itemStyle={{ color: '#fff' }}
                   />
                 </RadarChart>
               </ResponsiveContainer>
@@ -153,6 +154,7 @@ export function AssessmentStats({ data }: { data: any[] }) {
                       backdropFilter: 'blur(8px)',
                       color: '#fff'
                     }}
+                    itemStyle={{ color: '#fff' }}
                   />
                   <Bar
                     dataKey="value"
@@ -182,10 +184,10 @@ export function AssessmentStats({ data }: { data: any[] }) {
                   <th className="text-left py-4 px-6 font-semibold">Career Role</th>
                   <th className="text-center py-4 px-3 font-semibold">Volume</th>
                   <th className="text-center py-4 px-3 font-semibold">Technical</th>
-                  <th className="text-center py-4 px-3 font-semibold">Soft</th>
-                  <th className="text-center py-4 px-3 font-semibold">Comm</th>
-                  <th className="text-center py-4 px-3 font-semibold">EI</th>
-                  <th className="text-center py-4 px-3 font-semibold">Exp</th>
+                  <th className="text-center py-4 px-3 font-semibold">Soft Skills</th>
+                  <th className="text-center py-4 px-3 font-semibold">Communication</th>
+                  <th className="text-center py-4 px-3 font-semibold">Emotional Intelligence</th>
+                  <th className="text-center py-4 px-3 font-semibold">Experience</th>
                   <th className="text-center py-4 px-3 font-semibold">QPI</th>
                   <th className="text-center py-4 px-6 font-bold text-primary">Avg Total</th>
                 </tr>
