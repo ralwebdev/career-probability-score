@@ -3,10 +3,10 @@ import { Info, Mail, Phone, MapPin, GraduationCap, BarChart3 } from "lucide-reac
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 
-export function AssessmentModal({ assessment, isOpen, onClose }: { 
-    assessment: any; 
-    isOpen: boolean; 
-    onClose: () => void 
+export function AssessmentModal({ assessment, isOpen, onClose }: {
+    assessment: any;
+    isOpen: boolean;
+    onClose: () => void
 }) {
     if (!assessment) return null;
 
@@ -97,7 +97,7 @@ export function AssessmentModal({ assessment, isOpen, onClose }: {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
                             <span className="text-muted-foreground mb-1">Market Demand</span>
-                            <span className="font-bold">{assessment.scores?.marketDemand || 0}%</span>
+                            <span className="font-bold">{assessment.scores?.marketDemand || 0} / 10</span>
                         </div>
                         <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
                             <span className="text-muted-foreground mb-1">Experience</span>
