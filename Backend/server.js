@@ -17,7 +17,10 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200
 };
-app.use(cors({}));
+
+console.log("Allowed Frontend URL:", process.env.FRONTEND_URL);
+
+app.use(cors(corsOptions));
 app.use(express.json()); // Parses incoming JSON requests
 
 // Route imports
