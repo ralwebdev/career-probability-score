@@ -28,7 +28,10 @@ export function Navbar() {
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold tracking-tight text-foreground leading-tight">Career Probability</span>
-            <span className="text-[10px] font-semibold text-primary tracking-widest uppercase leading-tight">Score</span>
+            <span className="flex items-center gap-1.5 mt-0.5">
+              <span className="text-[10px] font-semibold text-primary tracking-widest uppercase leading-tight">Score</span>
+              <span className="bg-primary/20 text-primary px-1.5 py-0.5 rounded-md text-[8px] font-bold tracking-widest uppercase leading-none">Beta</span>
+            </span>
           </div>
         </Link>
 
