@@ -21,9 +21,9 @@ export function LiveCounter() {
   }, []);
 
   const metrics = [
-    { label: "Analyzing Now", value: usersOnline.toLocaleString(), icon: Users, color: "text-success" },
-    { label: "Assessments Today", value: assessments.toLocaleString(), icon: BarChart3, color: "text-primary" },
-    { label: "Countries", value: countries.toString(), icon: Globe, color: "text-accent" },
+    { label: "Data Signals", value: usersOnline.toLocaleString(), icon: Users, color: "text-success" },
+    { label: "Analysis / sec", value: assessments.toLocaleString(), icon: BarChart3, color: "text-primary" },
+    { label: "Locations", value: countries.toString(), icon: Globe, color: "text-accent" },
   ];
 
   return (

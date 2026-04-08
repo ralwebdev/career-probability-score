@@ -203,7 +203,7 @@ export function HeroSection() {
           >
             <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground/60 mb-3">Signals from</p>
             <div className="flex items-center justify-center gap-6 opacity-30">
-              {["LinkedIn", "Indeed", "Glassdoor", "NSDC"].map((name) => (
+              {["LinkedIn", "Indeed", "Glassdoor", "Naukri"].map((name) => (
                 <span key={name} className="font-mono text-[11px] font-bold tracking-wider uppercase">{name}</span>
               ))}
             </div>
@@ -235,11 +235,10 @@ export function HeroSection() {
                   <span className="text-6xl font-extrabold text-muted/60 absolute top-4 right-6 select-none group-hover:text-primary/10 transition-colors duration-300">
                     {item.step}
                   </span>
-                  <div className={`inline-flex items-center justify-center h-12 w-12 rounded-xl mb-5 ${
-                    item.color === "primary" ? "bg-primary/10 text-primary" :
+                  <div className={`inline-flex items-center justify-center h-12 w-12 rounded-xl mb-5 ${item.color === "primary" ? "bg-primary/10 text-primary" :
                     item.color === "accent" ? "bg-accent/10 text-accent" :
-                    "bg-success/10 text-success"
-                  }`}>
+                      "bg-success/10 text-success"
+                    }`}>
                     <item.icon className="h-6 w-6" />
                   </div>
                   <h3 className="text-lg font-bold mb-2">{item.title}</h3>
@@ -271,7 +270,7 @@ export function HeroSection() {
               { icon: TrendingUp, title: "QPi Placement Index", desc: "Your placement readiness combining CPS, demand, and portfolio strength" },
               { icon: Briefcase, title: "Top Recruiter Matches", desc: "Companies actively hiring for your role with matching requirements" },
               { icon: BookOpen, title: "Course Recommendations", desc: "Prioritized learning paths from Red Apple and top platforms" },
-              { icon: Award, title: "Career Intelligence Report", desc: "Downloadable PDF with full breakdown, roadmap, and action steps" },
+              { icon: Award, title: "Career Intelligence Report", desc: "Downloadable PDF + full breakdown, roadmap & action steps" },
             ].map((item, i) => (
               <AnimatedSection key={item.title} delay={i * 0.1}>
                 <div className="flex gap-4 rounded-2xl border border-border bg-card p-6 hover-lift">
@@ -371,7 +370,7 @@ export function HeroSection() {
                   </div>
                   <p className="text-sm text-muted-foreground leading-relaxed flex-1">"{t.quote}"</p>
                   <div className="flex gap-0.5 mt-4">
-                    {[1,2,3,4,5].map(s => <Star key={s} className="h-3.5 w-3.5 fill-warning text-warning" />)}
+                    {[1, 2, 3, 4, 5].map(s => <Star key={s} className="h-3.5 w-3.5 fill-warning text-warning" />)}
                   </div>
                 </div>
               </AnimatedSection>
@@ -452,7 +451,7 @@ export function HeroSection() {
                 {[
                   { value: "2M+", label: "Data Points Analyzed" },
                   { value: "150+", label: "Career Roles" },
-                  { value: "94%", label: "Accuracy Rate" },
+                  { value: "96%", label: "Accuracy Rate" },
                   { value: "25K+", label: "Students Assessed" },
                 ].map(stat => (
                   <div key={stat.label}>
@@ -470,11 +469,18 @@ export function HeroSection() {
       <section className="py-16 px-4 bg-card border-y border-border">
         <div className="mx-auto max-w-5xl">
           <AnimatedSection className="text-center">
-            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-6 font-medium">Trusted by Leading Institutions</p>
-            <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-4 opacity-40">
-              {["Red Apple Learning", "NSDC", "NASSCOM", "Coursera", "Udemy", "Google"].map(brand => (
-                <span key={brand} className="font-mono text-sm font-bold tracking-wider uppercase text-foreground">{brand}</span>
-              ))}
+            <p className="text-xs uppercase tracking-widest text-muted-foreground mb-6 font-medium">Our Trusted Partners</p>
+            <div className="flex overflow-hidden opacity-40 w-full relative group [mask-image:_linear-gradient(to_right,transparent_0,_black_128px,_black_calc(100%-128px),transparent_100%)]">
+              <div className="flex min-w-full shrink-0 animate-marquee gap-12 pr-12 items-center">
+                {["Red Apple Learning", "Red Apple Technologies", "Scope Magazine", "JIS School of Polytechnic", "JIS College of Engineering", "The Indian College of Arts & Draftsmanship", "Swami Vivekananda University", "Haldia Institute of Management"].map(brand => (
+                  <span key={brand} className="font-mono text-sm font-bold tracking-wider uppercase text-foreground whitespace-nowrap">{brand}</span>
+                ))}
+              </div>
+              <div className="flex min-w-full shrink-0 animate-marquee gap-12 pr-12 items-center" aria-hidden="true">
+                {["Red Apple Learning", "Red Apple Technologies", "Scope Magazine", "JIS School of Polytechnic", "JIS College of Engineering", "The Indian College of Arts & Draftsmanship", "Swami Vivekananda University", "Haldia Institute of Management"].map(brand => (
+                  <span key={`dup-${brand}`} className="font-mono text-sm font-bold tracking-wider uppercase text-foreground whitespace-nowrap">{brand}</span>
+                ))}
+              </div>
             </div>
           </AnimatedSection>
         </div>
@@ -554,7 +560,7 @@ export function HeroSection() {
             </div>
           </div>
           <div className="border-t border-border pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-muted-foreground">
-            <p>© 2026 Career Probability Score. All rights reserved.</p>
+            <p>© 2026 Career Probability Score. All rights reserved. Red Apple Technologies</p>
             <p>An initiative for ethical, transparent career guidance.</p>
           </div>
         </div>

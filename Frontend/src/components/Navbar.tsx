@@ -22,9 +22,9 @@ export function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2.5 group">
-          <div className="flex items-center justify-center h-9 w-9 rounded-xl gradient-primary text-primary-foreground transition-transform duration-300 group-hover:scale-110">
+          <div className="flex items-center justify-center h-9 w-9 rounded-xl text-primary-foreground transition-transform duration-300 group-hover:scale-110">
             {/* <GraduationCap className="h-5 w-5" /> */}
-            <img src="https://redapplelearning.in/wp-content/uploads/2025/02/RAL-Logo-Mark-120x120.png" alt="Logo" height={36} width={36} />
+            <img src="/RAL-Logo-Mark-120x120.webp" alt="Logo" height={36} width={36} />
           </div>
           <div className="flex flex-col">
             <span className="text-sm font-bold tracking-tight text-foreground leading-tight">Career Probability</span>
