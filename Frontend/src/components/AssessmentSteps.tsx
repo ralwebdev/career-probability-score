@@ -90,8 +90,8 @@ function SkillLevelBar({ level, active }: { level: number; active: boolean }) {
             backgroundColor: i <= level && active
               ? "hsl(var(--primary-foreground))"
               : i <= level && !active
-              ? "hsl(var(--muted-foreground) / 0.35)"
-              : "hsl(var(--muted-foreground) / 0.12)",
+                ? "hsl(var(--muted-foreground) / 0.35)"
+                : "hsl(var(--muted-foreground) / 0.12)",
           }}
         />
       ))}
@@ -116,11 +116,10 @@ function SkillPill({ label, value, onChange, compact }: { label: string; value: 
                 onClick={() => onChange(level)}
                 whileTap={{ scale: 0.85 }}
                 whileHover={{ scale: 1.15 }}
-                className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${
-                  value === level
+                className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${value === level
                     ? "gradient-primary text-primary-foreground shadow-sm"
                     : "bg-muted/50 text-muted-foreground hover:bg-secondary"
-                }`}
+                  }`}
               >
                 <SkillLevelBar level={level} active={value === level} />
                 {!compact && <span className="hidden sm:inline">{ratingLabels[level]}</span>}
@@ -141,13 +140,13 @@ function ProgressRing({ progress, size = 56 }: { progress: number; size?: number
   const radius = (size - 6) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (progress / 100) * circumference;
-  
+
   return (
     <div className="relative" style={{ width: size, height: size }}>
       <svg width={size} height={size} className="-rotate-90">
-        <circle cx={size/2} cy={size/2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+        <circle cx={size / 2} cy={size / 2} r={radius} fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
         <motion.circle
-          cx={size/2} cy={size/2} r={radius} fill="none"
+          cx={size / 2} cy={size / 2} r={radius} fill="none"
           stroke="hsl(var(--primary))"
           strokeWidth="3"
           strokeLinecap="round"
@@ -172,11 +171,10 @@ function CompletionChip({ filled, total }: { filled: number; total: number }) {
         {Array.from({ length: Math.min(total, 10) }).map((_, i) => (
           <div
             key={i}
-            className={`w-1.5 h-4 rounded-full transition-all duration-300 ${
-              i < Math.ceil((filled / total) * Math.min(total, 10))
+            className={`w-1.5 h-4 rounded-full transition-all duration-300 ${i < Math.ceil((filled / total) * Math.min(total, 10))
                 ? "bg-primary"
                 : "bg-muted"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -237,7 +235,7 @@ export function AssessmentSteps() {
     if (currentStep === 1) {
       if (!data.educationLevel) newErrors.educationLevel = "Education level is required";
       if (!data.fieldOfStudy) newErrors.fieldOfStudy = "Field of study is required";
-      
+
       if (data.educationLevel && data.fieldOfStudy) {
         if (availableDomains.length === 0) {
           newErrors.fieldOfStudy = "This field has no mapped career domains yet. Please choose another.";
@@ -435,8 +433,8 @@ export function AssessmentSteps() {
     // Step 1: Education + Career (merged — progressive disclosure using Master DB hierarchy)
     <div key="edu-career" className="space-y-5">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-         <div className="space-y-1.5">
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Education Level *</Label>
+        <div className="space-y-1.5">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Current Education Level *</Label>
           <Select value={data.educationLevel} onValueChange={v => update({ educationLevel: v, fieldOfStudy: "", careerRole: "", careerDomain: "", specialization: "" })}>
             <SelectTrigger className={`h-11 ${errors.educationLevel ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select level" /></SelectTrigger>
             <SelectContent>{masterEducationLevels.map(id => <SelectItem key={id} value={formatLabel(id)}>{formatLabel(id)}</SelectItem>)}</SelectContent>
@@ -492,127 +490,127 @@ export function AssessmentSteps() {
       {/* Career Role — shows when we have a leaf domain with roles */}
       {((data.careerDomain && !needsSpecialization && availableRoleIds.length > 0) ||
         (needsSpecialization && data.specialization && availableRoleIds.length > 0)) && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-1.5">
-          <Label className="text-xs uppercase tracking-wider text-muted-foreground">
-            Career Role * <span className="normal-case font-normal text-muted-foreground">({availableRoleIds.length} available)</span>
-          </Label>
-          <Select value={data.careerRole} onValueChange={v => update({ careerRole: v, technicalSkills: {} })}>
-            <SelectTrigger className={`h-11 ${errors.careerRole ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select career" /></SelectTrigger>
-            <SelectContent>
-              {availableRoleIds.map(roleId => (
-                <SelectItem key={roleId} value={formatLabel(roleId)}>
-                  {formatLabel(roleId)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          {errors.careerRole && <p className="text-[10px] font-medium text-destructive">{errors.careerRole}</p>}
-          {data.careerRole && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.97 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3"
-            >
-              <div className="flex items-center gap-2 flex-wrap">
-                <Target className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                <span className="text-xs font-semibold text-primary">
-                  {formatLabel(data.careerDomain)} {data.specialization ? `→ ${formatLabel(data.specialization)}` : ""} → {data.careerRole}
-                </span>
-              </div>
-
-              {/* Skills from master DB — always available */}
-              {selectedRoleSkills.length > 0 && (
-                <div className="space-y-1.5 text-[11px] text-muted-foreground border-t border-primary/10 pt-2">
-                  <p>
-                    <span className="font-semibold text-foreground/80">Key Skills Required:</span>{" "}
-                    {selectedRoleSkills.join(" · ")}
-                  </p>
+          <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="space-y-1.5">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+              Career Role * <span className="normal-case font-normal text-muted-foreground">({availableRoleIds.length} available)</span>
+            </Label>
+            <Select value={data.careerRole} onValueChange={v => update({ careerRole: v, technicalSkills: {} })}>
+              <SelectTrigger className={`h-11 ${errors.careerRole ? "border-destructive ring-1 ring-destructive/50" : ""}`}><SelectValue placeholder="Select career" /></SelectTrigger>
+              <SelectContent>
+                {availableRoleIds.map(roleId => (
+                  <SelectItem key={roleId} value={formatLabel(roleId)}>
+                    {formatLabel(roleId)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.careerRole && <p className="text-[10px] font-medium text-destructive">{errors.careerRole}</p>}
+            {data.careerRole && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="mt-3 rounded-xl border border-primary/20 bg-primary/5 p-4 space-y-3"
+              >
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Target className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                  <span className="text-xs font-semibold text-primary">
+                    {formatLabel(data.careerDomain)} {data.specialization ? `→ ${formatLabel(data.specialization)}` : ""} → {data.careerRole}
+                  </span>
                 </div>
-              )}
 
-              {/* Average Salary — always shown */}
-              {data.careerRole && (() => {
-                const sal = getSalaryForRole(data.careerRole);
-                return (
-                  <div className="border-t border-primary/10 pt-2 space-y-1.5">
-                    <p className="text-[11px] font-semibold text-foreground/80 flex items-center gap-1.5">
-                      <IndianRupee className="w-3 h-3 text-muted-foreground" /> Average Salary (India)
-                    </p>
-                    <div className="grid grid-cols-3 gap-2">
-                      <div className="rounded-md bg-secondary/50 p-2 text-center">
-                        <div className="text-[10px] text-muted-foreground">Entry Level</div>
-                        <div className="text-[11px] font-bold text-foreground/90">{sal.entry}</div>
-                      </div>
-                      <div className="rounded-md bg-secondary/50 p-2 text-center">
-                        <div className="text-[10px] text-muted-foreground">Mid Level</div>
-                        <div className="text-[11px] font-bold text-primary">{sal.mid}</div>
-                      </div>
-                      <div className="rounded-md bg-secondary/50 p-2 text-center">
-                        <div className="text-[10px] text-muted-foreground">Senior Level</div>
-                        <div className="text-[11px] font-bold text-accent">{sal.senior}</div>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Extended metadata from careerData (if available) */}
-              {selectedRole && (
-                <>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div className="flex items-center gap-1.5 text-[11px]">
-                      <IndianRupee className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <span className="text-muted-foreground">Avg Cost:</span>
-                      <span className="font-semibold text-foreground/80">{selectedRole.avgCost}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px]">
-                      <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <span className="text-muted-foreground">Time to Job:</span>
-                      <span className="font-semibold text-foreground/80">{selectedRole.avgTimeToJob}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px]">
-                      <Building2 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                      <span className="text-muted-foreground">Sector:</span>
-                      <span className="font-semibold text-foreground/80">{selectedRole.sector.join(" · ")}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 text-[11px]">
-                      {selectedRole.trend === "Rising" ? <TrendingUp className="w-3 h-3 text-green-500 flex-shrink-0" /> :
-                       selectedRole.trend === "Declining" ? <TrendingDown className="w-3 h-3 text-red-500 flex-shrink-0" /> :
-                       <Minus className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
-                      <span className="text-muted-foreground">Trend:</span>
-                      <span className={`font-semibold ${selectedRole.trend === "Rising" ? "text-green-600" : selectedRole.trend === "Declining" ? "text-red-500" : "text-yellow-600"}`}>
-                        {selectedRole.trend}
-                      </span>
-                    </div>
-                    {selectedRole.remoteEligibility && (
-                      <div className="flex items-center gap-1.5 text-[11px]">
-                        <Wifi className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground">Remote:</span>
-                        <span className="font-semibold text-foreground/80">{selectedRole.remoteEligibility}</span>
-                      </div>
-                    )}
-                    {selectedRole.certifications && selectedRole.certifications.length > 0 && (
-                      <div className="flex items-center gap-1.5 text-[11px]">
-                        <Award className="w-3 h-3 text-muted-foreground flex-shrink-0" />
-                        <span className="text-muted-foreground">Certs:</span>
-                        <span className="font-semibold text-foreground/80 truncate">{selectedRole.certifications.slice(0, 2).join(", ")}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5 text-[11px]">
-                      <span className="text-muted-foreground">Demand:</span>
-                      <span className="font-mono-data font-semibold text-primary">{selectedRole.demandScore}/10</span>
-                    </div>
-                  </div>
+                {/* Skills from master DB — always available */}
+                {selectedRoleSkills.length > 0 && (
                   <div className="space-y-1.5 text-[11px] text-muted-foreground border-t border-primary/10 pt-2">
-                    <p><span className="font-semibold text-foreground/80">Tools & Technologies:</span> {selectedRole.tools.join(" · ")}</p>
-                    <p><span className="font-semibold text-foreground/80">Top Recruiters:</span> {selectedRole.topRecruiters.slice(0, 4).join(" · ")}{selectedRole.topRecruiters.length > 4 ? ` +${selectedRole.topRecruiters.length - 4} more` : ""}</p>
+                    <p>
+                      <span className="font-semibold text-foreground/80">Key Skills Required:</span>{" "}
+                      {selectedRoleSkills.join(" · ")}
+                    </p>
                   </div>
-                </>
-              )}
-            </motion.div>
-          )}
-        </motion.div>
-      )}
+                )}
+
+                {/* Average Salary — always shown */}
+                {data.careerRole && (() => {
+                  const sal = getSalaryForRole(data.careerRole);
+                  return (
+                    <div className="border-t border-primary/10 pt-2 space-y-1.5">
+                      <p className="text-[11px] font-semibold text-foreground/80 flex items-center gap-1.5">
+                        <IndianRupee className="w-3 h-3 text-muted-foreground" /> Average Salary (India)
+                      </p>
+                      <div className="grid grid-cols-3 gap-2">
+                        <div className="rounded-md bg-secondary/50 p-2 text-center">
+                          <div className="text-[10px] text-muted-foreground">Entry Level</div>
+                          <div className="text-[11px] font-bold text-foreground/90">{sal.entry}</div>
+                        </div>
+                        <div className="rounded-md bg-secondary/50 p-2 text-center">
+                          <div className="text-[10px] text-muted-foreground">Mid Level</div>
+                          <div className="text-[11px] font-bold text-primary">{sal.mid}</div>
+                        </div>
+                        <div className="rounded-md bg-secondary/50 p-2 text-center">
+                          <div className="text-[10px] text-muted-foreground">Senior Level</div>
+                          <div className="text-[11px] font-bold text-accent">{sal.senior}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Extended metadata from careerData (if available) */}
+                {selectedRole && (
+                  <>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        <IndianRupee className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground">Avg Cost:</span>
+                        <span className="font-semibold text-foreground/80">{selectedRole.avgCost}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        <Clock className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground">Time to Job:</span>
+                        <span className="font-semibold text-foreground/80">{selectedRole.avgTimeToJob}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        <Building2 className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                        <span className="text-muted-foreground">Sector:</span>
+                        <span className="font-semibold text-foreground/80">{selectedRole.sector.join(" · ")}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        {selectedRole.trend === "Rising" ? <TrendingUp className="w-3 h-3 text-green-500 flex-shrink-0" /> :
+                          selectedRole.trend === "Declining" ? <TrendingDown className="w-3 h-3 text-red-500 flex-shrink-0" /> :
+                            <Minus className="w-3 h-3 text-yellow-500 flex-shrink-0" />}
+                        <span className="text-muted-foreground">Trend:</span>
+                        <span className={`font-semibold ${selectedRole.trend === "Rising" ? "text-green-600" : selectedRole.trend === "Declining" ? "text-red-500" : "text-yellow-600"}`}>
+                          {selectedRole.trend}
+                        </span>
+                      </div>
+                      {selectedRole.remoteEligibility && (
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <Wifi className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="text-muted-foreground">Remote:</span>
+                          <span className="font-semibold text-foreground/80">{selectedRole.remoteEligibility}</span>
+                        </div>
+                      )}
+                      {selectedRole.certifications && selectedRole.certifications.length > 0 && (
+                        <div className="flex items-center gap-1.5 text-[11px]">
+                          <Award className="w-3 h-3 text-muted-foreground flex-shrink-0" />
+                          <span className="text-muted-foreground">Certs:</span>
+                          <span className="font-semibold text-foreground/80 truncate">{selectedRole.certifications.slice(0, 2).join(", ")}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5 text-[11px]">
+                        <span className="text-muted-foreground">Demand:</span>
+                        <span className="font-mono-data font-semibold text-primary">{selectedRole.demandScore}/10</span>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 text-[11px] text-muted-foreground border-t border-primary/10 pt-2">
+                      <p><span className="font-semibold text-foreground/80">Tools & Technologies:</span> {selectedRole.tools.join(" · ")}</p>
+                      <p><span className="font-semibold text-foreground/80">Top Recruiters:</span> {selectedRole.topRecruiters.slice(0, 4).join(" · ")}{selectedRole.topRecruiters.length > 4 ? ` +${selectedRole.topRecruiters.length - 4} more` : ""}</p>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            )}
+          </motion.div>
+        )}
 
       {/* Compassionate & humorous validation nudges */}
       {data.educationLevel && data.fieldOfStudy && availableDomains.length === 0 && (
@@ -625,7 +623,7 @@ export function AssessmentSteps() {
           <div className="space-y-1">
             <p className="text-sm font-medium text-destructive">Hmm, that's a dead end! 🛑</p>
             <p className="text-xs text-muted-foreground">
-              We love the ambition, but <strong>{formatLabel(data.fieldOfStudy)}</strong> under <strong>{data.educationLevel}</strong> doesn't 
+              We love the ambition, but <strong>{formatLabel(data.fieldOfStudy)}</strong> under <strong>{data.educationLevel}</strong> doesn't
               have mapped career domains yet. Think of it like GPS — we need a valid route! Try a different field of study above. 🗺️
             </p>
           </div>
@@ -653,7 +651,7 @@ export function AssessmentSteps() {
         >
           <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
           <p className="text-xs text-muted-foreground">
-            <strong>{formatLabel(data.careerDomain)}</strong> is a big world! Choose a <strong>Specialization</strong> to zoom in. 
+            <strong>{formatLabel(data.careerDomain)}</strong> is a big world! Choose a <strong>Specialization</strong> to zoom in.
             Think of it as choosing your superpower. 🦸
           </p>
         </motion.div>
@@ -667,7 +665,7 @@ export function AssessmentSteps() {
         >
           <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
           <p className="text-xs text-muted-foreground">
-            Almost there! Pick your <strong>Career Role</strong> — this is the job title you'll tell your parents about. 😏 
+            Almost there! Pick your <strong>Career Role</strong> — this is the job title you'll tell your parents about. 😏
             Choose wisely (or don't, you can always come back).
           </p>
         </motion.div>
@@ -817,11 +815,10 @@ export function AssessmentSteps() {
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.03 }}
               onClick={() => update({ portfolioLevel: opt.value })}
-              className={`rounded-xl border-2 p-4 text-center transition-all ${
-                data.portfolioLevel === opt.value
+              className={`rounded-xl border-2 p-4 text-center transition-all ${data.portfolioLevel === opt.value
                   ? "border-primary box-glow bg-primary/5"
                   : "border-border hover:border-muted-foreground"
-              }`}
+                }`}
             >
               <opt.icon className={`w-6 h-6 mx-auto mb-1 ${data.portfolioLevel === opt.value ? "text-primary" : "text-muted-foreground"}`} />
               <div className="text-xs font-semibold">{opt.label}</div>
@@ -865,9 +862,8 @@ export function AssessmentSteps() {
           {Array.from({ length: TOTAL_STEPS }).map((_, i) => (
             <motion.div
               key={i}
-              className={`h-1 rounded-full flex-1 transition-colors duration-500 ${
-                i < step ? "bg-primary" : i === step ? "gradient-primary" : "bg-muted"
-              }`}
+              className={`h-1 rounded-full flex-1 transition-colors duration-500 ${i < step ? "bg-primary" : i === step ? "gradient-primary" : "bg-muted"
+                }`}
               animate={i === step ? { scaleY: [1, 1.5, 1] } : {}}
               transition={{ duration: 0.4 }}
             />
