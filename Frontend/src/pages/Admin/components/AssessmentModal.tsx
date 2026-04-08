@@ -76,36 +76,44 @@ export function AssessmentModal({ assessment, isOpen, onClose }: {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
                             <div className="rounded-lg border p-3 bg-muted/30">
                                 <div className="text-[10px] uppercase text-muted-foreground font-bold">Total CPS</div>
-                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.total || 0}</div>
+                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.total || 0} <span className="text-sm font-normal text-muted-foreground">/ 100</span></div>
                             </div>
                             <div className="rounded-lg border p-3 bg-muted/30">
                                 <div className="text-[10px] uppercase text-muted-foreground font-bold">QPI Score</div>
-                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.qpi || 0}</div>
+                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.qpi || 0} <span className="text-sm font-normal text-muted-foreground">/ 100</span></div>
                             </div>
                             <div className="rounded-lg border p-3 bg-muted/30">
                                 <div className="text-[10px] uppercase text-muted-foreground font-bold">Technical</div>
-                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.technical || 0}</div>
+                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.technical || 0} <span className="text-sm font-normal text-muted-foreground">/ 30</span></div>
                             </div>
                             <div className="rounded-lg border p-3 bg-muted/30">
                                 <div className="text-[10px] uppercase text-muted-foreground font-bold">Soft Skills</div>
-                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.softSkill || 0}</div>
+                                <div className="text-2xl font-mono font-bold text-primary">{assessment.scores?.softSkill || 0} <span className="text-sm font-normal text-muted-foreground">/ 10</span></div>
                             </div>
                         </div>
                     </div>
 
                     {/* Section: Secondary Scores */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+                        <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
+                            <span className="text-muted-foreground mb-1">Communication</span>
+                            <span className="font-bold">{assessment.scores?.communication || 0} / 10</span>
+                        </div>
+                        <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
+                            <span className="text-muted-foreground mb-1">Emotional Intel.</span>
+                            <span className="font-bold">{assessment.scores?.ei || 0} / 10</span>
+                        </div>
                         <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
                             <span className="text-muted-foreground mb-1">Market Demand</span>
                             <span className="font-bold">{assessment.scores?.marketDemand || 0} / 10</span>
                         </div>
                         <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
                             <span className="text-muted-foreground mb-1">Experience</span>
-                            <span className="font-bold">{assessment.scores?.experience || 0}</span>
+                            <span className="font-bold">{assessment.scores?.experience || 0} / 15</span>
                         </div>
                         <div className="text-xs p-2 rounded-md border flex flex-col items-center justify-center text-center">
                             <span className="text-muted-foreground mb-1">Portfolio</span>
-                            <span className="font-bold">{assessment.scores?.portfolio || 0}</span>
+                            <span className="font-bold">{assessment.scores?.portfolio || 0} / 15</span>
                         </div>
                     </div>
 
