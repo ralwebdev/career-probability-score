@@ -92,10 +92,12 @@ export default function Workshops() {
           <p className="text-muted-foreground mb-6 max-w-md mx-auto">
             Get daily job alerts, career advice, and connect with 5,000+ professionals — completely free.
           </p>
-          <Button size="lg" className="bg-success text-success-foreground hover:bg-success/90 gap-2 px-8">
-            <MessageCircle className="h-5 w-5" />
-            Join WhatsApp Community
-            <ExternalLink className="h-4 w-4" />
+          <Button size="lg" className="bg-success text-success-foreground hover:bg-success/90 gap-2 px-8" asChild>
+            <a href="https://chat.whatsapp.com/La9kNdYxicWC3QTN4QO8nt" target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="h-5 w-5" />
+              Join WhatsApp Community
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </Button>
         </motion.div>
 
@@ -121,9 +123,9 @@ export default function Workshops() {
         </div>
 
         <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-          <Calendar className="h-5 w-5 text-primary" /> Upcoming Webinars
+          <Calendar className="h-5 w-5 text-primary" /> Upcoming Webinars / Seminars
         </h2>
-        
+
         {isLoading ? (
           <div className="flex h-32 items-center justify-center border rounded-xl bg-card/50 mb-12">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -148,9 +150,9 @@ export default function Workshops() {
                     <div className="text-[10px] text-muted-foreground">{formatTime(w.time)}</div>
                   </div>
                   {w.date !== "-" && (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
+                    <Button
+                      size="sm"
+                      variant="outline"
                       className="text-xs shrink-0"
                       onClick={() => w.registrationLink && w.registrationLink !== "#" && window.open(w.registrationLink, "_blank")}
                     >
