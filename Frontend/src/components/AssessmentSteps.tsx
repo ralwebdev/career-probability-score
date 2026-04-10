@@ -187,6 +187,7 @@ export function AssessmentSteps() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [data, setData] = useState<AssessmentData>({
     name: "", email: "", phone: "", city: "", state: "", country: "India",
@@ -350,11 +351,15 @@ export function AssessmentSteps() {
 
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+    
     const stepErrors = validateStep(step);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
+
+    setIsSubmitting(true);
 
     const trimmedData = {
       ...data,
@@ -372,6 +377,8 @@ export function AssessmentSteps() {
       // Fallback in case backend is down or connection fails
       sessionStorage.setItem("cps-assessment", JSON.stringify(trimmedData));
       navigate("/results");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -916,6 +923,7 @@ export function AssessmentSteps() {
           ) : (
             <Button
               onClick={handleSubmit}
+              disabled={isSubmitting}
               className="gradient-primary text-primary-foreground gap-2 px-6 relative overflow-hidden"
             >
               <motion.div
@@ -924,7 +932,7 @@ export function AssessmentSteps() {
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               />
               <Trophy className="h-4 w-4 relative z-10" />
-              <span className="relative z-10">See My Score</span>
+              <span className="relative z-10">{isSubmitting ? "Submitting..." : "See My Score"}</span>
             </Button>
           )}
         </div>
