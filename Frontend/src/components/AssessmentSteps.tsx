@@ -356,14 +356,21 @@ export function AssessmentSteps() {
       return;
     }
 
+    const trimmedData = {
+      ...data,
+      name: data.name.trim(),
+      email: data.email.trim(),
+      phone: data.phone.trim()
+    };
+
     try {
-      const result = await submitAssessment(data);
-      sessionStorage.setItem("cps-assessment", JSON.stringify(data));
+      const result = await submitAssessment(trimmedData);
+      sessionStorage.setItem("cps-assessment", JSON.stringify(trimmedData));
       navigate(`/results?id=${result._id}`);
     } catch (error) {
       console.error("Submission failed:", error);
       // Fallback in case backend is down or connection fails
-      sessionStorage.setItem("cps-assessment", JSON.stringify(data));
+      sessionStorage.setItem("cps-assessment", JSON.stringify(trimmedData));
       navigate("/results");
     }
   };
