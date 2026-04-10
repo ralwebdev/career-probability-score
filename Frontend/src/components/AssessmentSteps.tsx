@@ -117,8 +117,8 @@ function SkillPill({ label, value, onChange, compact }: { label: string; value: 
                 whileTap={{ scale: 0.85 }}
                 whileHover={{ scale: 1.15 }}
                 className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${value === level
-                    ? "gradient-primary text-primary-foreground shadow-sm"
-                    : "bg-muted/50 text-muted-foreground hover:bg-secondary"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "bg-muted/50 text-muted-foreground hover:bg-secondary"
                   }`}
               >
                 <SkillLevelBar level={level} active={value === level} />
@@ -172,8 +172,8 @@ function CompletionChip({ filled, total }: { filled: number; total: number }) {
           <div
             key={i}
             className={`w-1.5 h-4 rounded-full transition-all duration-300 ${i < Math.ceil((filled / total) * Math.min(total, 10))
-                ? "bg-primary"
-                : "bg-muted"
+              ? "bg-primary"
+              : "bg-muted"
               }`}
           />
         ))}
@@ -187,7 +187,6 @@ export function AssessmentSteps() {
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [celebrating, setCelebrating] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [data, setData] = useState<AssessmentData>({
     name: "", email: "", phone: "", city: "", state: "", country: "India",
@@ -351,15 +350,11 @@ export function AssessmentSteps() {
 
 
   const handleSubmit = async () => {
-    if (isSubmitting) return;
-    
     const stepErrors = validateStep(step);
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors);
       return;
     }
-
-    setIsSubmitting(true);
 
     const trimmedData = {
       ...data,
@@ -377,8 +372,6 @@ export function AssessmentSteps() {
       // Fallback in case backend is down or connection fails
       sessionStorage.setItem("cps-assessment", JSON.stringify(trimmedData));
       navigate("/results");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -830,8 +823,8 @@ export function AssessmentSteps() {
               whileHover={{ scale: 1.03 }}
               onClick={() => update({ portfolioLevel: opt.value })}
               className={`rounded-xl border-2 p-4 text-center transition-all ${data.portfolioLevel === opt.value
-                  ? "border-primary box-glow bg-primary/5"
-                  : "border-border hover:border-muted-foreground"
+                ? "border-primary box-glow bg-primary/5"
+                : "border-border hover:border-muted-foreground"
                 }`}
             >
               <opt.icon className={`w-6 h-6 mx-auto mb-1 ${data.portfolioLevel === opt.value ? "text-primary" : "text-muted-foreground"}`} />
@@ -923,7 +916,6 @@ export function AssessmentSteps() {
           ) : (
             <Button
               onClick={handleSubmit}
-              disabled={isSubmitting}
               className="gradient-primary text-primary-foreground gap-2 px-6 relative overflow-hidden"
             >
               <motion.div
@@ -932,7 +924,7 @@ export function AssessmentSteps() {
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
               />
               <Trophy className="h-4 w-4 relative z-10" />
-              <span className="relative z-10">{isSubmitting ? "Submitting..." : "See My Score"}</span>
+              <span className="relative z-10">See My Score</span>
             </Button>
           )}
         </div>
