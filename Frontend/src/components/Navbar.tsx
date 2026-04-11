@@ -59,10 +59,10 @@ export function Navbar() {
         </div>
 
         <div className="hidden md:flex items-center gap-1">
-          <Link to="/college-dashboard">
-            {/* <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
-              College Dashboard
-            </Button> */}
+          <Link to="/college-login">
+            <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
+              College Login
+            </Button>
           </Link>
           <Link to="/admin">
             <Button variant="ghost" size="sm" className="text-xs text-muted-foreground hover:text-foreground">
@@ -100,9 +100,9 @@ export function Navbar() {
                   {l.label}
                 </Link>
               ))}
-              {/* <Link to="/college-dashboard" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
-                College Dashboard
-              </Link> */}
+              <Link to="/college-login" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
+                College Login
+              </Link>
               <Link to="/admin" onClick={() => setOpen(false)} className="rounded-lg px-3 py-2.5 text-sm text-muted-foreground hover:text-foreground">
                 Admin
               </Link>

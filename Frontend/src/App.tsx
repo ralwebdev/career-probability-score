@@ -15,6 +15,8 @@ import Workshops from "./pages/Workshops";
 import Admin from "./pages/Admin/index";
 import CourseLanding from "./pages/CourseLanding";
 import CollegeDashboard from "./pages/CollegeDashboard";
+import CollegeLogin from "./pages/CollegeLogin";
+import EmployabilityDashboard from "./pages/EmployabilityDashboard";
 import NotFound from "./pages/NotFound";
 import Downtime from "./pages/Downtime";
 
@@ -46,6 +48,8 @@ const App = () => {
               <Route path="/admin" element={<Admin />} />
               <Route path="/course/:courseId" element={<CourseLanding />} />
               {/* <Route path="/college-dashboard" element={<CollegeDashboard />} /> */}
+              <Route path="/college-login" element={<CollegeLogin />} />
+              <Route path="/employability-dashboard" element={<EmployabilityDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>

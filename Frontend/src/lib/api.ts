@@ -270,3 +270,35 @@ export async function deleteWebinar(id: string, token: string) {
   }
   return response.json();
 }
+
+// College API
+export async function loginCollege(credentials: any) {
+  const response = await fetch(`${API_BASE_URL}/college/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(credentials),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Invalid college credentials");
+  }
+
+  return response.json();
+}
+
+export async function getCollegeStudents(token: string) {
+  const response = await fetch(`${API_BASE_URL}/college/students`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch college students");
+  }
+
+  return response.json();
+}

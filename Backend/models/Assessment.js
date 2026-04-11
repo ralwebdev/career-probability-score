@@ -12,7 +12,28 @@ const assessmentSchema = new mongoose.Schema({
   careerDomain: { type: String, required: true },
   specialization: { type: String },
   careerRole: { type: String, required: true },
+
+  // College specific fields
+  collegeName: { type: String },
+  department: { type: String },
+  course: { type: String },
+  year: { type: Number, enum: [1, 2, 3, 4] },
+  cpsHistory: [{ type: Number }],
   
+  // Dashboard specific metrics (stored in Assessment for single source of truth)
+  placementReadiness: { type: String },
+  topCareerDomains: [{ type: String }],
+  topCareerRoles: [{
+    role: String,
+    fit: { type: String, enum: ['High', 'Medium', 'Low'] }
+  }],
+  skillGaps: [{
+    skill: String,
+    level: { type: String, enum: ['High', 'Medium', 'Low'] }
+  }],
+  likelyIndustries: [{ type: String }],
+  suggestedTraining: [{ type: String }],
+
   // Storing raw inputs
   technicalSkills: { type: Map, of: Number },
   softSkills: { type: Map, of: Number },
