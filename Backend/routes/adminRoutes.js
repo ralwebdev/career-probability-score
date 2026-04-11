@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { loginAdmin, verifyAdmin } = require('../controllers/adminController');
+const { loginAdmin, verifyAdmin, createCollege, getColleges } = require('../controllers/adminController');
+const { protectAdmin } = require('../utils/authMiddleware');
 
 // @desc    Auth admin & get token
 // @route   POST /api/admin/login
@@ -11,5 +12,10 @@ router.post('/login', loginAdmin);
 // @route   GET /api/admin/verify
 // @access  Private
 router.get('/verify', verifyAdmin);
+
+// College management
+router.route('/colleges')
+  .post(protectAdmin, createCollege)
+  .get(protectAdmin, getColleges);
 
 module.exports = router;

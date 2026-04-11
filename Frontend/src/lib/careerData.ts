@@ -1876,6 +1876,7 @@ export type AssessmentData = {
   fieldOfStudy: string;
   careerDomain: string;
   specialization: string;
+  collegeId?: string;
   careerRole: string;
   technicalSkills: Record<string, number>;
   softSkills: Record<string, number>;

@@ -11,7 +11,9 @@ import {
     LeadsModal,
     AdminCourseManagement,
     AdminWebinarManagement,
+    AdminCollegeManagement,
     StatsGrid,
+
     ChartsSection,
     CounselingTable,
     AssessmentsTable,
@@ -189,7 +191,9 @@ export default function Admin() {
                                 <TabsTrigger value="leads">Leads ({leadsData.length})</TabsTrigger>
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                                 <TabsTrigger value="webinars">Webinars</TabsTrigger>
+                                <TabsTrigger value="colleges">Colleges</TabsTrigger>
                             </TabsList>
+
 
                             <TabsContent value="dashboard" className="space-y-8">
                                 {dataLoading || !dashboardData ? (
@@ -232,7 +236,12 @@ export default function Admin() {
                             <TabsContent value="webinars">
                                 <AdminWebinarManagement token={localStorage.getItem("adminToken") || ""} />
                             </TabsContent>
+
+                            <TabsContent value="colleges">
+                                <AdminCollegeManagement token={localStorage.getItem("adminToken") || ""} />
+                            </TabsContent>
                         </Tabs>
+
                     </motion.div>
                 )}
             </AnimatePresence>

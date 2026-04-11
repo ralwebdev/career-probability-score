@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
-const CollegeUser = require('../models/CollegeUser');
+const College = require('../models/College');
 const Assessment = require('../models/Assessment');
+
 
 // @desc    Auth college user & get token
 // @route   POST /api/college/login
@@ -9,7 +10,7 @@ const loginCollegeUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await CollegeUser.findOne({ email });
+    const user = await College.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
       const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'secret', {
@@ -20,11 +21,11 @@ const loginCollegeUser = async (req, res) => {
         id: user._id,
         email: user.email,
         name: user.name,
+        collegeId: user.collegeId,
         role: user.role,
-        department: user.department,
-        collegeName: user.collegeName,
         token: token,
       });
+
     } else {
       res.status(401).json({ message: 'Invalid email or password' });
     }
@@ -39,15 +40,16 @@ const loginCollegeUser = async (req, res) => {
 const getStudents = async (req, res) => {
   try {
     const userId = req.user.id;
-    const user = await CollegeUser.findById(userId);
+    const user = await College.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     let filter = {
-      collegeName: user.collegeName
+      collegeId: user.collegeId
     };
+
 
     // If faculty, restrict to their department
     if (user.role === 'faculty') {
@@ -108,8 +110,9 @@ const protect = async (req, res, next) => {
     try {
       token = req.headers.authorization.split(' ')[1];
       const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-      req.user = await CollegeUser.findById(decoded.id).select('-password');
+      req.user = await College.findById(decoded.id).select('-password');
       next();
+
     } catch (error) {
       res.status(401).json({ message: 'Not authorized, token failed' });
     }

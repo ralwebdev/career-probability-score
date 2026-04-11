@@ -15,8 +15,10 @@ const assessmentSchema = new mongoose.Schema({
 
   // College specific fields
   collegeName: { type: String },
+  collegeId: { type: String },
   department: { type: String },
   course: { type: String },
+
   year: { type: Number, enum: [1, 2, 3, 4] },
   cpsHistory: [{ type: Number }],
   

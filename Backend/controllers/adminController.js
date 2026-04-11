@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
+const College = require('../models/College');
+
 
 // @desc    Auth admin & get token
 // @route   POST /api/admin/login
@@ -58,7 +60,52 @@ const verifyAdmin = async (req, res) => {
   }
 };
 
+// @desc    Create new college
+// @route   POST /api/admin/colleges
+// @access  Private
+const createCollege = async (req, res) => {
+  const { name, collegeId, location, email, password } = req.body;
+
+  try {
+    const collegeExists = await College.findOne({ 
+      $or: [{ collegeId }, { email }] 
+    });
+
+    if (collegeExists) {
+      const field = collegeExists.collegeId === collegeId ? 'College ID' : 'Email';
+      return res.status(400).json({ message: `${field} already exists` });
+    }
+
+    const college = await College.create({
+      name,
+      collegeId,
+      location,
+      email,
+      password,
+    });
+
+    res.status(201).json(college);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Get all colleges
+// @route   GET /api/admin/colleges
+// @access  Private
+const getColleges = async (req, res) => {
+  try {
+    const colleges = await College.find({}).sort({ createdAt: -1 });
+    res.json(colleges);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginAdmin,
   verifyAdmin,
+  createCollege,
+  getColleges,
 };
+

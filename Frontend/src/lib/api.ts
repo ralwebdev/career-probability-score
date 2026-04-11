@@ -302,3 +302,30 @@ export async function getCollegeStudents(token: string) {
 
   return response.json();
 }
+
+// Admin College Management
+export async function getColleges(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/colleges`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to fetch colleges");
+  return response.json();
+}
+
+export async function createCollege(collegeData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/colleges`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(collegeData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to create college");
+  }
+  return response.json();
+}

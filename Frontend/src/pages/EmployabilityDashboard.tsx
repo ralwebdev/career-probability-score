@@ -371,8 +371,9 @@ export default function EmployabilityDashboard() {
                 <h1 className="text-xl font-bold">Student Employability Intelligence System</h1>
                 <p className="text-xs text-muted-foreground flex items-center gap-2">
                   <ShieldCheck className="h-3 w-3" />
-                  {user.name} · {user.role === "admin" ? "Admin" : `Faculty — ${user.department}`} · {user.collegeName}
+                  {user.name} · {user.collegeId} · {user.role === "admin" ? "College Administrator" : "Faculty Account"}
                 </p>
+
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 text-xs">
