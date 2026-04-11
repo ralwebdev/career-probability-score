@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, LogOut } from "lucide-react";
+import { Lock, LogOut, Database } from "lucide-react";
 import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getLeads, getAssessments, getAssessmentStats } from "@/lib/api";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,9 +35,60 @@ export default function Admin() {
     const [leadsData, setLeadsData] = useState<any[]>([]);
     const [assessmentStats, setAssessmentStats] = useState<any[]>([]);
     const [dataLoading, setDataLoading] = useState(false);
+    const [selectedScoreRange, setSelectedScoreRange] = useState<any>(null);
+    const [selectedCareerRole, setSelectedCareerRole] = useState<string | null>(null);
     const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
     const [selectedCounseling, setSelectedCounseling] = useState<any>(null);
     const [selectedLead, setSelectedLead] = useState<any>(null);
+
+    // Derived filtered assessments based on active analytics filters
+    const filteredAssessments = useMemo(() => {
+        let result = assessmentsData;
+
+        if (selectedScoreRange) {
+            const [min, max] = selectedScoreRange.range.split('-').map(Number);
+            result = result.filter(s => {
+                const score = s.scores?.total || 0;
+                return score >= min && score <= max;
+            });
+        }
+
+        if (selectedCareerRole) {
+            result = result.filter(s => s.careerRole === selectedCareerRole);
+        }
+
+        return result;
+    }, [assessmentsData, selectedScoreRange, selectedCareerRole]);
+
+    const handleScoreClick = (data: any) => {
+        if (data && data.activePayload && data.activePayload.length > 0) {
+            const payload = data.activePayload[0].payload;
+            if (selectedScoreRange?.range === payload.range) {
+                setSelectedScoreRange(null);
+            } else {
+                setSelectedScoreRange(payload);
+                toast.info(`Filtering by ${payload.range} Score Range`);
+            }
+        }
+    };
+
+    const handleCareerClick = (data: any) => {
+        if (data && data.activePayload && data.activePayload.length > 0) {
+            const payload = data.activePayload[0].payload;
+            if (selectedCareerRole === payload.name) {
+                setSelectedCareerRole(null);
+            } else {
+                setSelectedCareerRole(payload.name);
+                toast.info(`Filtering by ${payload.name} Role`);
+            }
+        }
+    };
+
+    const clearFilters = () => {
+        setSelectedScoreRange(null);
+        setSelectedCareerRole(null);
+        toast.success("Filters cleared");
+    };
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -214,7 +265,52 @@ export default function Admin() {
                                             assessmentsCount={assessmentsData.length}
                                             counselingCount={counselingData.length}
                                             leadsCount={leadsData.length}
+                                            onScoreClick={handleScoreClick}
+                                            onCareerClick={handleCareerClick}
+                                            selectedScoreRange={selectedScoreRange?.range}
+                                            selectedCareerRole={selectedCareerRole}
                                         />
+
+                                        <div className="space-y-4 pt-4 border-t relative">
+                                            <div className="flex items-center justify-between">
+                                                <div>
+                                                    <h3 className="text-xl font-bold"> Talent Drill-Down Records</h3>
+                                                    <p className="text-xs text-muted-foreground mt-0.5">
+                                                        {selectedScoreRange || selectedCareerRole ? "Filtered results based on chart selection" : "All platform assessment records"}
+                                                    </p>
+                                                </div>
+                                                <div className="flex items-center gap-4">
+                                                    <div className="text-[11px] font-bold text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border">
+                                                        Viewing {filteredAssessments.length} of {assessmentsData.length} candidates
+                                                    </div>
+                                                    {(selectedScoreRange || selectedCareerRole) && (
+                                                        <button 
+                                                            onClick={clearFilters}
+                                                            className="text-xs font-bold text-primary hover:underline"
+                                                        >
+                                                            Reset Filters
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {selectedScoreRange || selectedCareerRole ? (
+                                                <div className="flex items-center gap-2 mb-2">
+                                                    {selectedCareerRole && (
+                                                        <span className="px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                                                            Role: {selectedCareerRole}
+                                                        </span>
+                                                    )}
+                                                    {selectedScoreRange && (
+                                                        <span className="px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[10px] font-bold border border-accent/20">
+                                                            Score: {selectedScoreRange.range}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            ) : null}
+
+                                            <AssessmentsTable data={filteredAssessments} onRowClick={setSelectedAssessment} />
+                                        </div>
                                     </>
                                 )}
                             </TabsContent>

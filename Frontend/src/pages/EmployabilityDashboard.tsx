@@ -278,16 +278,24 @@ export default function EmployabilityDashboard() {
                     <BarChart data={popularInterests} layout="vertical" onClick={handleCareerClick}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                       <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" width={100} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} stroke="none" />
+                      <YAxis dataKey="name" type="category" width={100} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="none" />
                       <Tooltip 
-                        contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px" }}
+                        contentStyle={{ 
+                            background: "hsl(var(--card))", 
+                            border: "1px solid hsl(var(--border))", 
+                            borderRadius: "12px",
+                            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                            fontSize: "12px",
+                            fontWeight: "600"
+                        }}
                         cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
+                        itemStyle={{ color: "hsl(var(--primary))" }}
                       />
                       <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={20} className="cursor-pointer">
                         {popularInterests.map((entry, index) => (
                           <Cell 
                             key={`cell-${index}`} 
-                            fillOpacity={selectedCareerRole ? (selectedCareerRole === entry.name ? 1 : 0.4) : 1}
+                            fillOpacity={selectedCareerRole ? (selectedCareerRole === entry.name ? 1 : 0.45) : 1}
                             stroke={selectedCareerRole === entry.name ? "hsl(var(--primary))" : "none"}
                             strokeWidth={2}
                           />
@@ -315,10 +323,17 @@ export default function EmployabilityDashboard() {
                   <ResponsiveContainer width="100%" height={300}>
                     <BarChart data={scoreDistribution} onClick={handleScoreClick}>
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="range" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} stroke="hsl(var(--border))" />
-                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} stroke="hsl(var(--border))" />
+                      <XAxis dataKey="range" tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="hsl(var(--border))" />
+                      <YAxis tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="hsl(var(--border))" />
                       <Tooltip 
-                        contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px" }}
+                        contentStyle={{ 
+                            background: "hsl(var(--card))", 
+                            border: "1px solid hsl(var(--border))", 
+                            borderRadius: "12px",
+                            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                            fontSize: "12px",
+                            fontWeight: "600"
+                        }}
                         cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
                       />
                       <Bar dataKey="count" radius={[6, 6, 0, 0]} className="cursor-pointer">
@@ -326,7 +341,7 @@ export default function EmployabilityDashboard() {
                           <Cell 
                             key={`cell-${index}`} 
                             fill={entry.color} 
-                            fillOpacity={selectedScoreRange ? (selectedScoreRange.label === entry.range ? 1 : 0.4) : 1}
+                            fillOpacity={selectedScoreRange ? (selectedScoreRange.label === entry.range ? 1 : 0.5) : 1}
                             stroke={selectedScoreRange?.label === entry.range ? entry.color : "none"}
                             strokeWidth={2}
                           />

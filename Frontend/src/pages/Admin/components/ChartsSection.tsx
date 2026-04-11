@@ -1,13 +1,26 @@
-import { Award, BarChart3, Globe, AlertTriangle } from "lucide-react";
+import { Award, BarChart3, Globe, AlertTriangle, Database } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, PieChart, Pie, Cell } from "recharts";
 
 const PIE_COLORS = ["hsl(186, 100%, 50%)", "hsl(186, 80%, 40%)", "hsl(186, 60%, 35%)", "hsl(42, 100%, 50%)", "hsl(42, 80%, 40%)", "hsl(215, 20%, 40%)"];
 
-export function ChartsSection({ dashboardData, assessmentsCount, counselingCount, leadsCount }: { 
+export function ChartsSection({ 
+    dashboardData, 
+    assessmentsCount, 
+    counselingCount, 
+    leadsCount,
+    onScoreClick,
+    onCareerClick,
+    selectedScoreRange,
+    selectedCareerRole
+}: { 
     dashboardData: any;
     assessmentsCount: number;
     counselingCount: number;
     leadsCount: number;
+    onScoreClick?: (data: any) => void;
+    onCareerClick?: (data: any) => void;
+    selectedScoreRange?: string | null;
+    selectedCareerRole?: string | null;
 }) {
     if (!dashboardData) return null;
 
@@ -15,43 +28,86 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
         <div className="space-y-8">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Popular Careers */}
-                <div className="rounded-xl border bg-card/50 p-6">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <Award className="h-5 w-5 text-primary" /> Popular Career Interests
-                    </h3>
+                <div className="rounded-xl border bg-card p-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <Award className="h-5 w-5 text-primary" /> Popular Career Interests
+                        </h3>
+                        {selectedCareerRole && (
+                            <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                                Filter Active
+                            </span>
+                        )}
+                    </div>
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={dashboardData.popularCareers} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsla(220, 26%, 93%, 1.00)" />
-                            <XAxis type="number" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
-                            <YAxis dataKey="name" type="category" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} width={100} />
+                        <BarChart data={dashboardData.popularCareers} layout="vertical" onClick={onCareerClick}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" horizontal={false} />
+                            <XAxis type="number" hide />
+                            <YAxis dataKey="name" type="category" tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 600 }} width={100} axisLine={false} tickLine={false} />
                             <Tooltip 
-                                contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} 
-                                itemStyle={{ color: "white" }}
-                                labelStyle={{ color: "white" }}
+                                cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
+                                contentStyle={{ 
+                                    background: "hsl(var(--card))", 
+                                    border: "1px solid hsl(var(--border))", 
+                                    borderRadius: "12px",
+                                    boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                    fontSize: "12px",
+                                    fontWeight: "600"
+                                }} 
+                                itemStyle={{ color: "hsl(var(--primary))" }}
                             />
-                            <Bar dataKey="count" fill="hsl(186, 100%, 50%)" radius={[0, 4, 4, 0]} />
+                            <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} barSize={20} className="cursor-pointer">
+                                {dashboardData.popularCareers.map((entry: any, i: number) => (
+                                    <Cell 
+                                        key={i} 
+                                        fillOpacity={selectedCareerRole ? (selectedCareerRole === entry.name ? 1 : 0.4) : 1}
+                                        stroke={selectedCareerRole === entry.name ? "hsl(var(--primary))" : "none"}
+                                        strokeWidth={2}
+                                        fill="hsl(var(--primary))"
+                                    />
+                                ))}
+                            </Bar>
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
                 {/* Score Distribution */}
-                <div className="rounded-xl border bg-card/50 p-6">
-                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-primary" /> CPS Score Distribution
-                    </h3>
+                <div className="rounded-xl border bg-card p-6 shadow-sm hover:shadow-md transition-all">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold flex items-center gap-2">
+                            <BarChart3 className="h-5 w-5 text-primary" /> CPS Score Distribution
+                        </h3>
+                        {selectedScoreRange && (
+                           <span className="text-[10px] font-bold text-accent bg-accent/10 px-2 py-0.5 rounded-full border border-accent/20">
+                               Filter Active
+                           </span>
+                        )}
+                    </div>
                     <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={dashboardData.scoreDistribution}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 18%)" />
-                            <XAxis dataKey="range" tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
-                            <YAxis tick={{ fill: "hsl(215, 20%, 55%)", fontSize: 11 }} />
+                        <BarChart data={dashboardData.scoreDistribution} onClick={onScoreClick}>
+                            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border) / 0.5)" vertical={false} />
+                            <XAxis dataKey="range" tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
+                            <YAxis tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 600 }} axisLine={false} tickLine={false} />
                             <Tooltip 
-                                contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} 
-                                itemStyle={{ color: "white" }}
-                                labelStyle={{ color: "white" }}
+                                cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
+                                contentStyle={{ 
+                                    background: "hsl(var(--card))", 
+                                    border: "1px solid hsl(var(--border))", 
+                                    borderRadius: "12px",
+                                    boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                                    fontSize: "12px",
+                                    fontWeight: "600"
+                                }} 
                             />
-                            <Bar dataKey="count" fill="hsl(186, 100%, 50%)" radius={[4, 4, 0, 0]}>
+                            <Bar dataKey="count" radius={[4, 4, 0, 0]} barSize={35} className="cursor-pointer">
                                 {dashboardData.scoreDistribution.map((entry: any, i: number) => (
-                                    <Cell key={i} fill={entry.color} />
+                                    <Cell 
+                                        key={i} 
+                                        fill={entry.color} 
+                                        fillOpacity={selectedScoreRange ? (selectedScoreRange === entry.range ? 1 : 0.45) : 1}
+                                        stroke={selectedScoreRange === entry.range ? entry.color : "none"}
+                                        strokeWidth={2}
+                                    />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -61,7 +117,7 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* Top Countries */}
-                <div className="rounded-xl border bg-card/50 p-6">
+                <div className="rounded-xl border bg-card p-6">
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <Globe className="h-5 w-5 text-primary" /> Users by Country
                     </h3>
@@ -74,9 +130,12 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
                                     ))}
                                 </Pie>
                                 <Tooltip 
-                                    contentStyle={{ background: "hsl(222, 40%, 10%)", border: "1px solid hsl(222, 30%, 18%)", borderRadius: 8 }} 
-                                    itemStyle={{ color: "white" }}
-                                    labelStyle={{ color: "white" }}
+                                    contentStyle={{ 
+                                        background: "hsl(var(--card))", 
+                                        border: "1px solid hsl(var(--border))", 
+                                        borderRadius: "12px",
+                                        boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)"
+                                    }} 
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -93,19 +152,19 @@ export function ChartsSection({ dashboardData, assessmentsCount, counselingCount
                 </div>
 
                 {/* Quick Info */}
-                <div className="rounded-xl border bg-card/50 p-6">
+                <div className="rounded-xl border bg-card p-6 shadow-sm">
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                         <AlertTriangle className="h-5 w-5 text-accent" /> System Notice
                     </h3>
                     <div className="space-y-4">
-                        <div className="rounded-lg bg-accent/10 p-4 border border-accent/20">
+                        <div className="rounded-lg bg-accent/10 p-4 border border-accent/20 shadow-inner">
                             <p className="text-sm text-accent font-semibold">Growth Tip</p>
-                            <p className="text-xs text-muted-foreground mt-1">
+                            <p className="text-xs text-muted-foreground mt-1 font-medium">
                                 Career interests in {dashboardData.popularCareers[0]?.name || "Tech"} are trending up this week.
                             </p>
                         </div>
-                        <div className="text-sm text-muted-foreground">
-                            Total data records: {assessmentsCount + counselingCount + leadsCount}
+                        <div className="text-sm text-muted-foreground font-semibold flex items-center gap-2">
+                            <Database className="h-4 w-4 text-primary/60" /> Total platform records: <span className="text-foreground">{(assessmentsCount + counselingCount + leadsCount).toLocaleString()}</span>
                         </div>
                     </div>
                 </div>
