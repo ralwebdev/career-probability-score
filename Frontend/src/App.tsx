@@ -16,34 +16,43 @@ import Admin from "./pages/Admin/index";
 import CourseLanding from "./pages/CourseLanding";
 import CollegeDashboard from "./pages/CollegeDashboard";
 import NotFound from "./pages/NotFound";
+import Downtime from "./pages/Downtime";
 
 const queryClient = new QueryClient();
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Layout>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/assessment" element={<Assessment />} />
-            <Route path="/results" element={<Results />} />
-            <Route path="/report" element={<Report />} />
-            <Route path="/counseling" element={<Counseling />} />
-            <Route path="/market-signals" element={<MarketSignals />} />
-            {/* <Route path="/courses" element={<Courses />} /> */}
-            <Route path="/workshops" element={<Workshops />} />
-            <Route path="/admin" element={<Admin />} />
-            <Route path="/course/:courseId" element={<CourseLanding />} />
-            {/* <Route path="/college-dashboard" element={<CollegeDashboard />} /> */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </Layout>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const isDowntimeActive = import.meta.env.VITE_DOWNTIME_ACTIVE === 'true';
+
+const App = () => {
+  if (isDowntimeActive) {
+    return <Downtime />;
+  }
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Layout>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/assessment" element={<Assessment />} />
+              <Route path="/results" element={<Results />} />
+              <Route path="/report" element={<Report />} />
+              <Route path="/counseling" element={<Counseling />} />
+              <Route path="/market-signals" element={<MarketSignals />} />
+              {/* <Route path="/courses" element={<Courses />} /> */}
+              <Route path="/workshops" element={<Workshops />} />
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/course/:courseId" element={<CourseLanding />} />
+              {/* <Route path="/college-dashboard" element={<CollegeDashboard />} /> */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </Layout>
+        </BrowserRouter>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
