@@ -555,7 +555,58 @@ function calculateCPS(data) {
   return { total, technical, softSkill, communication, ei, experience, portfolio, marketDemand, qpi };
 }
 
+const skillGapsByField = {
+  "computer_science": [
+    { skill: "Python", level: "High" }, { skill: "System Design", level: "Medium" }, { skill: "Communication", level: "Medium" },
+  ],
+  "medical": [
+    { skill: "Data Analysis", level: "High" }, { skill: "Lab Techniques", level: "Medium" }, { skill: "Scientific Writing", level: "Low" },
+  ],
+  "accounting_finance": [
+    { skill: "Financial Modeling", level: "High" }, { skill: "Excel Advanced", level: "Medium" }, { skill: "Presentation Skills", level: "Low" },
+  ],
+  "design": [
+    { skill: "Digital Tools", level: "High" }, { skill: "Research Methods", level: "Medium" }, { skill: "Portfolio Building", level: "Medium" },
+  ],
+};
+
+const industriesByField = {
+  "computer_science": ["IT Services", "Product Companies", "Startups", "Consulting Firms", "E-Commerce"],
+  "medical": ["Pharmaceuticals", "Biotech Firms", "Research Labs", "Healthcare", "Environmental Agencies"],
+  "accounting_finance": ["Banking & Finance", "Big 4 Accounting", "Insurance", "FMCG", "Consulting"],
+  "design": ["Media Houses", "Publishing", "EdTech", "NGOs", "Government"],
+};
+
+const trainingByField = {
+  "computer_science": ["Full Stack Bootcamp", "DSA Masterclass", "Cloud Certification", "Soft Skills Workshop"],
+  "medical": ["Data Analytics for Bio", "Lab Safety Certification", "Research Methodology", "Scientific Communication"],
+  "accounting_finance": ["Tally & GST Training", "Financial Modeling Course", "Business Analytics", "Mock Interview Prep"],
+  "design": ["Digital Marketing Basics", "Content Writing Workshop", "UX Research Fundamentals", "Public Speaking"],
+};
+
+function getCareerInsights(fieldOfStudy, totalScore) {
+  // Normalize field name to match our mapping keys
+  const fieldKey = fieldOfStudy?.toLowerCase().replace(/ /g, '_') || 'computer_science';
+  
+  const skillGaps = skillGapsByField[fieldKey] || skillGapsByField["computer_science"];
+  const likelyIndustries = industriesByField[fieldKey] || industriesByField["computer_science"];
+  const suggestedTraining = trainingByField[fieldKey] || trainingByField["computer_science"];
+  
+  let placementReadiness = "Not Ready";
+  if (totalScore > 70) placementReadiness = "Ready for Placement";
+  else if (totalScore >= 40) placementReadiness = "Needs Training";
+
+  return {
+    skillGaps,
+    likelyIndustries,
+    suggestedTraining,
+    placementReadiness
+  };
+}
+
 module.exports = {
   careerRoles,
-  calculateCPS
+  calculateCPS,
+  getCareerInsights
 };
+

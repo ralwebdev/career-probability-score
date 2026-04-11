@@ -21,7 +21,7 @@ const assessmentSchema = new mongoose.Schema({
 
   year: { type: Number, enum: [1, 2, 3, 4] },
   cpsHistory: [{ type: Number }],
-  
+
   // Dashboard specific metrics (stored in Assessment for single source of truth)
   placementReadiness: { type: String },
   topCareerDomains: [{ type: String }],

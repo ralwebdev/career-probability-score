@@ -110,7 +110,13 @@ export default function Admin() {
     }
 
     return (
-        <div className="min-h-screen px-4 py-8">
+        <div className="min-h-screen px-4 py-8 bg-background relative overflow-hidden">
+            {/* Premium background effects */}
+            <div className="absolute inset-0 gradient-mesh opacity-60 pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+            
+            <div className="relative z-10">
+
             <AnimatePresence mode="wait">
                 {!isAuthenticated ? (
                     <motion.div
@@ -263,6 +269,7 @@ export default function Admin() {
                 isOpen={!!selectedLead}
                 onClose={() => setSelectedLead(null)}
             />
+            </div>
         </div>
     );
 }

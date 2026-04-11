@@ -2,7 +2,7 @@ import { AssessmentData } from "./careerData";
 
 const API_BASE_URL = `${import.meta.env.VITE_BACKEND_URL}/api`;
 
-export type CPSScores = {
+export interface CPSScores {
   total: number;
   technical: number;
   softSkill: number;
@@ -12,7 +12,7 @@ export type CPSScores = {
   portfolio: number;
   marketDemand: number;
   qpi: number;
-};
+}
 
 export async function submitAssessment(data: AssessmentData) {
   const response = await fetch(`${API_BASE_URL}/assessments`, {
@@ -289,7 +289,7 @@ export async function loginCollege(credentials: any) {
   return response.json();
 }
 
-export async function getCollegeStudents(token: string) {
+export async function getCollegeStudents(token: string): Promise<any[]> {
   const response = await fetch(`${API_BASE_URL}/college/students`, {
     headers: {
       "Authorization": `Bearer ${token}`,

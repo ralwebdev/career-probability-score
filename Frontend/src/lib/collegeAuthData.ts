@@ -15,7 +15,17 @@ export interface CollegeUser {
 
 export interface StudentRecord {
   id: string;
+  _id?: string;
   name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  country: string;
+  educationLevel: string;
+  fieldOfStudy: string;
+  careerDomain: string;
+  careerRole: string;
   department: string;
   course: string;
   year: 1 | 2 | 3 | 4;
@@ -33,6 +43,8 @@ export interface StudentRecord {
   placementReadiness: "Ready for Placement" | "Needs Training" | "Not Ready";
   likelyIndustries: string[];
   suggestedTraining: string[];
+  scores?: any;
+  createdAt: string;
 }
 
 // Demo college users

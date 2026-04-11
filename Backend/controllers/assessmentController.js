@@ -1,5 +1,6 @@
 const Assessment = require('../models/Assessment');
-const { calculateCPS } = require('../utils/careerData');
+const { calculateCPS, getCareerInsights } = require('../utils/careerData');
+
 
 // @desc    Create new assessment
 // @route   POST /api/assessments
@@ -7,11 +8,17 @@ const createAssessment = async (req, res, next) => {
   try {
     // Calculate CPS score on the backend for data integrity
     const scores = calculateCPS(req.body);
+    
+    // Calculate intelligent insights for the dashboard
+    const insights = getCareerInsights(req.body.fieldOfStudy, scores.total);
+
     const assessment = await Assessment.create({
       ...req.body,
-      scores
+      scores,
+      ...insights
     });
     res.status(201).json(assessment);
+
   } catch (error) {
     res.status(400);
     next(error);

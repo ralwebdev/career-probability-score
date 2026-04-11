@@ -2,324 +2,34 @@ import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Users, BarChart3, TrendingUp, Search, Filter, GraduationCap,
-  ShieldCheck, Flame, Zap, Snowflake, Target, BookOpen, Building2,
-  ArrowRight, ChevronRight, LogOut, BriefcaseBusiness, AlertTriangle,
-  Lightbulb, Activity
+  LogOut, GraduationCap, ShieldCheck, LayoutDashboard, Database,
+  TrendingUp, BarChart3, Award, Users, ArrowRight
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
-import { Progress } from "@/components/ui/progress";
-import { RadarChart } from "@/components/RadarChart";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { getCollegeStudents } from "@/lib/api";
+import { toast } from "sonner";
+import { 
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
+  CartesianGrid, Tooltip, Cell, AreaChart, Area 
+} from "recharts";
+
+// Import Admin components for consistency
 import {
-  type CollegeUser,
-  type StudentRecord
-} from "@/lib/collegeAuthData";
-
-function getEmployabilityLabel(cps: number) {
-  if (cps > 70) return { label: "High Employability", color: "text-success", icon: Flame, bg: "bg-success/10" };
-  if (cps >= 40) return { label: "Moderate", color: "text-warning", icon: Zap, bg: "bg-warning/10" };
-  return { label: "Needs Improvement", color: "text-destructive", icon: Snowflake, bg: "bg-destructive/10" };
-}
-
-function getReadinessInfo(r: string) {
-  if (r === "Ready for Placement") return { icon: "🔥", color: "text-success", bg: "bg-success/10 border-success/20" };
-  if (r === "Needs Training") return { icon: "⚡", color: "text-warning", bg: "bg-warning/10 border-warning/20" };
-  return { icon: "❄️", color: "text-destructive", bg: "bg-destructive/10 border-destructive/20" };
-}
-
-function StatCard({ label, value, icon, sub }: { label: string; value: string | number; icon: React.ReactNode; sub?: string }) {
-  return (
-    <div className="rounded-xl border bg-card p-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="rounded-lg bg-primary/10 p-1.5">{icon}</div>
-        <span className="text-xs text-muted-foreground">{label}</span>
-      </div>
-      <p className="text-2xl font-bold font-mono">{value}</p>
-      {sub && <p className="text-[10px] text-muted-foreground mt-1">{sub}</p>}
-    </div>
-  );
-}
-
-function StudentDetailPanel({ student, onClose }: { student: StudentRecord; onClose: () => void }) {
-  const emp = getEmployabilityLabel(student.cpsScore);
-  const readiness = getReadinessInfo(student.placementReadiness);
-  const radarData = [
-    { subject: "Technical", score: student.dimensions.technical, fullMark: 100 },
-    { subject: "Analytical", score: student.dimensions.analytical, fullMark: 100 },
-    { subject: "Communication", score: student.dimensions.communication, fullMark: 100 },
-    { subject: "Emotional Int.", score: student.dimensions.emotional_intelligence, fullMark: 100 },
-  ];
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      className="space-y-4"
-    >
-      {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h2 className="text-lg font-bold">{student.name}</h2>
-          <p className="text-xs text-muted-foreground">{student.course} · {student.department} · Year {student.year}</p>
-        </div>
-        <Button variant="ghost" size="sm" onClick={onClose} className="text-xs">← Back</Button>
-      </div>
-
-      {/* CPS + Employability + Readiness */}
-      <div className="grid grid-cols-3 gap-3">
-        <div className="rounded-xl border bg-card p-4 text-center">
-          <p className="text-[10px] text-muted-foreground mb-1">CPS Score</p>
-          <p className="text-3xl font-bold text-primary">{student.cpsScore}</p>
-        </div>
-        <div className={`rounded-xl border p-4 text-center ${emp.bg}`}>
-          <p className="text-[10px] text-muted-foreground mb-1">Employability</p>
-          <p className={`text-sm font-bold ${emp.color}`}>{emp.label}</p>
-        </div>
-        <div className={`rounded-xl border p-4 text-center ${readiness.bg}`}>
-          <p className="text-[10px] text-muted-foreground mb-1">Placement</p>
-          <p className={`text-sm font-bold ${readiness.color}`}>
-            {readiness.icon} {student.placementReadiness}
-          </p>
-        </div>
-      </div>
-
-      {/* CPS Breakdown Radar */}
-      <div className="rounded-xl border bg-card p-4">
-        <h3 className="text-sm font-semibold mb-2 flex items-center gap-2">
-          <BarChart3 className="h-4 w-4 text-primary" /> CPS Breakdown
-        </h3>
-        <RadarChart data={radarData} />
-        <div className="grid grid-cols-4 gap-2 mt-3">
-          {radarData.map(d => (
-            <div key={d.subject} className="text-center">
-              <p className="text-[10px] text-muted-foreground">{d.subject}</p>
-              <p className="text-sm font-bold">{d.score}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* CPS Trend */}
-      {student.cpsHistory.length > 1 && (
-        <div className="rounded-xl border bg-card p-4">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <TrendingUp className="h-4 w-4 text-primary" /> Employability Trend
-          </h3>
-          <div className="flex items-end gap-2 h-16">
-            {student.cpsHistory.map((score, i) => (
-              <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                <span className="text-[10px] font-mono font-bold">{score}</span>
-                <div
-                  className="w-full rounded-t gradient-primary transition-all"
-                  style={{ height: `${(score / 100) * 48}px` }}
-                />
-                <span className="text-[9px] text-muted-foreground">#{i + 1}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Career Alignment */}
-      <div className="rounded-xl border bg-card p-4">
-        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Target className="h-4 w-4 text-primary" /> Career Alignment
-        </h3>
-        <div className="mb-3">
-          <p className="text-[10px] text-muted-foreground mb-1.5">Top Career Domains</p>
-          <div className="flex flex-wrap gap-1.5">
-            {student.topCareerDomains.map(d => (
-              <Badge key={d} variant="secondary" className="text-[10px]">{d}</Badge>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="text-[10px] text-muted-foreground mb-1.5">Top Career Roles</p>
-          <div className="space-y-1.5">
-            {student.topCareerRoles.map(r => (
-              <div key={r.role} className="flex items-center justify-between rounded-lg border px-3 py-2">
-                <span className="text-xs font-medium">{r.role}</span>
-                <Badge variant="outline" className={`text-[9px] ${
-                  r.fit === "High" ? "border-success/40 text-success" :
-                  r.fit === "Medium" ? "border-warning/40 text-warning" :
-                  "border-destructive/40 text-destructive"
-                }`}>{r.fit} Fit</Badge>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Skill Gaps */}
-      <div className="rounded-xl border bg-card p-4">
-        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <AlertTriangle className="h-4 w-4 text-warning" /> Skill Gap Identification
-        </h3>
-        <div className="space-y-2">
-          {student.skillGaps.map(g => (
-            <div key={g.skill} className="flex items-center justify-between">
-              <span className="text-xs font-medium">{g.skill}</span>
-              <Badge variant="outline" className={`text-[9px] ${
-                g.level === "High" ? "border-destructive/40 text-destructive" :
-                g.level === "Medium" ? "border-warning/40 text-warning" :
-                "border-success/40 text-success"
-              }`}>{g.level} Gap</Badge>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Industry Mapping */}
-      <div className="rounded-xl border bg-card p-4">
-        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <Building2 className="h-4 w-4 text-primary" /> Likely Hiring Industries
-        </h3>
-        <div className="flex flex-wrap gap-1.5">
-          {student.likelyIndustries.map(ind => (
-            <Badge key={ind} variant="outline" className="text-[10px]">{ind}</Badge>
-          ))}
-        </div>
-      </div>
-
-      {/* Training Recommendations */}
-      <div className="rounded-xl border bg-card p-4">
-        <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-primary" /> Suggested Training Path
-        </h3>
-        <div className="space-y-1.5">
-          {student.suggestedTraining.map((t, i) => (
-            <div key={t} className="flex items-center gap-2 text-xs">
-              <span className="h-5 w-5 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px] font-bold">{i + 1}</span>
-              {t}
-            </div>
-          ))}
-        </div>
-      </div>
-    </motion.div>
-  );
-}
-
-function BatchAnalytics({ students }: { students: StudentRecord[] }) {
-  const avgCPS = Math.round(students.reduce((s, st) => s + st.cpsScore, 0) / students.length);
-  const readyPct = Math.round((students.filter(s => s.placementReadiness === "Ready for Placement").length / students.length) * 100);
-  const needsTrainingPct = Math.round((students.filter(s => s.placementReadiness === "Needs Training").length / students.length) * 100);
-  const notReadyPct = 100 - readyPct - needsTrainingPct;
-
-  // Top skill gaps across batch
-  const gapCount: Record<string, number> = {};
-  students.forEach(s => s.skillGaps.forEach(g => {
-    if (g.level === "High" || g.level === "Medium") {
-      gapCount[g.skill] = (gapCount[g.skill] || 0) + 1;
-    }
-  }));
-  const topGaps = Object.entries(gapCount).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-  // Department breakdown
-  const deptStats: Record<string, { count: number; avgCPS: number; ready: number }> = {};
-  students.forEach(s => {
-    if (!deptStats[s.department]) deptStats[s.department] = { count: 0, avgCPS: 0, ready: 0 };
-    deptStats[s.department].count++;
-    deptStats[s.department].avgCPS += s.cpsScore;
-    if (s.placementReadiness === "Ready for Placement") deptStats[s.department].ready++;
-  });
-
-  const interventions: string[] = [];
-  if (topGaps.length > 0) {
-    const weakPct = Math.round((topGaps[0][1] / students.length) * 100);
-    interventions.push(`${weakPct}% students weak in ${topGaps[0][0]} → Conduct targeted workshops`);
-  }
-  if (notReadyPct > 20) interventions.push(`${notReadyPct}% not placement-ready → Add technical bootcamps`);
-  if (topGaps.find(g => g[0].toLowerCase().includes("communication"))) {
-    interventions.push("Communication gap detected → Add mock interviews & presentation drills");
-  }
-  interventions.push("Schedule industry guest lectures for career exposure");
-
-  return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold flex items-center gap-2">
-        <Activity className="h-4 w-4 text-primary" /> Batch / Class Analytics
-      </h3>
-
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        <StatCard label="Average CPS" value={avgCPS} icon={<BarChart3 className="h-4 w-4 text-primary" />} />
-        <StatCard label="Placement Ready" value={`${readyPct}%`} icon={<Flame className="h-4 w-4 text-success" />} sub={`${students.filter(s => s.placementReadiness === "Ready for Placement").length} students`} />
-        <StatCard label="Needs Training" value={`${needsTrainingPct}%`} icon={<Zap className="h-4 w-4 text-warning" />} />
-        <StatCard label="Not Ready" value={`${notReadyPct}%`} icon={<Snowflake className="h-4 w-4 text-destructive" />} />
-      </div>
-
-      {/* Department Breakdown */}
-      <div className="rounded-xl border bg-card p-4">
-        <h4 className="text-xs font-semibold mb-3">Department Breakdown</h4>
-        <div className="space-y-3">
-          {Object.entries(deptStats).map(([dept, stats]) => {
-            const avg = Math.round(stats.avgCPS / stats.count);
-            const readyRate = Math.round((stats.ready / stats.count) * 100);
-            return (
-              <div key={dept}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium">{dept}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {stats.count} students · Avg CPS {avg} · {readyRate}% ready
-                  </span>
-                </div>
-                <Progress value={avg} className="h-2" />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Top Skill Gaps */}
-      <div className="rounded-xl border bg-card p-4">
-        <h4 className="text-xs font-semibold mb-3">Top Skill Gaps Across Batch</h4>
-        <div className="space-y-2">
-          {topGaps.map(([skill, count]) => {
-            const pct = Math.round((count / students.length) * 100);
-            return (
-              <div key={skill}>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-xs font-medium">{skill}</span>
-                  <span className="text-[10px] text-muted-foreground">{pct}% students affected</span>
-                </div>
-                <Progress value={pct} className="h-2" />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Intervention Suggestions */}
-      <div className="rounded-xl border bg-card p-4">
-        <h4 className="text-xs font-semibold mb-3 flex items-center gap-2">
-          <Lightbulb className="h-4 w-4 text-accent" /> Intervention Suggestions
-        </h4>
-        <div className="space-y-2">
-          {interventions.map((int, i) => (
-            <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
-              <ArrowRight className="h-3.5 w-3.5 text-primary mt-0.5 shrink-0" />
-              <span>{int}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
+  AssessmentModal,
+  StatsGrid,
+  AssessmentsTable,
+  AssessmentStats
+} from "./Admin/components";
 
 export default function EmployabilityDashboard() {
   const navigate = useNavigate();
-  const [user, setUser] = useState<CollegeUser | null>(null);
-  const [selectedStudent, setSelectedStudent] = useState<StudentRecord | null>(null);
-  const [search, setSearch] = useState("");
-  const [deptFilter, setDeptFilter] = useState("all");
-  const [readinessFilter, setReadinessFilter] = useState("all");
-  const [view, setView] = useState<"students" | "analytics">("students");
-  const [studentViewMode, setStudentViewMode] = useState<"snippet" | "list">("snippet");
+  const [user, setUser] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("analytics");
+  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
+  const [selectedScoreRange, setSelectedScoreRange] = useState<{ min: number; max: number; label: string } | null>(null);
+  const [selectedCareerRole, setSelectedCareerRole] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("collegeUser");
@@ -341,253 +51,354 @@ export default function EmployabilityDashboard() {
     enabled: !!user,
   });
 
-  if (!user) return null;
+  // Derived filtered students based on active score range and career role filters
+  const filteredStudents = useMemo(() => {
+    let result = students;
+    
+    if (selectedScoreRange) {
+      result = result.filter(s => {
+        const score = s.scores?.total || 0;
+        return score >= selectedScoreRange.min && score <= selectedScoreRange.max;
+      });
+    }
 
-  const departments = [...new Set(students.map((s: StudentRecord) => s.department))];
+    if (selectedCareerRole) {
+      result = result.filter(s => s.careerRole === selectedCareerRole);
+    }
 
-  const filtered = students.filter((s: StudentRecord) => {
-    const matchSearch = search === "" || s.name.toLowerCase().includes(search.toLowerCase()) || s.course.toLowerCase().includes(search.toLowerCase());
-    const matchDept = deptFilter === "all" || s.department === deptFilter;
-    const matchReadiness = readinessFilter === "all" || s.placementReadiness === readinessFilter;
-    return matchSearch && matchDept && matchReadiness;
-  });
+    return result;
+  }, [students, selectedScoreRange, selectedCareerRole]);
+
+  // Calculate aggregated scores based on filtered results
+  const aggregatedStats = useMemo(() => {
+    if (!filteredStudents || filteredStudents.length === 0) return [];
+    
+    const stats: Record<string, any> = {};
+    filteredStudents.forEach((s: any) => {
+      const role = s.careerRole;
+      if (!stats[role]) {
+        stats[role] = { 
+          role, count: 0, technical: 0, softSkill: 0, 
+          communication: 0, ei: 0, experience: 0, 
+          portfolio: 0, marketDemand: 0, qpi: 0, total: 0 
+        };
+      }
+      const st = stats[role];
+      const scores = s.scores || {};
+      st.count++;
+      st.technical += scores.technical || 0;
+      st.softSkill += scores.softSkill || 0;
+      st.communication += scores.communication || 0;
+      st.ei += scores.ei || 0;
+      st.experience += scores.experience || 0;
+      st.portfolio += scores.portfolio || 0;
+      st.marketDemand += scores.marketDemand || 0;
+      st.qpi += scores.qpi || 0;
+      st.total += scores.total || 0;
+    });
+
+    return Object.values(stats).map(s => ({
+      ...s,
+      technical: Math.round(s.technical / s.count),
+      softSkill: Math.round(s.softSkill / s.count),
+      communication: Math.round(s.communication / s.count),
+      ei: Math.round(s.ei / s.count),
+      experience: Math.round(s.experience / s.count),
+      portfolio: Math.round(s.portfolio / s.count),
+      marketDemand: Math.round(s.marketDemand / s.count),
+      qpi: Math.round(s.qpi / s.count),
+      total: Math.round(s.total / s.count),
+    }));
+  }, [filteredStudents]);
+
+  // Calculate CPS Distribution for the bar chart (always shows institutional scale)
+  const scoreDistribution = useMemo(() => {
+    const bins = [
+      { range: "0-20", count: 0, color: "hsl(0, 70%, 65%)", min: 0, max: 20 },
+      { range: "21-40", count: 0, color: "hsl(30, 80%, 60%)", min: 21, max: 40 },
+      { range: "41-60", count: 0, color: "hsl(45, 90%, 55%)", min: 41, max: 60 },
+      { range: "61-80", count: 0, color: "hsl(142, 70%, 45%)", min: 61, max: 80 },
+      { range: "81-100", count: 0, color: "hsl(235, 72%, 50%)", min: 81, max: 100 },
+    ];
+    students.forEach(s => {
+      const score = s.scores?.total || 0;
+      if (score <= 20) bins[0].count++;
+      else if (score <= 40) bins[1].count++;
+      else if (score <= 60) bins[2].count++;
+      else if (score <= 80) bins[3].count++;
+      else bins[4].count++;
+    });
+    return bins;
+  }, [students]);
+
+  const handleScoreClick = (data: any) => {
+    if (data && data.activePayload && data.activePayload.length > 0) {
+      const payload = data.activePayload[0].payload;
+      if (selectedScoreRange?.label === payload.range) {
+        setSelectedScoreRange(null);
+      } else {
+        setSelectedScoreRange({ min: payload.min, max: payload.max, label: payload.range });
+        toast.info(`Filtering by ${payload.range} Score Range`);
+      }
+    }
+  };
+
+  const handleCareerClick = (data: any) => {
+    if (data && data.activePayload && data.activePayload.length > 0) {
+      const payload = data.activePayload[0].payload;
+      if (selectedCareerRole === payload.name) {
+        setSelectedCareerRole(null);
+      } else {
+        setSelectedCareerRole(payload.name);
+        toast.info(`Filtering by ${payload.name} Role`);
+      }
+    }
+  };
+
+  const clearAllFilters = () => {
+    setSelectedScoreRange(null);
+    setSelectedCareerRole(null);
+    toast.success("All filters cleared");
+  };
+
+  // Calculate Popular Career Interests
+  const popularInterests = useMemo(() => {
+    const counts: Record<string, number> = {};
+    students.forEach(s => {
+      const role = s.careerRole;
+      counts[role] = (counts[role] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 6);
+  }, [students]);
+
+  const summaryData = useMemo(() => {
+    if (!students || students.length === 0) return null;
+    const totalUsers = students.length;
+    const avgCPS = Math.round(students.reduce((acc: number, s: any) => acc + (s.scores?.total || 0), 0) / totalUsers);
+    
+    const today = new Date().toISOString().split('T')[0];
+    const assessmentsToday = students.filter((s: any) => {
+      const created = s.createdAt?.split('T')[0];
+      return today === created;
+    }).length;
+
+    const depts = [...new Set(students.map((s: any) => s.department))];
+
+    return {
+      totalUsers,
+      avgCPS,
+      assessmentsToday,
+      topCountries: depts
+    };
+  }, [students]);
 
   const handleLogout = () => {
     sessionStorage.removeItem("collegeUser");
+    toast.success("Logged out successfully");
     navigate("/college-login");
   };
 
+  if (!user) return null;
+
   return (
-    <div className="min-h-screen px-4 py-6 bg-background text-foreground">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-xl gradient-primary flex items-center justify-center">
-                <GraduationCap className="h-5 w-5 text-primary-foreground" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold">Student Employability Intelligence System</h1>
-                <p className="text-xs text-muted-foreground flex items-center gap-2">
-                  <ShieldCheck className="h-3 w-3" />
-                  {user.name} · {user.collegeId} · {user.role === "admin" ? "College Administrator" : "Faculty Account"}
-                </p>
-
-              </div>
+    <div className="min-h-screen px-4 py-8 bg-background relative overflow-hidden">
+      {/* Premium background effects */}
+      <div className="absolute inset-0 gradient-mesh opacity-60 pointer-events-none" />
+      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
+      
+      <div className="mx-auto max-w-6xl relative z-10">
+        <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center gap-4">
+               <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center border border-primary/20 shadow-lg box-glow">
+                    <GraduationCap className="h-7 w-7 text-primary-foreground" />
+               </div>
+               <div>
+                    <h1 className="text-3xl font-extrabold tracking-tight">Institutional Dashboard</h1>
+                    <div className="flex items-center gap-3 mt-1.5">
+                        <div className="flex items-center gap-1.5 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{user.role} Portal</span>
+                        </div>
+                        <p className="text-muted-foreground text-sm font-medium">
+                            {user.name} <span className="mx-1 text-border">|</span> {user.collegeId}
+                        </p>
+                    </div>
+               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 text-xs">
-              <LogOut className="h-3.5 w-3.5" /> Sign Out
-            </Button>
-          </div>
-        </motion.div>
-
-        {/* View Toggle */}
-        <div className="flex gap-2 mb-4">
-          <button
-            onClick={() => { setView("students"); setSelectedStudent(null); }}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 ${
-              view === "students" ? "gradient-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            <Users className="h-4 w-4" /> Students
-          </button>
-          <button
-            onClick={() => { setView("analytics"); setSelectedStudent(null); }}
-            className={`rounded-lg px-4 py-2 text-sm font-medium transition-all flex items-center gap-2 ${
-              view === "analytics" ? "gradient-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"
-            }`}
-          >
-            <BarChart3 className="h-4 w-4" /> Batch Analytics
-          </button>
-          {view === "students" && (
-            <div className="ml-auto flex items-center gap-1 rounded-lg border bg-card p-1">
-              <button
-                onClick={() => setStudentViewMode("snippet")}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                  studentViewMode === "snippet" ? "gradient-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"
-                }`}
-              >
-                Cards
-              </button>
-              <button
-                onClick={() => setStudentViewMode("list")}
-                className={`rounded-md px-3 py-1.5 text-xs font-medium transition-all ${
-                  studentViewMode === "list" ? "gradient-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted/50"
-                }`}
-              >
-                List
-              </button>
-            </div>
-          )}
+            <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 rounded-xl border bg-card/80 backdrop-blur-md px-6 py-3 text-sm font-bold hover:bg-accent transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+            >
+                <LogOut className="h-4 w-4" /> Sign Out
+            </button>
         </div>
 
         {isLoading ? (
-          <div className="flex flex-col items-center justify-center p-20 opacity-50">
-             <div className="h-8 w-8 rounded-full border-4 border-primary border-t-transparent animate-spin mb-4" />
-             <p className="text-xs font-bold uppercase tracking-widest text-primary">Fetching Batch Analytics...</p>
+          <div className="h-[400px] flex items-center justify-center">
+            <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : error ? (
-           <div className="p-10 text-center text-destructive">
-              <AlertTriangle className="h-8 w-8 mx-auto mb-3 opacity-50" />
-              Failed to fetch records. 
+           <div className="p-20 text-center rounded-2xl border bg-destructive/5 text-destructive font-bold border-destructive/20 backdrop-blur-sm">
+              Failed to fetch dashboard records. Please check your connection.
            </div>
-        ) : view === "analytics" ? (
-          <BatchAnalytics students={students} />
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Left Panel - Student List */}
-            <div className={`${selectedStudent ? "lg:col-span-4" : "lg:col-span-12"}`}>
-              {/* Filters */}
-              <div className="flex flex-wrap gap-2 mb-4">
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
-                  <Input placeholder="Search student or course..." className="pl-8 h-9 text-xs" value={search} onChange={e => setSearch(e.target.value)} />
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <TabsList className="bg-card/40 border backdrop-blur-xl p-1.5 rounded-2xl shadow-sm">
+              <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
+                <LayoutDashboard className="h-4 w-4 mr-2" /> Performance Analytics
+              </TabsTrigger>
+              <TabsTrigger value="assessments" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
+                <Database className="h-4 w-4 mr-2" /> Student Database ({students.length})
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="analytics" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <StatsGrid dashboardData={summaryData} />
+              
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Popular Career Interests */}
+                <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="flex items-center justify-between mb-8">
+                    <div>
+                        <h3 className="text-lg font-bold flex items-center gap-2">
+                            <Award className="h-5 w-5 text-primary" /> Popular Career Interests
+                        </h3>
+                        <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a role to filter individual candidates</p>
+                    </div>
+                    {selectedCareerRole && (
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedCareerRole(null)} className="h-8 text-xs font-bold text-primary hover:text-primary hover:bg-primary/10">
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={popularInterests} layout="vertical" onClick={handleCareerClick}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
+                      <XAxis type="number" hide />
+                      <YAxis dataKey="name" type="category" width={100} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} stroke="none" />
+                      <Tooltip 
+                        contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px" }}
+                        cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
+                      />
+                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={20} className="cursor-pointer">
+                        {popularInterests.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fillOpacity={selectedCareerRole ? (selectedCareerRole === entry.name ? 1 : 0.4) : 1}
+                            stroke={selectedCareerRole === entry.name ? "hsl(var(--primary))" : "none"}
+                            strokeWidth={2}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
                 </div>
-                <select
-                  className="rounded-lg border bg-card px-3 py-1.5 text-xs font-medium text-foreground"
-                  value={deptFilter}
-                  onChange={e => setDeptFilter(e.target.value)}
-                >
-                  <option value="all">All Departments</option>
-                  {departments.map(d => <option key={d} value={d}>{d}</option>)}
-                </select>
-                <select
-                  className="rounded-lg border bg-card px-3 py-1.5 text-xs font-medium text-foreground"
-                  value={readinessFilter}
-                  onChange={e => setReadinessFilter(e.target.value)}
-                >
-                  <option value="all">All Readiness</option>
-                  <option value="Ready for Placement">🔥 Ready</option>
-                  <option value="Needs Training">⚡ Needs Training</option>
-                  <option value="Not Ready">❄️ Not Ready</option>
-                </select>
+
+                {/* Score Distribution */}
+                <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
+                   <div className="flex items-center justify-between mb-8">
+                    <div>
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                          <BarChart3 className="h-5 w-5 text-accent" /> CPS Score Distribution
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a bar to filter institutional summary</p>
+                    </div>
+                    {selectedScoreRange && (
+                      <Button variant="ghost" size="sm" onClick={() => setSelectedScoreRange(null)} className="h-8 text-xs font-bold text-accent hover:text-accent hover:bg-accent/10">
+                        Clear
+                      </Button>
+                    )}
+                  </div>
+                  <ResponsiveContainer width="100%" height={300}>
+                    <BarChart data={scoreDistribution} onClick={handleScoreClick}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+                      <XAxis dataKey="range" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} stroke="hsl(var(--border))" />
+                      <YAxis tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }} stroke="hsl(var(--border))" />
+                      <Tooltip 
+                        contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px" }}
+                        cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
+                      />
+                      <Bar dataKey="count" radius={[6, 6, 0, 0]} className="cursor-pointer">
+                        {scoreDistribution.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={entry.color} 
+                            fillOpacity={selectedScoreRange ? (selectedScoreRange.label === entry.range ? 1 : 0.4) : 1}
+                            stroke={selectedScoreRange?.label === entry.range ? entry.color : "none"}
+                            strokeWidth={2}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
 
-              <p className="text-[10px] text-muted-foreground mb-3">{filtered.length} students</p>
+              <div className="relative group space-y-4">
+                <div className="flex items-center justify-between px-2">
+                  <div className="space-y-1">
+                    <h3 className="text-xl font-bold flex items-center gap-2">
+                      <Database className="h-5 w-5 text-primary" /> 
+                      {selectedScoreRange || selectedCareerRole ? "Filtered Candidate Records" : "Institutional Talent Records"}
+                    </h3>
+                    <div className="flex items-center gap-2">
+                       {selectedCareerRole && (
+                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                           Role: {selectedCareerRole}
+                         </span>
+                       )}
+                       {selectedScoreRange && (
+                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[10px] font-bold border border-accent/20">
+                           Score: {selectedScoreRange.label}
+                         </span>
+                       )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-[11px] font-bold text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border">
+                      Viewing {filteredStudents.length} of {students.length} Total
+                    </div>
+                    {(selectedScoreRange || selectedCareerRole) && (
+                      <Button variant="outline" size="sm" onClick={clearAllFilters} className="h-8 text-xs font-bold border-primary/20 hover:bg-primary/5">
+                        Reset All
+                      </Button>
+                    )}
+                  </div>
+                </div>
 
-              {/* Student Cards / List */}
-              {studentViewMode === "list" && !selectedStudent ? (
-                <div className="rounded-xl border bg-card overflow-hidden">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b bg-muted/30">
-                        <th className="p-3 text-left text-xs text-muted-foreground font-medium">Name</th>
-                        <th className="p-3 text-left text-xs text-muted-foreground font-medium hidden sm:table-cell">Course</th>
-                        <th className="p-3 text-left text-xs text-muted-foreground font-medium hidden md:table-cell">Department</th>
-                        <th className="p-3 text-left text-xs text-muted-foreground font-medium">CPS</th>
-                        <th className="p-3 text-left text-xs text-muted-foreground font-medium hidden lg:table-cell">Readiness</th>
-                        <th className="p-3 text-left text-xs text-muted-foreground font-medium hidden lg:table-cell">Skill Gaps</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filtered.map(s => {
-                        const emp = getEmployabilityLabel(s.cpsScore);
-                        const readiness = getReadinessInfo(s.placementReadiness);
-                        return (
-                          <tr key={s.id} onClick={() => setSelectedStudent(s)} className="border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer">
-                            <td className="p-3">
-                              <div className="flex items-center gap-2">
-                                <div className="h-7 w-7 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold shrink-0">{s.name.charAt(0)}</div>
-                                <div>
-                                  <p className="text-xs font-medium">{s.name}</p>
-                                  <p className="text-[10px] text-muted-foreground">Year {s.year}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className="p-3 text-xs text-muted-foreground hidden sm:table-cell">{s.course}</td>
-                            <td className="p-3 text-xs text-muted-foreground hidden md:table-cell">{s.department}</td>
-                            <td className="p-3">
-                              <span className={`text-sm font-bold ${emp.color}`}>{s.cpsScore}</span>
-                            </td>
-                            <td className="p-3 hidden lg:table-cell">
-                              <Badge variant="outline" className={`text-[9px] ${readiness.bg} ${readiness.color}`}>
-                                {readiness.icon} {s.placementReadiness}
-                              </Badge>
-                            </td>
-                            <td className="p-3 hidden lg:table-cell">
-                              <div className="flex flex-wrap gap-1">
-                                {s.skillGaps.filter(g => g.level === "High").map(g => (
-                                  <span key={g.skill} className="rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[9px]">{g.skill} ↓</span>
-                                ))}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                  {filtered.length === 0 && <div className="text-center p-8 text-xs text-muted-foreground">No students match your filters.</div>}
-                </div>
-              ) : (
-                <div className={`space-y-2 ${selectedStudent ? "max-h-[70vh] overflow-y-auto pr-1" : "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"}`}>
-                  {filtered.map(s => {
-                    const emp = getEmployabilityLabel(s.cpsScore);
-                    const readiness = getReadinessInfo(s.placementReadiness);
-                    const EmpIcon = emp.icon;
-                    return (
-                      <motion.div
-                        key={s.id}
-                        whileHover={{ scale: 1.01 }}
-                        onClick={() => setSelectedStudent(s)}
-                        className={`rounded-xl border bg-card p-3 cursor-pointer transition-all hover:border-primary/30 ${
-                          selectedStudent?.id === s.id ? "border-primary ring-1 ring-primary/20" : ""
-                        }`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <div className="h-8 w-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold shrink-0">
-                              {s.name.charAt(0)}
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold truncate">{s.name}</p>
-                              <p className="text-[10px] text-muted-foreground truncate">{s.course} · Year {s.year}</p>
-                            </div>
-                          </div>
-                          <div className="text-right shrink-0">
-                            <p className="text-lg font-bold text-primary">{s.cpsScore}</p>
-                            <p className="text-[9px] text-muted-foreground">CPS</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-1">
-                            <EmpIcon className={`h-3 w-3 ${emp.color}`} />
-                            <span className={`text-[10px] font-medium ${emp.color}`}>{emp.label}</span>
-                          </div>
-                          <Badge variant="outline" className={`text-[9px] ${readiness.bg} ${readiness.color}`}>
-                            {readiness.icon} {s.placementReadiness.split(" ")[0]}
-                          </Badge>
-                        </div>
-                        {!selectedStudent && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {s.skillGaps.filter(g => g.level === "High").map(g => (
-                              <span key={g.skill} className="rounded-full bg-destructive/10 text-destructive px-2 py-0.5 text-[9px]">
-                                {g.skill} ↓
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </motion.div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                <AnimatePresence>
+                  {(selectedScoreRange || selectedCareerRole) && (
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest shadow-2xl border border-white/10"
+                    >
+                      <Database className="h-4 w-4" />
+                      Dynamic Drill-Down Active
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                
+                <AssessmentsTable data={filteredStudents} onRowClick={setSelectedAssessment} />
+              </div>
+            </TabsContent>
 
-            {/* Right Panel - Student Detail */}
-            <AnimatePresence mode="wait">
-              {selectedStudent && (
-                <div className="lg:col-span-8">
-                  <StudentDetailPanel
-                    student={selectedStudent}
-                    onClose={() => setSelectedStudent(null)}
-                  />
-                </div>
-              )}
-            </AnimatePresence>
-          </div>
+            <TabsContent value="assessments" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+              <AssessmentsTable data={students} onRowClick={setSelectedAssessment} />
+            </TabsContent>
+          </Tabs>
         )}
       </div>
+
+      <AssessmentModal
+        assessment={selectedAssessment}
+        isOpen={!!selectedAssessment}
+        onClose={() => setSelectedAssessment(null)}
+      />
     </div>
   );
 }

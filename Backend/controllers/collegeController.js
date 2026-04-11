@@ -70,10 +70,21 @@ const getStudents = async (req, res) => {
         emotional_intelligence: a.scores?.ei || 0
       };
 
-      // Return unified record pulling ONLY from Assessment collection fields
+      // Return unified record pulling from all Assessment collection fields
       return {
+        _id: a._id.toString(), // Support both id and _id
         id: a._id.toString(),
         name: a.name,
+        email: a.email,
+        phone: a.phone,
+        city: a.city,
+        state: a.state,
+        country: a.country,
+        educationLevel: a.educationLevel,
+        fieldOfStudy: a.fieldOfStudy,
+        careerDomain: a.careerDomain,
+        specialization: a.specialization,
+        careerRole: a.careerRole,
         department: a.department || a.fieldOfStudy || "General",
         course: a.course || a.specialization || "General",
         year: a.year || 1,
@@ -89,7 +100,10 @@ const getStudents = async (req, res) => {
         skillGaps: a.skillGaps || [],
         placementReadiness: a.placementReadiness || (a.scores?.total > 70 ? "Ready for Placement" : a.scores?.total >= 40 ? "Needs Training" : "Not Ready"),
         likelyIndustries: a.likelyIndustries || [],
-        suggestedTraining: a.suggestedTraining || []
+        suggestedTraining: a.suggestedTraining || [],
+        portfolioLevel: a.portfolioLevel,
+        scores: a.scores, // Raw scores for Analytics
+        createdAt: a.createdAt
       };
     });
 
