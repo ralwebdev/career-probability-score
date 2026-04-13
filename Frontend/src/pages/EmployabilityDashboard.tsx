@@ -25,7 +25,7 @@ import {
 export default function EmployabilityDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("analytics");
+  const [activeTab, setActiveTab] = useState("assessments");
   const [selectedScoreRange, setSelectedScoreRange] = useState<{ min: number; max: number; label: string } | null>(null);
   const [selectedCareerRole, setSelectedCareerRole] = useState<string | null>(null);
 
@@ -244,20 +244,20 @@ export default function EmployabilityDashboard() {
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
-            <TabsList className="bg-card/40 border backdrop-blur-xl p-1.5 rounded-2xl shadow-sm">
-              {/* <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
+            {/* <TabsList className="bg-card/40 border backdrop-blur-xl p-1.5 rounded-2xl shadow-sm">
+              <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
                 <LayoutDashboard className="h-4 w-4 mr-2" /> Performance Analytics
-              </TabsTrigger> */}
+              </TabsTrigger>
               <TabsTrigger value="assessments" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
                 <Database className="h-4 w-4 mr-2" /> Student Database ({students.length})
               </TabsTrigger>
-            </TabsList>
+            </TabsList> */}
 
-            <TabsContent value="analytics" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* <TabsContent value="analytics" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <StatsGrid dashboardData={summaryData} />
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Popular Career Interests */}
+
                 <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-8">
                     <div>
@@ -303,7 +303,6 @@ export default function EmployabilityDashboard() {
                   </ResponsiveContainer>
                 </div>
 
-                {/* Score Distribution */}
                 <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-8">
                     <div>
@@ -398,7 +397,7 @@ export default function EmployabilityDashboard() {
 
                 <AssessmentsTable data={filteredStudents} />
               </div>
-            </TabsContent>
+            </TabsContent> */}
 
             <TabsContent value="assessments" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <AssessmentsTable data={students} />
