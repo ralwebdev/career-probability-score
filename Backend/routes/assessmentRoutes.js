@@ -5,7 +5,8 @@ const {
   getAnalytics,
   getAssessments,
   getAssessmentById,
-  getCourseScoreStats
+  getCourseScoreStats,
+  exportAssessmentsToCSV
 } = require('../controllers/assessmentController');
 
 // @desc    Create new assessment
@@ -23,6 +24,10 @@ router.get('/stats/course-scores', getCourseScoreStats);
 // @desc    Get all assessments
 // @route   GET /api/assessments
 router.get('/', getAssessments);
+
+// @desc    Export all assessments to CSV
+// @route   GET /api/assessments/export/csv
+router.get('/export/csv', exportAssessmentsToCSV);
 
 // @desc    Get assessment by ID (for results page)
 // @route   GET /api/assessments/:id

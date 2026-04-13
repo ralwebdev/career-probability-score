@@ -186,10 +186,52 @@ const getAssessmentById = async (req, res, next) => {
   }
 };
 
+// @desc    Export all assessments to CSV
+// @route   GET /api/assessments/export/csv
+const exportAssessmentsToCSV = async (req, res, next) => {
+  try {
+    const { jsonToCsv } = require('../utils/csvHelper');
+    const assessments = await Assessment.find({}).sort({ createdAt: -1 });
+
+    const fields = [
+      { label: 'Name', path: 'name' },
+      { label: 'Email', path: 'email' },
+      { label: 'Phone', path: 'phone' },
+      { label: 'City', path: 'city' },
+      { label: 'State', path: 'state' },
+      { label: 'Country', path: 'country' },
+      { label: 'Education Level', path: 'educationLevel' },
+      { label: 'Field of Study', path: 'fieldOfStudy' },
+      { label: 'Domain', path: 'careerDomain' },
+      { label: 'Specialization', path: 'specialization' },
+      { label: 'Target Role', path: 'careerRole' },
+      { label: 'QPI Score', path: 'scores.qpi' },
+      { label: 'Technical Score', path: 'scores.technical' },
+      { label: 'Soft Skills Score', path: 'scores.softSkill' },
+      { label: 'Communication Score', path: 'scores.communication' },
+      { label: 'EI Score', path: 'scores.ei' },
+      { label: 'Experience Score', path: 'scores.experience' },
+      { label: 'Portfolio Score', path: 'scores.portfolio' },
+      { label: 'Market Demand', path: 'scores.marketDemand' },
+      { label: 'Date', path: 'createdAt' }
+    ];
+
+    const csv = jsonToCsv(assessments, fields);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', 'attachment; filename=assessments_export.csv');
+    res.status(200).send(csv);
+
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createAssessment,
   getAnalytics,
   getAssessments,
   getAssessmentById,
-  getCourseScoreStats
+  getCourseScoreStats,
+  exportAssessmentsToCSV
 };

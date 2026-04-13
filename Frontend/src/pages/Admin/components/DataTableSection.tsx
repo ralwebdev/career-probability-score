@@ -1,12 +1,26 @@
 import { format } from "date-fns";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Download } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { exportToCSV } from "@/lib/csvUtils";
 
 export function CounselingTable({ data, onRowClick }: { data: any[]; onRowClick: (req: any) => void }) {
     return (
-        <div className="rounded-xl border bg-card/50 overflow-hidden">
-            <Table>
+        <div className="space-y-4">
+            <div className="flex justify-end">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => exportToCSV(data, "counseling_requests.csv")}
+                    className="gap-2 text-xs font-bold"
+                >
+                    <Download className="h-3.5 w-3.5" />
+                    Export CSV
+                </Button>
+            </div>
+            <div className="rounded-xl border bg-card/50 overflow-hidden">
+                <Table>
                 <TableHeader className="bg-muted/50">
                     <TableRow>
                         <TableHead>Name</TableHead>
@@ -54,13 +68,26 @@ export function CounselingTable({ data, onRowClick }: { data: any[]; onRowClick:
                 </TableBody>
             </Table>
         </div>
+        </div>
     );
 }
 
 export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick?: (assessment: any) => void }) {
     return (
-        <div className="rounded-xl border bg-card/50 overflow-hidden">
-            <Table>
+        <div className="space-y-4">
+            <div className="flex justify-end">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => exportToCSV(data, "assessments.csv")}
+                    className="gap-2 text-xs font-bold"
+                >
+                    <Download className="h-3.5 w-3.5" />
+                    Export CSV
+                </Button>
+            </div>
+            <div className="rounded-xl border bg-card/50 overflow-hidden">
+                <Table>
                 <TableHeader className="bg-muted/50">
                     <TableRow>
                         <TableHead>User</TableHead>
@@ -105,6 +132,7 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                 </TableBody>
             </Table>
         </div>
+        </div>
     );
 }
 
@@ -113,8 +141,20 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
 
 export function LeadsTable({ data, onRowClick }: { data: any[]; onRowClick: (lead: any) => void }) {
     return (
-        <div className="rounded-xl border bg-card/50 overflow-hidden">
-            <Table>
+        <div className="space-y-4">
+            <div className="flex justify-end">
+                <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => exportToCSV(data, "leads.csv")}
+                    className="gap-2 text-xs font-bold"
+                >
+                    <Download className="h-3.5 w-3.5" />
+                    Export CSV
+                </Button>
+            </div>
+            <div className="rounded-xl border bg-card/50 overflow-hidden">
+                <Table>
                 <TableHeader className="bg-muted/50">
                     <TableRow>
                         <TableHead>User</TableHead>
@@ -151,7 +191,7 @@ export function LeadsTable({ data, onRowClick }: { data: any[]; onRowClick: (lea
                                 <TableCell className="text-xs">
                                     <div className="flex items-center justify-between">
                                         {format(new Date(lead.createdAt), "MMM dd, HH:mm")}
-                                        <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                                        {onRowClick && <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />}
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -159,6 +199,7 @@ export function LeadsTable({ data, onRowClick }: { data: any[]; onRowClick: (lea
                     )}
                 </TableBody>
             </Table>
+        </div>
         </div>
     );
 }
