@@ -144,6 +144,8 @@ export function ResultsDashboard() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-10"
         >
+          <p className="text-muted-foreground mb-4 uppercase tracking-[0.2em] text-[10px] font-bold">Assessment Result For</p>
+          <h2 className="text-2xl font-black text-foreground mb-1">{data.name}</h2>
           <p className="text-muted-foreground mb-2">Your probability of getting hired as</p>
           <h1 className="text-3xl sm:text-4xl font-bold text-primary text-glow">{data.careerRole}</h1>
           {role && <p className="text-sm text-muted-foreground mt-1">{role.domain} · {role.subdomain}</p>}
