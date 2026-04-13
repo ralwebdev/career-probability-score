@@ -10,9 +10,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
 import { getCollegeStudents } from "@/lib/api";
 import { toast } from "sonner";
-import { 
-  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, 
-  CartesianGrid, Tooltip, Cell, AreaChart, Area 
+import {
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
+  CartesianGrid, Tooltip, Cell, AreaChart, Area
 } from "recharts";
 
 // Import Admin components for consistency
@@ -52,7 +52,7 @@ export default function EmployabilityDashboard() {
   // Derived filtered students based on active score range and career role filters
   const filteredStudents = useMemo(() => {
     let result = students;
-    
+
     if (selectedScoreRange) {
       result = result.filter(s => {
         const score = s.scores?.total || 0;
@@ -70,15 +70,15 @@ export default function EmployabilityDashboard() {
   // Calculate aggregated scores based on filtered results
   const aggregatedStats = useMemo(() => {
     if (!filteredStudents || filteredStudents.length === 0) return [];
-    
+
     const stats: Record<string, any> = {};
     filteredStudents.forEach((s: any) => {
       const role = s.careerRole;
       if (!stats[role]) {
-        stats[role] = { 
-          role, count: 0, technical: 0, softSkill: 0, 
-          communication: 0, ei: 0, experience: 0, 
-          portfolio: 0, marketDemand: 0, qpi: 0, total: 0 
+        stats[role] = {
+          role, count: 0, technical: 0, softSkill: 0,
+          communication: 0, ei: 0, experience: 0,
+          portfolio: 0, marketDemand: 0, qpi: 0, total: 0
         };
       }
       const st = stats[role];
@@ -176,7 +176,7 @@ export default function EmployabilityDashboard() {
     if (!students || students.length === 0) return null;
     const totalUsers = students.length;
     const avgCPS = Math.round(students.reduce((acc: number, s: any) => acc + (s.scores?.total || 0), 0) / totalUsers);
-    
+
     const today = new Date().toISOString().split('T')[0];
     const assessmentsToday = students.filter((s: any) => {
       const created = s.createdAt?.split('T')[0];
@@ -206,32 +206,32 @@ export default function EmployabilityDashboard() {
       {/* Premium background effects */}
       <div className="absolute inset-0 gradient-mesh opacity-60 pointer-events-none" />
       <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-primary/5 to-transparent pointer-events-none" />
-      
+
       <div className="mx-auto max-w-6xl relative z-10">
         <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-               <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center border border-primary/20 shadow-lg box-glow">
-                    <GraduationCap className="h-7 w-7 text-primary-foreground" />
-               </div>
-               <div>
-                    <h1 className="text-3xl font-extrabold tracking-tight">Institutional Dashboard</h1>
-                    <div className="flex items-center gap-3 mt-1.5">
-                        <div className="flex items-center gap-1.5 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-                            <ShieldCheck className="h-3.5 w-3.5 text-primary" />
-                            <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{user.role} Portal</span>
-                        </div>
-                        <p className="text-muted-foreground text-sm font-medium">
-                            {user.name} <span className="mx-1 text-border">|</span> {user.collegeId}
-                        </p>
-                    </div>
-               </div>
+          <div className="flex items-center gap-4">
+            <div className="h-14 w-14 rounded-2xl gradient-primary flex items-center justify-center border border-primary/20 shadow-lg box-glow">
+              <GraduationCap className="h-7 w-7 text-primary-foreground" />
             </div>
-            <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 rounded-xl border bg-card/80 backdrop-blur-md px-6 py-3 text-sm font-bold hover:bg-accent transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-            >
-                <LogOut className="h-4 w-4" /> Sign Out
-            </button>
+            <div>
+              <h1 className="text-3xl font-extrabold tracking-tight">Institutional Dashboard</h1>
+              <div className="flex items-center gap-3 mt-1.5">
+                <div className="flex items-center gap-1.5 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                  <ShieldCheck className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{user.role} Portal</span>
+                </div>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {user.name} <span className="mx-1 text-border">|</span> {user.collegeId}
+                </p>
+              </div>
+            </div>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 rounded-xl border bg-card/80 backdrop-blur-md px-6 py-3 text-sm font-bold hover:bg-accent transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out
+          </button>
         </div>
 
         {isLoading ? (
@@ -239,15 +239,15 @@ export default function EmployabilityDashboard() {
             <div className="h-10 w-10 animate-spin rounded-full border-4 border-primary border-t-transparent" />
           </div>
         ) : error ? (
-           <div className="p-20 text-center rounded-2xl border bg-destructive/5 text-destructive font-bold border-destructive/20 backdrop-blur-sm">
-              Failed to fetch dashboard records. Please check your connection.
-           </div>
+          <div className="p-20 text-center rounded-2xl border bg-destructive/5 text-destructive font-bold border-destructive/20 backdrop-blur-sm">
+            Failed to fetch dashboard records. Please check your connection.
+          </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <TabsList className="bg-card/40 border backdrop-blur-xl p-1.5 rounded-2xl shadow-sm">
-              <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
+              {/* <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
                 <LayoutDashboard className="h-4 w-4 mr-2" /> Performance Analytics
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="assessments" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
                 <Database className="h-4 w-4 mr-2" /> Student Database ({students.length})
               </TabsTrigger>
@@ -255,16 +255,16 @@ export default function EmployabilityDashboard() {
 
             <TabsContent value="analytics" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <StatsGrid dashboardData={summaryData} />
-              
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Popular Career Interests */}
                 <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h3 className="text-lg font-bold flex items-center gap-2">
-                            <Award className="h-5 w-5 text-primary" /> Popular Career Interests
-                        </h3>
-                        <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a role to filter individual candidates</p>
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <Award className="h-5 w-5 text-primary" /> Popular Career Interests
+                      </h3>
+                      <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a role to filter individual candidates</p>
                     </div>
                     {selectedCareerRole && (
                       <Button variant="ghost" size="sm" onClick={() => setSelectedCareerRole(null)} className="h-8 text-xs font-bold text-primary hover:text-primary hover:bg-primary/10">
@@ -277,22 +277,22 @@ export default function EmployabilityDashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
                       <XAxis type="number" hide />
                       <YAxis dataKey="name" type="category" width={100} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="none" />
-                      <Tooltip 
-                        contentStyle={{ 
-                            background: "hsl(var(--card))", 
-                            border: "1px solid hsl(var(--border))", 
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                            fontSize: "12px",
-                            fontWeight: "600"
+                      <Tooltip
+                        contentStyle={{
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                          fontSize: "12px",
+                          fontWeight: "600"
                         }}
                         cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
                         itemStyle={{ color: "hsl(var(--primary))" }}
                       />
                       <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={20} className="cursor-pointer">
                         {popularInterests.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
+                          <Cell
+                            key={`cell-${index}`}
                             fillOpacity={selectedCareerRole ? (selectedCareerRole === entry.name ? 1 : 0.45) : 1}
                             stroke={selectedCareerRole === entry.name ? "hsl(var(--primary))" : "none"}
                             strokeWidth={2}
@@ -305,10 +305,10 @@ export default function EmployabilityDashboard() {
 
                 {/* Score Distribution */}
                 <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
-                   <div className="flex items-center justify-between mb-8">
+                  <div className="flex items-center justify-between mb-8">
                     <div>
                       <h3 className="text-lg font-bold flex items-center gap-2">
-                          <BarChart3 className="h-5 w-5 text-accent" /> CPS Score Distribution
+                        <BarChart3 className="h-5 w-5 text-accent" /> CPS Score Distribution
                       </h3>
                       <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a bar to filter institutional summary</p>
                     </div>
@@ -323,22 +323,22 @@ export default function EmployabilityDashboard() {
                       <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
                       <XAxis dataKey="range" tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="hsl(var(--border))" />
                       <YAxis tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="hsl(var(--border))" />
-                      <Tooltip 
-                        contentStyle={{ 
-                            background: "hsl(var(--card))", 
-                            border: "1px solid hsl(var(--border))", 
-                            borderRadius: "12px",
-                            boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                            fontSize: "12px",
-                            fontWeight: "600"
+                      <Tooltip
+                        contentStyle={{
+                          background: "hsl(var(--card))",
+                          border: "1px solid hsl(var(--border))",
+                          borderRadius: "12px",
+                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
+                          fontSize: "12px",
+                          fontWeight: "600"
                         }}
                         cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
                       />
                       <Bar dataKey="count" radius={[6, 6, 0, 0]} className="cursor-pointer">
                         {scoreDistribution.map((entry, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={entry.color} 
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.color}
                             fillOpacity={selectedScoreRange ? (selectedScoreRange.label === entry.range ? 1 : 0.5) : 1}
                             stroke={selectedScoreRange?.label === entry.range ? entry.color : "none"}
                             strokeWidth={2}
@@ -354,20 +354,20 @@ export default function EmployabilityDashboard() {
                 <div className="flex items-center justify-between px-2">
                   <div className="space-y-1">
                     <h3 className="text-xl font-bold flex items-center gap-2">
-                      <Database className="h-5 w-5 text-primary" /> 
+                      <Database className="h-5 w-5 text-primary" />
                       {selectedScoreRange || selectedCareerRole ? "Filtered Candidate Records" : "Institutional Talent Records"}
                     </h3>
                     <div className="flex items-center gap-2">
-                       {selectedCareerRole && (
-                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
-                           Role: {selectedCareerRole}
-                         </span>
-                       )}
-                       {selectedScoreRange && (
-                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[10px] font-bold border border-accent/20">
-                           Score: {selectedScoreRange.label}
-                         </span>
-                       )}
+                      {selectedCareerRole && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
+                          Role: {selectedCareerRole}
+                        </span>
+                      )}
+                      {selectedScoreRange && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[10px] font-bold border border-accent/20">
+                          Score: {selectedScoreRange.label}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
@@ -384,7 +384,7 @@ export default function EmployabilityDashboard() {
 
                 <AnimatePresence>
                   {(selectedScoreRange || selectedCareerRole) && (
-                    <motion.div 
+                    <motion.div
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
@@ -395,7 +395,7 @@ export default function EmployabilityDashboard() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-                
+
                 <AssessmentsTable data={filteredStudents} />
               </div>
             </TabsContent>

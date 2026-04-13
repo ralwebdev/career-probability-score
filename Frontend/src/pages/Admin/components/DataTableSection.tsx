@@ -25,8 +25,8 @@ export function CounselingTable({ data, onRowClick }: { data: any[]; onRowClick:
                         </TableRow>
                     ) : (
                         data.map((req: any) => (
-                            <TableRow 
-                                key={req._id} 
+                            <TableRow
+                                key={req._id}
                                 className="cursor-pointer hover:bg-muted/50 transition-colors group"
                                 onClick={() => onRowClick(req)}
                             >
@@ -65,8 +65,8 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                     <TableRow>
                         <TableHead>User</TableHead>
                         <TableHead>Location</TableHead>
-                        <TableHead>Education</TableHead>
-                        <TableHead>Domain</TableHead>
+                        <TableHead>Current Education</TableHead>
+                        <TableHead>Target Domain</TableHead>
                         <TableHead>Target Role</TableHead>
                         <TableHead>Date</TableHead>
                     </TableRow>
@@ -80,8 +80,8 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                         </TableRow>
                     ) : (
                         data.map((assessment: any) => (
-                            <TableRow 
-                                key={assessment._id} 
+                            <TableRow
+                                key={assessment._id}
                                 className={`transition-colors group ${onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}`}
                                 onClick={() => onRowClick?.(assessment)}
                             >
@@ -133,8 +133,8 @@ export function LeadsTable({ data, onRowClick }: { data: any[]; onRowClick: (lea
                         </TableRow>
                     ) : (
                         data.map((lead: any) => (
-                            <TableRow 
-                                key={lead._id} 
+                            <TableRow
+                                key={lead._id}
                                 className="cursor-pointer hover:bg-muted/50 transition-colors group"
                                 onClick={() => onRowClick(lead)}
                             >
