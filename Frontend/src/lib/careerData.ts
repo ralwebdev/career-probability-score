@@ -1,6 +1,5 @@
-// Career data aligned with Career Master Database JSON
-// Education levels from master DB (no Diploma, added Graduate)
 import { getStreamCPSWeights, getDomainCPSModifier, isGeneralPass as checkGeneralPass, getGeneralPassPenalty } from "@/lib/careerMasterDB";
+import { getTaxonomyForRole, calculateSkillScore, normalizeSkillScore, type UserSkill, type Proficiency } from "@/lib/skillEngine";
 
 export const educationLevels = [
   "Class 12 - Science", "Class 12 - Commerce", "Class 12 - Arts",
@@ -1865,6 +1864,191 @@ export const experienceTypes = [
   "Internships", "Projects", "Freelance Work", "Hackathons", "Open Source"
 ] as const;
 
+export type UserType = "student" | "fresher" | "professional";
+
+export const industries = [
+  "Technology & IT",
+  "Data & AI",
+  "Cybersecurity",
+  "Banking, Finance & Insurance",
+  "FinTech",
+  "Sales & Business Development",
+  "Marketing & Advertising",
+  "Media & Content",
+  "E-commerce & Retail",
+  "Human Resources",
+  "Education & Training",
+  "EdTech",
+  "Healthcare & Medical",
+  "Pharmaceuticals",
+  "Biotechnology & Life Sciences",
+  "Manufacturing & Production",
+  "Automobile",
+  "Electronics & Semiconductor",
+  "Construction & Real Estate",
+  "Infrastructure",
+  "Logistics & Supply Chain",
+  "Hospitality & Tourism",
+  "Aviation",
+  "Legal & Compliance",
+  "Energy & Utilities",
+  "Oil & Gas",
+  "Renewable Energy",
+  "Telecommunications",
+  "Design & Creative",
+  "Gaming & Animation",
+  "Research & Development",
+  "Agriculture & AgriTech",
+  "Government & Public Administration",
+  "NGO & Social Impact",
+  "Other"
+] as const;
+
+export const rolesByIndustry: Record<string, string[]> = {
+  "Technology & IT": ["Software Engineer", "Frontend Developer", "Backend Developer", "Full Stack Developer", "Mobile App Developer", "QA Engineer", "DevOps Engineer", "System Administrator", "Cloud Engineer", "IT Support Engineer"],
+  "Data & AI": ["Data Analyst", "Data Scientist", "Machine Learning Engineer", "AI Engineer", "Data Engineer", "Business Analyst"],
+  "Cybersecurity": ["Cybersecurity Analyst", "Information Security Analyst", "Security Engineer", "Penetration Tester", "Ethical Hacker", "SOC Analyst"],
+  "Banking, Finance & Insurance": ["Accountant", "Financial Analyst", "Investment Analyst", "Auditor", "Relationship Manager", "Insurance Advisor"],
+  "FinTech": ["FinTech Product Analyst", "Risk Analyst", "Payment Systems Specialist", "FinTech Developer"],
+  "Sales & Business Development": ["Sales Executive", "Business Development Executive", "Account Manager", "Sales Manager"],
+  "Marketing & Advertising": ["Digital Marketing Executive", "SEO Specialist", "Performance Marketer", "Brand Manager", "Marketing Analyst"],
+  "Media & Content": ["Content Writer", "Copywriter", "Content Strategist", "Social Media Manager", "Video Producer"],
+  "E-commerce & Retail": ["E-commerce Manager", "Category Manager", "Retail Manager", "Merchandiser"],
+  "Human Resources": ["HR Executive", "Recruiter", "HR Manager", "Talent Acquisition Specialist"],
+  "Education & Training": ["Teacher", "Trainer", "Academic Coordinator", "Instructional Designer"],
+  "EdTech": ["Learning Experience Designer", "Course Developer", "Instructional Designer"],
+  "Healthcare & Medical": ["Doctor", "Nurse", "Medical Officer", "Lab Technician"],
+  "Pharmaceuticals": ["Pharmacist", "Medical Representative", "Drug Safety Associate"],
+  "Biotechnology & Life Sciences": ["Research Scientist", "Lab Analyst", "Biotech Associate"],
+  "Manufacturing & Production": ["Production Engineer", "Plant Manager", "Quality Control Engineer"],
+  "Automobile": ["Automobile Engineer", "Service Engineer", "Design Engineer"],
+  "Electronics & Semiconductor": ["Electronics Engineer", "Embedded Engineer", "Chip Design Engineer"],
+  "Construction & Real Estate": ["Civil Engineer", "Site Engineer", "Project Manager"],
+  "Infrastructure": ["Project Engineer", "Infrastructure Planner"],
+  "Logistics & Supply Chain": ["Supply Chain Analyst", "Logistics Manager", "Warehouse Manager"],
+  "Hospitality & Tourism": ["Hotel Manager", "Front Office Executive", "Travel Consultant"],
+  "Aviation": ["Ground Staff", "Cabin Crew", "Aviation Operations Executive"],
+  "Legal & Compliance": ["Legal Associate", "Corporate Lawyer", "Compliance Officer"],
+  "Energy & Utilities": ["Electrical Engineer", "Energy Analyst"],
+  "Oil & Gas": ["Petroleum Engineer", "Drilling Engineer"],
+  "Renewable Energy": ["Solar Engineer", "Wind Energy Specialist"],
+  "Telecommunications": ["Network Engineer", "Telecom Engineer"],
+  "Design & Creative": ["Graphic Designer", "UI Designer", "UX Designer", "Product Designer", "UI/UX Designer"],
+  "Gaming & Animation": ["Game Designer", "Game Developer", "Animator", "3D Artist"],
+  "Research & Development": ["Research Analyst", "R&D Engineer"],
+  "Agriculture & AgriTech": ["Agronomist", "AgriTech Specialist"],
+  "Government & Public Administration": ["Civil Servant", "Policy Analyst"],
+  "NGO & Social Impact": ["Program Manager", "Field Coordinator"],
+  "Other": ["Generalist Role"],
+};
+
+export const targetDomains = [
+  "Not Sure Yet",
+  "Software Development",
+  "Frontend Development",
+  "Backend Development",
+  "Full Stack Development",
+  "Mobile App Development",
+  "Data Analytics",
+  "Data Science",
+  "Machine Learning",
+  "Artificial Intelligence",
+  "Cybersecurity",
+  "Cloud Computing",
+  "DevOps Engineering",
+  "UI/UX Design",
+  "Product Design",
+  "Graphic Design",
+  "Digital Marketing",
+  "Performance Marketing",
+  "SEO & Content Marketing",
+  "Social Media Marketing",
+  "Brand Management",
+  "Product Management",
+  "Project Management",
+  "Business Analysis",
+  "Sales",
+  "Business Development",
+  "Account Management",
+  "Finance",
+  "Investment Banking",
+  "Financial Analysis",
+  "Accounting",
+  "FinTech",
+  "Human Resources",
+  "Talent Acquisition",
+  "HR Analytics",
+  "Operations Management",
+  "Supply Chain Management",
+  "Logistics",
+  "Entrepreneurship",
+  "Startup Operations",
+  "Teaching & Training",
+  "EdTech Roles",
+  "Healthcare Services",
+  "Clinical Research",
+  "Pharmaceutical Roles",
+  "Legal",
+  "Corporate Law",
+  "Compliance",
+  "Media & Content Creation",
+  "Journalism",
+  "Public Relations",
+  "Animation & VFX",
+  "Game Development",
+  "3D Design",
+  "Research & Development",
+  "Government Jobs",
+  "Public Policy",
+  "Hospitality & Tourism",
+  "Aviation Careers",
+  "Agriculture & AgriTech",
+  "NGO & Social Impact",
+  "Other"
+] as const;
+
+export const employmentStatusOptions = [
+  "Employed",
+  "Serving Notice Period",
+  "Unemployed (Actively Looking)",
+  "Unemployed (Not Looking)",
+  "Freelancer / Self-Employed"
+] as const;
+
+export type EmploymentStatus = typeof employmentStatusOptions[number];
+
+// Career Timeline Node for professionals
+export type SeniorityLevel = "Intern" | "Junior" | "Mid-Level" | "Senior" | "Lead" | "Director";
+export type OwnershipLevel = "Individual Contributor" | "Team Lead" | "Department Head" | "P&L Owner";
+export type GapReason = "Sabbatical" | "Upskilling" | "Health" | "Layoff" | "Other";
+
+export interface CareerNode {
+  id: string;
+  companyName: string;
+  industry: string;
+  roleTitle: string;
+  seniorityLevel: SeniorityLevel;
+  startDate: string; // MM/YYYY
+  endDate: string; // MM/YYYY or "Present"
+  isCurrent: boolean;
+  teamSizeManaged: number;
+  ownership: OwnershipLevel;
+}
+
+export interface CareerGapEntry {
+  startDate: string;
+  endDate: string;
+  reason: GapReason;
+}
+
+export interface TransitionIntent {
+  employmentStatus: EmploymentStatus | "";
+  lastWorkingDay: string; // date string, required only if "Serving Notice Period"
+  currentCtc: string;
+  expectedCtc: string;
+  willingnessToRelocate: boolean;
+}
+
 export type AssessmentData = {
   name: string;
   email: string;
@@ -1872,12 +2056,36 @@ export type AssessmentData = {
   city: string;
   state: string;
   country: string;
+  // User type
+  userType: UserType;
+  // Student fields
   educationLevel: string;
   fieldOfStudy: string;
   careerDomain: string;
   specialization: string;
-  collegeId?: string;
   careerRole: string;
+  // Fresher fields
+  passoutYear: string;
+  hadInternships: boolean;
+  // Professional fields
+  totalExperience: number;
+  currentRole: string;
+  industry: string;
+  employmentStatus: EmploymentStatus | "";
+  careerGap: boolean;
+  jobSwitchIntent: boolean;
+  // Career Timeline (professionals)
+  careerTimeline: CareerNode[];
+  careerGapLog: CareerGapEntry[];
+  transitionIntent: TransitionIntent;
+  // Career Switch fields — CSPM
+  switchIntent: boolean;
+  targetDomain: string;
+  switchType: "minor" | "major";
+  gapDuration: number; // months
+  timeToSwitch: number; // months
+  learningWillingness: number; // 1–5
+  // Shared
   technicalSkills: Record<string, number>;
   softSkills: Record<string, number>;
   communicationSkills: Record<string, number>;
@@ -1885,6 +2093,86 @@ export type AssessmentData = {
   experience: Record<string, number>;
   portfolioLevel: "none" | "basic" | "strong";
 };
+
+// Career Timeline derived intelligence
+export function calculateTotalActiveMonths(timeline: CareerNode[]): number {
+  let total = 0;
+  for (const node of timeline) {
+    const [sm, sy] = node.startDate.split("/").map(Number);
+    const isPresent = node.endDate === "Present";
+    const [em, ey] = isPresent
+      ? [new Date().getMonth() + 1, new Date().getFullYear()]
+      : node.endDate.split("/").map(Number);
+    if (sy && ey) total += (ey - sy) * 12 + (em - sm);
+  }
+  return Math.max(0, total);
+}
+
+export function getRoleProgressionIndicator(timeline: CareerNode[]): "Upward" | "Lateral" | "Stagnant" {
+  if (timeline.length < 2) return "Lateral";
+  const levels: SeniorityLevel[] = ["Intern", "Junior", "Mid-Level", "Senior", "Lead", "Director"];
+  const first = levels.indexOf(timeline[timeline.length - 1].seniorityLevel);
+  const last = levels.indexOf(timeline[0].seniorityLevel);
+  if (last > first) return "Upward";
+  if (last < first) return "Stagnant";
+  return "Lateral";
+}
+
+export function getAverageTenureMonths(timeline: CareerNode[]): number {
+  if (timeline.length === 0) return 0;
+  return Math.round(calculateTotalActiveMonths(timeline) / timeline.length);
+}
+
+export function getTenureStabilityMultiplier(avgTenure: number): number {
+  if (avgTenure < 12) return 0.8;
+  if (avgTenure > 24) return 1.2;
+  return 1.0;
+}
+
+export function getResponsibilityScore(timeline: CareerNode[]): number {
+  if (timeline.length === 0) return 0;
+  const current = timeline.find(n => n.isCurrent) ?? timeline[0];
+  const ownershipScores: Record<OwnershipLevel, number> = {
+    "Individual Contributor": 40,
+    "Team Lead": 60,
+    "Department Head": 80,
+    "P&L Owner": 100,
+  };
+  const teamBonus = Math.min(20, current.teamSizeManaged * 2);
+  return Math.min(100, ownershipScores[current.ownership] + teamBonus);
+}
+
+// Experience scoring for professionals
+export function calculateExperienceScore(years: number): number {
+  if (years >= 5) return 90;
+  if (years >= 3) return 80;
+  if (years >= 1) return 60;
+  return 30;
+}
+
+// Employment status urgency bonus (added to CSP urgency)
+export function getEmploymentUrgencyBonus(status: EmploymentStatus | ""): number {
+  switch (status) {
+    case "Serving Notice Period": return 10;
+    case "Unemployed (Actively Looking)": return 15;
+    case "Unemployed (Not Looking)": return -5;
+    default: return 0;
+  }
+}
+
+// ERS (Employment Readiness Score) by user type
+export function getERS(data: AssessmentData): { level: "very_high" | "high" | "moderate" | "low"; label: string } {
+  if (data.userType === "fresher") return { level: "very_high", label: "Very High Urgency" };
+  if (data.userType === "professional") {
+    if (data.employmentStatus === "Serving Notice Period") return { level: "very_high", label: "Notice Period — Immediate" };
+    if (data.employmentStatus === "Unemployed (Actively Looking)") return { level: "very_high", label: "Actively Looking — High Urgency" };
+    if (data.jobSwitchIntent && data.totalExperience >= 3) return { level: "high", label: "Active Job Seeker" };
+    if (data.careerGap) return { level: "very_high", label: "Career Gap — High Urgency" };
+    if (data.employmentStatus === "Unemployed (Not Looking)") return { level: "low", label: "Not Actively Looking" };
+    return { level: "moderate", label: "Upskilling Mode" };
+  }
+  return { level: "moderate", label: "Building Foundation" };
+}
 
 export function calculateCPS(data: AssessmentData): {
   total: number;
@@ -1898,82 +2186,149 @@ export function calculateCPS(data: AssessmentData): {
   qpi: number;
   isGeneralPass: boolean;
   streamWeights: { technical: number; logical: number; communication: number; emotional_intelligence: number };
+  userType: UserType;
+  experienceScore: number;
 } {
   const role = careerRoles.find(r => r.name === data.careerRole);
+  const userType = data.userType || "student";
+
+  // ── Common skill calculations ──
+  // For professionals with structured taxonomy, use skill engine scoring
+  const proTaxonomy = (userType === "professional" && data.currentRole) ? getTaxonomyForRole(data.currentRole) : null;
+  let technical: number;
+
+  if (proTaxonomy) {
+    // Build UserSkill array from technicalSkills ratings + taxonomy categories
+    const profMap: Record<number, Proficiency> = { 1: "Beginner", 2: "Intermediate", 3: "Advanced" };
+    const allSkillsByCategory: { skill: string; cat: "core" | "tools" | "advanced" }[] = [
+      ...proTaxonomy.core.map(s => ({ skill: s, cat: "core" as const })),
+      ...proTaxonomy.tools.map(s => ({ skill: s, cat: "tools" as const })),
+      ...proTaxonomy.advanced.map(s => ({ skill: s, cat: "advanced" as const })),
+    ];
+    const userSkills: UserSkill[] = allSkillsByCategory
+      .filter(s => (data.technicalSkills[s.skill] ?? 0) > 0)
+      .map(s => ({
+        skillName: s.skill,
+        category: s.cat,
+        proficiency: profMap[data.technicalSkills[s.skill]] ?? "Beginner",
+      }));
+    const rawScore = calculateSkillScore(userSkills);
+    const normalized = normalizeSkillScore(rawScore);
+    technical = Math.round((normalized / 100) * 30);
+  } else {
+    // Original flat skill calculation
+    const techSkills = role?.skills ?? [];
+    const techWeights = role?.skillWeights ?? [];
+    let techWeightedSum = 0;
+    let techWeightedMax = 0;
+    techSkills.forEach((skill, i) => {
+      const weight = techWeights[i] ?? 5;
+      const proficiency = data.technicalSkills[skill] ?? 0;
+      techWeightedSum += proficiency * weight;
+      techWeightedMax += 3 * weight;
+    });
+    technical = techWeightedMax > 0 ? Math.round((techWeightedSum / techWeightedMax) * 30) : 0;
+  }
+
+  const ssValues = Object.values(data.softSkills);
+  const ssMax = ssValues.length * 3;
+  const ssSum = ssValues.reduce((a, b) => a + b, 0);
+  const softSkill = ssMax > 0 ? Math.round((ssSum / ssMax) * 10) : 0;
+
+  const commValues = Object.values(data.communicationSkills);
+  const commMax = commValues.length * 3;
+  const commSum = commValues.reduce((a, b) => a + b, 0);
+  const communication = commMax > 0 ? Math.round((commSum / commMax) * 10) : 0;
+
+  const eiValues = Object.values(data.eiSkills);
+  const eiMax = eiValues.length * 3;
+  const eiSum = eiValues.reduce((a, b) => a + b, 0);
+  const ei = eiMax > 0 ? Math.round((eiSum / eiMax) * 10) : 0;
+
+  const portfolio = data.portfolioLevel === "none" ? 0 : data.portfolioLevel === "basic" ? 7 : 15;
+  const marketDemand = role?.demandScore ?? 5;
+
+  // ── Experience calculation (varies by user type) ──
+  let experience = 0;
+  let experienceScore = 0;
+
+  if (userType === "professional") {
+    // Professional: experience_score dominates (mapped to 15-point scale)
+    experienceScore = calculateExperienceScore(data.totalExperience);
+    experience = Math.round((experienceScore / 100) * 15);
+  } else if (userType === "fresher") {
+    // Fresher: internship bonus + passout recency
+    const internships = data.hadInternships ? 8 : 0;
+    const passoutYear = parseInt(data.passoutYear) || new Date().getFullYear();
+    const yearsSincePassout = Math.max(0, new Date().getFullYear() - passoutYear);
+    const recencyBonus = yearsSincePassout <= 1 ? 5 : yearsSincePassout <= 2 ? 3 : 0;
+    experience = Math.min(15, internships + recencyBonus + (data.experience["Projects"] ?? 0) * 2);
+    experienceScore = Math.round((experience / 15) * 100);
+  } else {
+    // Student: original formula
+    const internships = data.experience["Internships"] ?? 0;
+    const projects = data.experience["Projects"] ?? 0;
+    const freelance = data.experience["Freelance Work"] ?? 0;
+    const hackathons = data.experience["Hackathons"] ?? 0;
+    const openSource = data.experience["Open Source"] ?? 0;
+    experience = Math.min(15, internships * 5 + projects * 3 + (freelance + hackathons + openSource) * 2);
+    experienceScore = Math.round((experience / 15) * 100);
+  }
+
+  // ── Total CPS calculation (varies by user type) ──
+  let total: number;
+
+  if (userType === "professional") {
+    // Professional CPS: experience(40%) + skills(30%) + role_relevance(20%) + portfolio(10%)
+    const skillsComponent = (technical / 30) * 100;
+    const roleRelevance = role ? (marketDemand / 10) * 100 : 50;
+    const portfolioComponent = (portfolio / 15) * 100;
+    total = Math.round(
+      experienceScore * 0.40 +
+      skillsComponent * 0.30 +
+      roleRelevance * 0.20 +
+      portfolioComponent * 0.10
+    );
+    // Career gap penalty
+    if (data.careerGap) {
+      total = Math.round(total * 0.85); // 15% penalty
+    }
+  } else {
+    // Student/Fresher: original formula
+    const streamWeights = getStreamCPSWeights(data.fieldOfStudy);
+    const domainMod = getDomainCPSModifier(data.careerDomain);
+    const generalPass = checkGeneralPass(data.careerDomain);
+
+    total = technical + softSkill + communication + ei + experience + portfolio + marketDemand;
+
+    if (generalPass) {
+      const penalty = getGeneralPassPenalty();
+      total = Math.round(total * penalty.cpsPenalty);
+    }
+  }
+
+  // Clamp
+  total = Math.max(0, Math.min(100, total));
+
+  // ── Stream weights (for display) ──
   const streamWeights = getStreamCPSWeights(data.fieldOfStudy);
   const domainMod = getDomainCPSModifier(data.careerDomain);
-  const generalPass = checkGeneralPass(data.careerDomain);
-
-  // Apply domain modifiers to stream weights
   const effectiveWeights = { ...streamWeights };
   if (domainMod.technical) effectiveWeights.technical += domainMod.technical;
   if (domainMod.logical) effectiveWeights.logical += domainMod.logical;
   if (domainMod.communication) effectiveWeights.communication += domainMod.communication;
   if (domainMod.emotional_intelligence) effectiveWeights.emotional_intelligence += domainMod.emotional_intelligence;
 
-  // Technical (max 30) - weighted by skill importance per PDF formula
-  const techSkills = role?.skills ?? [];
-  const techWeights = role?.skillWeights ?? [];
-  let techWeightedSum = 0;
-  let techWeightedMax = 0;
-  techSkills.forEach((skill, i) => {
-    const weight = techWeights[i] ?? 5;
-    const proficiency = data.technicalSkills[skill] ?? 0;
-    techWeightedSum += proficiency * weight;
-    techWeightedMax += 3 * weight;
-  });
-  const technical = techWeightedMax > 0 ? Math.round((techWeightedSum / techWeightedMax) * 30) : 0;
+  const generalPass = checkGeneralPass(data.careerDomain);
 
-  // Soft Skills (max 10)
-  const ssValues = Object.values(data.softSkills);
-  const ssMax = ssValues.length * 3;
-  const ssSum = ssValues.reduce((a, b) => a + b, 0);
-  const softSkill = ssMax > 0 ? Math.round((ssSum / ssMax) * 10) : 0;
-
-  // Communication (max 10)
-  const commValues = Object.values(data.communicationSkills);
-  const commMax = commValues.length * 3;
-  const commSum = commValues.reduce((a, b) => a + b, 0);
-  const communication = commMax > 0 ? Math.round((commSum / commMax) * 10) : 0;
-
-  // EI (max 10)
-  const eiValues = Object.values(data.eiSkills);
-  const eiMax = eiValues.length * 3;
-  const eiSum = eiValues.reduce((a, b) => a + b, 0);
-  const ei = eiMax > 0 ? Math.round((eiSum / eiMax) * 10) : 0;
-
-  // Experience (max 15)
-  const internships = data.experience["Internships"] ?? 0;
-  const projects = data.experience["Projects"] ?? 0;
-  const freelance = data.experience["Freelance Work"] ?? 0;
-  const hackathons = data.experience["Hackathons"] ?? 0;
-  const openSource = data.experience["Open Source"] ?? 0;
-  const experience = Math.min(15, internships * 5 + projects * 3 + (freelance + hackathons + openSource) * 2);
-
-  // Portfolio (max 15)
-  const portfolio = data.portfolioLevel === "none" ? 0 : data.portfolioLevel === "basic" ? 7 : 15;
-
-  // Market Demand (max 10)
-  const marketDemand = role?.demandScore ?? 5;
-
-  let total = technical + softSkill + communication + ei + experience + portfolio + marketDemand;
-
-  // General Pass penalty: reduce CPS by 25%
-  if (generalPass) {
-    const penalty = getGeneralPassPenalty();
-    total = Math.round(total * penalty.cpsPenalty);
-  }
-
-  // QPi per PDF: 0.4*(CPS/100) + 0.3*(DemandScore/10) + 0.15*(PortfolioScore/15) + 0.15*(SkillScore/30)
+  // ── QPi ──
   let qpi = Math.round(
     (0.4 * (total / 100) + 0.3 * (marketDemand / 10) + 0.15 * (portfolio / 15) + 0.15 * (technical / 30)) * 100
   );
-
-  // General Pass QPi penalty: reduce by 30%
-  if (generalPass) {
+  if (generalPass && userType !== "professional") {
     const penalty = getGeneralPassPenalty();
     qpi = Math.round(qpi * penalty.qpiPenalty);
   }
 
-  return { total, technical, softSkill, communication, ei, experience, portfolio, marketDemand, qpi, isGeneralPass: generalPass, streamWeights: effectiveWeights };
+  return { total, technical, softSkill, communication, ei, experience, portfolio, marketDemand, qpi, isGeneralPass: generalPass, streamWeights: effectiveWeights, userType, experienceScore };
 }

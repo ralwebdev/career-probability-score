@@ -57,7 +57,7 @@ export function CounselingTable({ data, onRowClick }: { data: any[]; onRowClick:
     );
 }
 
-export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick: (assessment: any) => void }) {
+export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick?: (assessment: any) => void }) {
     return (
         <div className="rounded-xl border bg-card/50 overflow-hidden">
             <Table>
@@ -67,13 +67,15 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                         <TableHead>Location</TableHead>
                         <TableHead>Education</TableHead>
                         <TableHead>Career Role</TableHead>
+                        <TableHead>Target Role</TableHead>
+                        <TableHead>Domain</TableHead>
                         <TableHead>Date</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {data.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center py-10 text-muted-foreground">
+                            <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
                                 No assessments found
                             </TableCell>
                         </TableRow>
@@ -81,8 +83,8 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                         data.map((assessment: any) => (
                             <TableRow 
                                 key={assessment._id} 
-                                className="cursor-pointer hover:bg-muted/50 transition-colors group"
-                                onClick={() => onRowClick(assessment)}
+                                className={`transition-colors group ${onRowClick ? "cursor-pointer hover:bg-muted/50" : ""}`}
+                                onClick={() => onRowClick?.(assessment)}
                             >
                                 <TableCell>
                                     <div className="font-medium text-xs group-hover:text-primary transition-colors">{assessment.name}</div>
@@ -91,10 +93,12 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                                 <TableCell className="text-xs">{assessment.city}, {assessment.country}</TableCell>
                                 <TableCell className="text-xs">{assessment.educationLevel}</TableCell>
                                 <TableCell className="text-xs font-semibold">{assessment.careerRole}</TableCell>
+                                <TableCell className="text-xs font-semibold">{assessment.careerRole}</TableCell>
+                                <TableCell className="text-xs">{assessment.careerDomain || assessment.domain || "N/A"}</TableCell>
                                 <TableCell className="text-xs">
                                     <div className="flex items-center justify-between">
                                         {format(new Date(assessment.createdAt), "MMM dd, HH:mm")}
-                                        <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />
+                                        {onRowClick && <ChevronRight className="h-3 w-3 opacity-0 group-hover:opacity-100 transition-opacity text-primary" />}
                                     </div>
                                 </TableCell>
                             </TableRow>
@@ -105,6 +109,8 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
         </div>
     );
 }
+
+
 
 export function LeadsTable({ data, onRowClick }: { data: any[]; onRowClick: (lead: any) => void }) {
     return (

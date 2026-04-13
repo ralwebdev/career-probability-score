@@ -17,7 +17,6 @@ import {
 
 // Import Admin components for consistency
 import {
-  AssessmentModal,
   StatsGrid,
   AssessmentsTable,
   AssessmentStats
@@ -27,7 +26,6 @@ export default function EmployabilityDashboard() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("analytics");
-  const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
   const [selectedScoreRange, setSelectedScoreRange] = useState<{ min: number; max: number; label: string } | null>(null);
   const [selectedCareerRole, setSelectedCareerRole] = useState<string | null>(null);
 
@@ -398,22 +396,17 @@ export default function EmployabilityDashboard() {
                   )}
                 </AnimatePresence>
                 
-                <AssessmentsTable data={filteredStudents} onRowClick={setSelectedAssessment} />
+                <AssessmentsTable data={filteredStudents} />
               </div>
             </TabsContent>
 
             <TabsContent value="assessments" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <AssessmentsTable data={students} onRowClick={setSelectedAssessment} />
+              <AssessmentsTable data={students} />
             </TabsContent>
           </Tabs>
         )}
       </div>
 
-      <AssessmentModal
-        assessment={selectedAssessment}
-        isOpen={!!selectedAssessment}
-        onClose={() => setSelectedAssessment(null)}
-      />
     </div>
   );
 }
