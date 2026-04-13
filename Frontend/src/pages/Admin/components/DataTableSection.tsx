@@ -66,16 +66,15 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                         <TableHead>User</TableHead>
                         <TableHead>Location</TableHead>
                         <TableHead>Education</TableHead>
-                        <TableHead>Career Role</TableHead>
-                        <TableHead>Target Role</TableHead>
                         <TableHead>Domain</TableHead>
+                        <TableHead>Target Role</TableHead>
                         <TableHead>Date</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {data.length === 0 ? (
                         <TableRow>
-                            <TableCell colSpan={7} className="text-center py-10 text-muted-foreground">
+                            <TableCell colSpan={6} className="text-center py-10 text-muted-foreground">
                                 No assessments found
                             </TableCell>
                         </TableRow>
@@ -92,9 +91,8 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
                                 </TableCell>
                                 <TableCell className="text-xs">{assessment.city}, {assessment.country}</TableCell>
                                 <TableCell className="text-xs">{assessment.educationLevel}</TableCell>
-                                <TableCell className="text-xs font-semibold">{assessment.careerRole}</TableCell>
-                                <TableCell className="text-xs font-semibold">{assessment.careerRole}</TableCell>
                                 <TableCell className="text-xs">{assessment.careerDomain || assessment.domain || "N/A"}</TableCell>
+                                <TableCell className="text-xs font-semibold">{assessment.careerRole}</TableCell>
                                 <TableCell className="text-xs">
                                     <div className="flex items-center justify-between">
                                         {format(new Date(assessment.createdAt), "MMM dd, HH:mm")}
@@ -109,6 +107,7 @@ export function AssessmentsTable({ data, onRowClick }: { data: any[]; onRowClick
         </div>
     );
 }
+
 
 
 
