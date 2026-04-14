@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { loginAdmin, verifyAdmin, createCollege, getColleges } = require('../controllers/adminController');
+const { getDuplicateAssessments } = require('../controllers/assessmentController');
 const { protectAdmin } = require('../utils/authMiddleware');
 
 // @desc    Auth admin & get token
@@ -17,5 +18,7 @@ router.get('/verify', verifyAdmin);
 router.route('/colleges')
   .post(protectAdmin, createCollege)
   .get(protectAdmin, getColleges);
+
+router.get('/assessments/duplicates', protectAdmin, getDuplicateAssessments);
 
 module.exports = router;

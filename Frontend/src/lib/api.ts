@@ -322,6 +322,16 @@ export async function getColleges(token: string) {
   return response.json();
 }
 
+export async function getDuplicateAssessments(token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/assessments/duplicates`, {
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to fetch duplicates");
+  return response.json();
+}
+
 export async function createCollege(collegeData: any, token: string) {
   const response = await fetch(`${API_BASE_URL}/admin/colleges`, {
     method: "POST",

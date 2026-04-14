@@ -8,3 +8,4 @@ export { CounselingTable, AssessmentsTable, LeadsTable } from './DataTableSectio
 export { LeadsModal } from './LeadsModal';
 export { StatsGrid } from './StatCards';
 export { AssessmentStats } from './AssessmentStats';
+export { default as DuplicatesSection } from './DuplicatesSection';

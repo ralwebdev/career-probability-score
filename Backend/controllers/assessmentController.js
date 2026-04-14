@@ -228,11 +228,34 @@ const exportAssessmentsToCSV = async (req, res, next) => {
   }
 };
 
+// @desc    Get duplicate assessments by email or phone
+// @route   GET /api/admin/assessments/duplicates
+const getDuplicateAssessments = async (req, res, next) => {
+  try {
+    const emailDuplicates = await Assessment.aggregate([
+      { $group: { _id: "$email", count: { $sum: 1 }, records: { $push: { id: "$_id", name: "$name", date: "$createdAt" } } } },
+      { $match: { count: { $gt: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    const phoneDuplicates = await Assessment.aggregate([
+      { $group: { _id: "$phone", count: { $sum: 1 }, records: { $push: { id: "$_id", name: "$name", date: "$createdAt" } } } },
+      { $match: { count: { $gt: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    res.json({ emailDuplicates, phoneDuplicates });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports = {
   createAssessment,
   getAnalytics,
   getAssessments,
   getAssessmentById,
   getCourseScoreStats,
-  exportAssessmentsToCSV
+  exportAssessmentsToCSV,
+  getDuplicateAssessments
 };

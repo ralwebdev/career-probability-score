@@ -18,7 +18,8 @@ import {
     CounselingTable,
     AssessmentsTable,
     LeadsTable,
-    AssessmentStats
+    AssessmentStats,
+    DuplicatesSection
 } from "./components";
 
 export default function Admin() {
@@ -249,6 +250,7 @@ export default function Admin() {
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                                 <TabsTrigger value="webinars">Webinars</TabsTrigger>
                                 <TabsTrigger value="colleges">Colleges</TabsTrigger>
+                                <TabsTrigger value="duplicates">Duplicates</TabsTrigger>
                             </TabsList>
 
 
@@ -341,6 +343,10 @@ export default function Admin() {
 
                             <TabsContent value="colleges">
                                 <AdminCollegeManagement token={localStorage.getItem("adminToken") || ""} />
+                            </TabsContent>
+
+                            <TabsContent value="duplicates">
+                                <DuplicatesSection token={localStorage.getItem("adminToken") || ""} />
                             </TabsContent>
                         </Tabs>
 
