@@ -151,11 +151,10 @@ export function ResultsDashboard() {
           {role && <p className="text-sm text-muted-foreground mt-1">{role.domain} · {role.subdomain}</p>}
           <div className="mt-6 flex justify-center flex-col items-center gap-3">
             <ScoreRing score={scores.total} label={verdict} />
-            <div className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-              cpsBand === "advanced" ? "bg-success/20 text-success border border-success/30" :
-              cpsBand === "growth" ? "bg-accent/20 text-accent border border-accent/30" :
-              "bg-muted text-muted-foreground border border-border"
-            }`}>
+            <div className={`px-4 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${cpsBand === "advanced" ? "bg-success/20 text-success border border-success/30" :
+                cpsBand === "growth" ? "bg-accent/20 text-accent border border-accent/30" :
+                  "bg-muted text-muted-foreground border border-border"
+              }`}>
               {cpsBand} Band
             </div>
           </div>
@@ -205,11 +204,10 @@ export function ResultsDashboard() {
                 {skillGaps.map(gap => (
                   <div key={gap.skill} className="flex items-center justify-between p-3 rounded-lg border bg-background/50">
                     <span className="text-sm font-medium">{gap.skill}</span>
-                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                      gap.severity === "critical" ? "bg-destructive/20 text-destructive" :
-                      gap.severity === "moderate" ? "bg-orange-500/20 text-orange-600" :
-                      "bg-yellow-500/20 text-yellow-600"
-                    }`}>
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${gap.severity === "critical" ? "bg-destructive/20 text-destructive" :
+                        gap.severity === "moderate" ? "bg-orange-500/20 text-orange-600" :
+                          "bg-yellow-500/20 text-yellow-600"
+                      }`}>
                       {gap.severity}
                     </span>
                   </div>
@@ -288,7 +286,7 @@ export function ResultsDashboard() {
         </div>
 
         {/* QPi Score - using document formula */}
-        <div className="mb-10 rounded-xl border border-accent/30 bg-accent/5 p-6">
+        {/* <div className="mb-10 rounded-xl border border-accent/30 bg-accent/5 p-6">
           <h3 className="text-lg font-semibold text-accent mb-2">QPi Score — {scores.qpi}%</h3>
           <p className="text-xs text-muted-foreground mb-4">
             Quantified Placement Index by <span className="font-semibold">Red Apple Learning</span>
@@ -308,7 +306,7 @@ export function ResultsDashboard() {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Actions */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
