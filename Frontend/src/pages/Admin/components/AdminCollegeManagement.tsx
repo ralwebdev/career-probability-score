@@ -95,8 +95,8 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
             <School className="h-12 w-12 mx-auto text-muted-foreground mb-4 opacity-20" />
             <p className="text-muted-foreground text-lg font-medium">No colleges registered yet</p>
             <button
-               onClick={() => setIsAdding(true)}
-               className="mt-4 text-primary font-semibold hover:underline"
+              onClick={() => setIsAdding(true)}
+              className="mt-4 text-primary font-semibold hover:underline"
             >
               Add your first college
             </button>
@@ -118,18 +118,18 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                   {college.collegeId}
                 </div>
               </div>
-              
+
               <h3 className="font-bold text-lg leading-tight mb-1">{college.name}</h3>
               <p className="text-xs text-muted-foreground mb-4">{college.location || "Location not specified"}</p>
-              
+
               <div className="space-y-3 pt-4 border-t border-muted/30">
                 <div className="flex flex-col gap-2">
-                   <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Assessment Track Link</div>
-                   <div className="flex items-center gap-2 bg-muted/30 p-2 rounded-lg text-[11px] font-mono break-all line-clamp-1 border">
-                      {window.location.origin}/{college.collegeId}/assessment
-                   </div>
+                  <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Assessment Track Link</div>
+                  <div className="flex items-center gap-2 bg-muted/30 p-2 rounded-lg text-[11px] font-mono break-all line-clamp-1 border">
+                    {window.location.origin}/{college.collegeId}/assessment
+                  </div>
                 </div>
-                
+
                 <div className="flex gap-2 pt-2">
                   <button
                     onClick={() => copyLink(college.collegeId)}
@@ -184,8 +184,8 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
                     <label className="text-sm font-medium">Unique College ID</label>
-                    <button 
-                      type="button" 
+                    <button
+                      type="button"
                       onClick={() => setNewCollege(prev => ({ ...prev, collegeId: generateId(prev.name) }))}
                       className="text-[10px] text-primary hover:underline font-bold"
                     >
@@ -228,8 +228,8 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <label className="text-xs font-medium">Password</label>
-                      <button 
-                        type="button" 
+                      <button
+                        type="button"
                         onClick={() => setNewCollege(prev => ({ ...prev, password: Math.random().toString(36).slice(-8) }))}
                         className="text-[10px] text-primary hover:underline font-bold"
                       >

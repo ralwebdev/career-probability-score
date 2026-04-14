@@ -389,12 +389,14 @@ export function AssessmentSteps() {
       ...data,
       name: data.name.trim(),
       email: data.email.trim(),
-      phone: data.phone.trim()
     };
 
+    const submissionData = { ...trimmedData };
+    if (!submissionData.year) delete submissionData.year;
+
     try {
-      const result = await submitAssessment(trimmedData);
-      sessionStorage.setItem("cps-assessment", JSON.stringify(trimmedData));
+      const result = await submitAssessment(submissionData);
+      sessionStorage.setItem("cps-assessment", JSON.stringify(submissionData));
       navigate(`/results?id=${result._id}`);
     } catch (error) {
       console.error("Submission failed:", error);
