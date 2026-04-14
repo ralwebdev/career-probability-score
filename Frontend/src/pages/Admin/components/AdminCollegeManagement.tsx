@@ -63,7 +63,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
 
   const copyLink = (collegeId: string) => {
     const baseUrl = window.location.origin;
-    const link = `${baseUrl}/assessment?cid=${collegeId}`;
+    const link = `${baseUrl}/${collegeId}/assessment`;
     navigator.clipboard.writeText(link);
     toast.success("Assessment link copied to clipboard!");
   };
@@ -126,7 +126,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                 <div className="flex flex-col gap-2">
                    <div className="text-[10px] uppercase tracking-wider font-bold text-muted-foreground">Assessment Track Link</div>
                    <div className="flex items-center gap-2 bg-muted/30 p-2 rounded-lg text-[11px] font-mono break-all line-clamp-1 border">
-                      {window.location.origin}/assessment?cid={college.collegeId}
+                      {window.location.origin}/{college.collegeId}/assessment
                    </div>
                 </div>
                 
@@ -138,7 +138,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                     <Copy className="h-3.5 w-3.5" /> Copy Link
                   </button>
                   <a
-                    href={`/assessment?cid=${college.collegeId}`}
+                    href={`/${college.collegeId}/assessment`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center p-2 rounded-lg border hover:bg-muted transition-colors text-muted-foreground"

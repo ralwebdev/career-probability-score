@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform } from "framer-motion";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,6 +186,7 @@ function CompletionChip({ filled, total }: { filled: number; total: number }) {
 
 export function AssessmentSteps() {
   const navigate = useNavigate();
+  const { collegeId } = useParams();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState(0);
 
@@ -197,7 +198,7 @@ export function AssessmentSteps() {
     educationLevel: "", fieldOfStudy: "",
     careerDomain: "", careerRole: "",
     specialization: "",
-    collegeId: searchParams.get("cid") || undefined,
+    collegeId: collegeId || searchParams.get("cid") || "RAL1",
     technicalSkills: {}, softSkills: {}, communicationSkills: {}, eiSkills: {},
     experience: {}, portfolioLevel: "none",
     year: ""
