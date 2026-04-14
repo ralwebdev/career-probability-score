@@ -244,6 +244,7 @@ export default function EmployabilityDashboard() {
           </div>
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
+            <h2 className="text-2xl font-bold tracking-tight">Student Database ({students.length})</h2>
             {/* <TabsList className="bg-card/40 border backdrop-blur-xl p-1.5 rounded-2xl shadow-sm">
               <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
                 <LayoutDashboard className="h-4 w-4 mr-2" /> Performance Analytics
