@@ -135,8 +135,24 @@ const protect = async (req, res, next) => {
   }
 };
 
+// @desc    Get public college info by cid
+// @route   GET /api/college/public/:cid
+// @access  Public
+const getPublicCollegeByCid = async (req, res) => {
+  try {
+    const college = await College.findOne({ collegeId: req.params.cid }).select('name');
+    if (!college) {
+      return res.status(404).json({ message: 'College not found' });
+    }
+    res.json(college);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginCollegeUser,
   getStudents,
+  getPublicCollegeByCid,
   protect
 };

@@ -2057,7 +2057,7 @@ export type AssessmentData = {
   state: string;
   country: string;
   // User type
-  userType: UserType;
+  userType?: UserType;
   // Student fields
   educationLevel: string;
   fieldOfStudy: string;
@@ -2065,26 +2065,26 @@ export type AssessmentData = {
   specialization: string;
   careerRole: string;
   // Fresher fields
-  passoutYear: string;
-  hadInternships: boolean;
+  passoutYear?: string;
+  hadInternships?: boolean;
   // Professional fields
-  totalExperience: number;
-  currentRole: string;
-  industry: string;
-  employmentStatus: EmploymentStatus | "";
-  careerGap: boolean;
-  jobSwitchIntent: boolean;
+  totalExperience?: number;
+  currentRole?: string;
+  industry?: string;
+  employmentStatus?: EmploymentStatus | "";
+  careerGap?: boolean;
+  jobSwitchIntent?: boolean;
   // Career Timeline (professionals)
-  careerTimeline: CareerNode[];
-  careerGapLog: CareerGapEntry[];
-  transitionIntent: TransitionIntent;
+  careerTimeline?: CareerNode[];
+  careerGapLog?: CareerGapEntry[];
+  transitionIntent?: TransitionIntent;
   // Career Switch fields — CSPM
-  switchIntent: boolean;
-  targetDomain: string;
-  switchType: "minor" | "major";
-  gapDuration: number; // months
-  timeToSwitch: number; // months
-  learningWillingness: number; // 1–5
+  switchIntent?: boolean;
+  targetDomain?: string;
+  switchType?: "minor" | "major";
+  gapDuration?: number; // months
+  timeToSwitch?: number; // months
+  learningWillingness?: number; // 1–5
   // Shared
   technicalSkills: Record<string, number>;
   softSkills: Record<string, number>;
@@ -2093,6 +2093,7 @@ export type AssessmentData = {
   experience: Record<string, number>;
   portfolioLevel: "none" | "basic" | "strong";
   year?: string;
+  collegeId?: string;
 };
 
 // Career Timeline derived intelligence

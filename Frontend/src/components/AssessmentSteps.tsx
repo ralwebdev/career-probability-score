@@ -19,7 +19,7 @@ import {
   type AssessmentData,
   calculateCPS,
 } from "@/lib/careerData";
-import { submitAssessment } from "@/lib/api";
+import { submitAssessment, getPublicCollegeByCid } from "@/lib/api";
 import {
   masterEducationLevels, fieldsByEducation, domainsByField,
   rolesByDomain, formatLabel, hasSubdomains, getSubdomains,
@@ -202,6 +202,21 @@ export function AssessmentSteps() {
     experience: {}, portfolioLevel: "none",
     year: ""
   });
+  const [collegeName, setCollegeName] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchCollege = async () => {
+      if (data.collegeId) {
+        try {
+          const college = await getPublicCollegeByCid(data.collegeId);
+          setCollegeName(college.name);
+        } catch (error) {
+          console.error("Failed to fetch college name:", error);
+        }
+      }
+    };
+    fetchCollege();
+  }, [data.collegeId]);
 
   const update = (partial: Partial<AssessmentData>) => {
     setData(prev => ({ ...prev, ...partial }));
@@ -872,6 +887,24 @@ export function AssessmentSteps() {
       <CelebrationBurst active={celebrating} />
 
       <div className="w-full max-w-2xl">
+        {collegeName && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 text-center"
+          >
+            <h1 className="text-3xl md:text-4xl font-black gradient-text tracking-tight mb-2">
+              {collegeName}
+            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <div className="h-1 w-12 bg-primary rounded-full" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                Career Assessment Portal
+              </span>
+              <div className="h-1 w-12 bg-primary rounded-full" />
+            </div>
+          </motion.div>
+        )}
         {/* Header with progress ring + step info */}
         <div className="flex items-center gap-4 mb-6">
           <ProgressRing progress={progress} />

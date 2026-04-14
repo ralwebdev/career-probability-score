@@ -303,6 +303,14 @@ export async function getCollegeStudents(token: string): Promise<any[]> {
   return response.json();
 }
 
+export async function getPublicCollegeByCid(cid: string) {
+  const response = await fetch(`${API_BASE_URL}/college/public/${cid}`);
+  if (!response.ok) {
+    throw new Error("College not found");
+  }
+  return response.json();
+}
+
 // Admin College Management
 export async function getColleges(token: string) {
   const response = await fetch(`${API_BASE_URL}/admin/colleges`, {
