@@ -118,8 +118,8 @@ function SkillPill({ label, value, onChange, compact }: { label: string; value: 
                 whileTap={{ scale: 0.85 }}
                 whileHover={{ scale: 1.15 }}
                 className={`rounded-lg px-2 py-1.5 text-xs font-medium transition-all flex items-center gap-1.5 ${value === level
-                    ? "gradient-primary text-primary-foreground shadow-sm"
-                    : "bg-muted/50 text-muted-foreground hover:bg-secondary"
+                  ? "gradient-primary text-primary-foreground shadow-sm"
+                  : "bg-muted/50 text-muted-foreground hover:bg-secondary"
                   }`}
               >
                 <SkillLevelBar level={level} active={value === level} />
@@ -173,8 +173,8 @@ function CompletionChip({ filled, total }: { filled: number; total: number }) {
           <div
             key={i}
             className={`w-1.5 h-4 rounded-full transition-all duration-300 ${i < Math.ceil((filled / total) * Math.min(total, 10))
-                ? "bg-primary"
-                : "bg-muted"
+              ? "bg-primary"
+              : "bg-muted"
               }`}
           />
         ))}
@@ -199,8 +199,8 @@ export function AssessmentSteps() {
     specialization: "",
     collegeId: searchParams.get("cid") || undefined,
     technicalSkills: {}, softSkills: {}, communicationSkills: {}, eiSkills: {},
-
-    experience: {}, portfolioLevel: "none"
+    experience: {}, portfolioLevel: "none",
+    year: ""
   });
 
   const update = (partial: Partial<AssessmentData>) => {
@@ -240,6 +240,9 @@ export function AssessmentSteps() {
 
     if (currentStep === 1) {
       if (!data.educationLevel) newErrors.educationLevel = "Education level is required";
+      if (data.educationLevel && !data.educationLevel.startsWith("Class 12") && !data.year) {
+        newErrors.year = "Year is required";
+      }
       if (!data.fieldOfStudy) newErrors.fieldOfStudy = "Field of study is required";
 
       if (data.educationLevel && data.fieldOfStudy) {
@@ -471,7 +474,23 @@ export function AssessmentSteps() {
           </div>
         )}
       </div>
-
+      {data.educationLevel && !data.educationLevel.startsWith("Class 12") && (
+        <div className="space-y-1.5">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Current Year *</Label>
+          <Select value={data.year} onValueChange={v => update({ year: v })}>
+            <SelectTrigger className={`h-11 ${errors.year ? "border-destructive ring-1 ring-destructive/50" : ""}`}>
+              <SelectValue placeholder="Select year" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1st year">1st year</SelectItem>
+              <SelectItem value="2nd year">2nd year</SelectItem>
+              <SelectItem value="3rd year">3rd year</SelectItem>
+              <SelectItem value="4th year">4th year</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.year && <p className="text-[10px] font-medium text-destructive">{errors.year}</p>}
+        </div>
+      )}
       {/* Career Domain — shows when field+education have available domains */}
       {data.educationLevel && data.fieldOfStudy && availableDomains.length > 0 && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3">
@@ -835,8 +854,8 @@ export function AssessmentSteps() {
               whileHover={{ scale: 1.03 }}
               onClick={() => update({ portfolioLevel: opt.value })}
               className={`rounded-xl border-2 p-4 text-center transition-all ${data.portfolioLevel === opt.value
-                  ? "border-primary box-glow bg-primary/5"
-                  : "border-border hover:border-muted-foreground"
+                ? "border-primary box-glow bg-primary/5"
+                : "border-border hover:border-muted-foreground"
                 }`}
             >
               <opt.icon className={`w-6 h-6 mx-auto mb-1 ${data.portfolioLevel === opt.value ? "text-primary" : "text-muted-foreground"}`} />

@@ -2092,6 +2092,7 @@ export type AssessmentData = {
   eiSkills: Record<string, number>;
   experience: Record<string, number>;
   portfolioLevel: "none" | "basic" | "strong";
+  year?: string;
 };
 
 // Career Timeline derived intelligence

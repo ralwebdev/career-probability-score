@@ -19,7 +19,7 @@ const assessmentSchema = new mongoose.Schema({
   department: { type: String },
   course: { type: String },
 
-  year: { type: Number, enum: [1, 2, 3, 4] },
+  year: { type: String, enum: ['1st year', '2nd year', '3rd year', '4th year'] },
   cpsHistory: [{ type: Number }],
 
   // Dashboard specific metrics (stored in Assessment for single source of truth)

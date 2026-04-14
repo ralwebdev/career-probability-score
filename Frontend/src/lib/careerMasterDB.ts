@@ -456,7 +456,7 @@ export const domainsByField: Record<string, string[]> = {
 
   // --- Undergraduate fields ---
   btech: [
-    "software_engineering", "mechanical", "civil", "electrical",
+    "software_engineering", "data_science_ai", "mechanical", "civil", "electrical",
     "electronics", "robotics", "automobile", "aerospace",
     "marine", "industrial_engineering",
   ],

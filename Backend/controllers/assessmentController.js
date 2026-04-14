@@ -205,6 +205,7 @@ const exportAssessmentsToCSV = async (req, res, next) => {
       { label: 'Domain', path: 'careerDomain' },
       { label: 'Specialization', path: 'specialization' },
       { label: 'Target Role', path: 'careerRole' },
+      { label: 'Year', path: 'year' },
       { label: 'QPI Score', path: 'scores.qpi' },
       { label: 'Technical Score', path: 'scores.technical' },
       { label: 'Soft Skills Score', path: 'scores.softSkill' },
