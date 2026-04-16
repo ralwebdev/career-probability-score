@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
+import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
-import { Lock, LogOut, Database, Building2, LayoutDashboard } from "lucide-react";
+import { Lock, LogOut, Database, Building2, LayoutDashboard, RefreshCw, Clock } from "lucide-react";
 import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getLeads, getAssessments, getAssessmentStats, getColleges } from "@/lib/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
@@ -46,6 +47,10 @@ export default function Admin() {
     // College Filter state
     const [colleges, setColleges] = useState<any[]>([]);
     const [selectedCollegeId, setSelectedCollegeId] = useState<string>("all");
+    
+    // Refresh & Timing state
+    const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Pagination state
     const [counselingPage, setCounselingPage] = useState(1);
@@ -163,10 +168,12 @@ export default function Admin() {
 
             setAssessmentStats(aStats);
             setColleges(collegesList);
+            setLastUpdated(new Date());
         } catch (error: any) {
             toast.error("Failed to fetch dashboard data");
         } finally {
             setDataLoading(false);
+            setIsRefreshing(false);
         }
     };
 
@@ -255,7 +262,8 @@ export default function Admin() {
                     ]);
                     setDashboardData(stats);
                     setAssessmentStats(aStats);
-
+                    setLastUpdated(new Date());
+                    
                     // Reset assessment pagination and re-fetch filtered list
                     setAssessmentsPage(1);
                     const res = await getAssessments(token, 1, assessmentsLimit, {
@@ -275,6 +283,36 @@ export default function Admin() {
             refreshStats();
         }
     }, [selectedCollegeId]);
+
+    // Re-fetch on Window Focus (Strategy 3)
+    useEffect(() => {
+        const onFocus = () => {
+            const token = localStorage.getItem("adminToken");
+            if (!isAuthenticated || !token) return;
+
+            // Only refresh if data is older than 5 minutes
+            const now = new Date();
+            const diffInMinutes = (now.getTime() - lastUpdated.getTime()) / 60000;
+            
+            if (diffInMinutes > 5) {
+                console.log("Data is stale, refreshing...");
+                fetchData(token);
+                toast.info("Dashboard refreshed automatically");
+            }
+        };
+
+        window.addEventListener('focus', onFocus);
+        return () => window.removeEventListener('focus', onFocus);
+    }, [isAuthenticated, lastUpdated]);
+
+    const handleRefreshData = () => {
+        const token = localStorage.getItem("adminToken");
+        if (token) {
+            setIsRefreshing(true);
+            fetchData(token);
+            toast.success("Refreshing dashboard...");
+        }
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -400,12 +438,31 @@ export default function Admin() {
                                         </Select>
                                     </div>
                                 </div>
-                                <button
-                                    onClick={handleLogout}
-                                    className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2 text-sm font-medium hover:bg-accent transition-colors"
-                                >
-                                    <LogOut className="h-4 w-4" /> Sign Out
-                                </button>
+                                
+                                <div className="flex items-center gap-4">
+                                    <div className="hidden md:flex flex-col items-end">
+                                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border/50">
+                                            <Clock className="h-3 w-3" />
+                                            Last updated: {format(lastUpdated, "HH:mm:ss")}
+                                        </div>
+                                    </div>
+                                    
+                                    <button
+                                        onClick={handleRefreshData}
+                                        disabled={dataLoading || isRefreshing}
+                                        className={`p-2 rounded-lg border bg-card hover:bg-accent transition-all ${isRefreshing ? 'bg-primary/5' : ''}`}
+                                        title="Refresh Dashboard"
+                                    >
+                                        <RefreshCw className={`h-4 w-4 text-primary ${isRefreshing ? 'animate-spin' : ''}`} />
+                                    </button>
+
+                                    <button
+                                        onClick={handleLogout}
+                                        className="flex items-center gap-2 rounded-lg border bg-card px-4 py-2 text-sm font-medium hover:bg-accent transition-colors"
+                                    >
+                                        <LogOut className="h-4 w-4" /> Sign Out
+                                    </button>
+                                </div>
                             </div>
 
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
