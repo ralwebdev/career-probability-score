@@ -67,18 +67,20 @@ const createCollege = async (req, res) => {
   const { name, collegeId, location, email, password } = req.body;
 
   try {
+    const normalizedCollegeId = collegeId.toUpperCase().trim();
+
     const collegeExists = await College.findOne({ 
-      $or: [{ collegeId }, { email }] 
+      $or: [{ collegeId: normalizedCollegeId }, { email }] 
     });
 
     if (collegeExists) {
-      const field = collegeExists.collegeId === collegeId ? 'College ID' : 'Email';
+      const field = collegeExists.collegeId === normalizedCollegeId ? 'College ID' : 'Email';
       return res.status(400).json({ message: `${field} already exists` });
     }
 
     const college = await College.create({
       name,
-      collegeId,
+      collegeId: normalizedCollegeId,
       location,
       email,
       password,
@@ -122,12 +124,13 @@ const updateCollege = async (req, res) => {
       college.email = req.body.email;
     }
 
-    if (req.body.collegeId && req.body.collegeId !== college.collegeId) {
-      const idExists = await College.findOne({ collegeId: req.body.collegeId });
+    if (req.body.collegeId && req.body.collegeId.toUpperCase().trim() !== college.collegeId) {
+      const normalizedNewId = req.body.collegeId.toUpperCase().trim();
+      const idExists = await College.findOne({ collegeId: normalizedNewId });
       if (idExists) {
         return res.status(400).json({ message: 'College ID already exists' });
       }
-      college.collegeId = req.body.collegeId;
+      college.collegeId = normalizedNewId;
     }
 
     college.name = req.body.name || college.name;

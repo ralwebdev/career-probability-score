@@ -140,7 +140,7 @@ const protect = async (req, res, next) => {
 // @access  Public
 const getPublicCollegeByCid = async (req, res) => {
   try {
-    const college = await College.findOne({ collegeId: req.params.cid }).select('name');
+    const college = await College.findOne({ collegeId: req.params.cid.toUpperCase() }).select('name');
     if (!college) {
       return res.status(404).json({ message: 'College not found' });
     }

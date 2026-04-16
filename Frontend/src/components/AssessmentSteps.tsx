@@ -198,7 +198,7 @@ export function AssessmentSteps() {
     educationLevel: "", fieldOfStudy: "",
     careerDomain: "", careerRole: "",
     specialization: "",
-    collegeId: collegeId || searchParams.get("cid") || "RAL1",
+    collegeId: (collegeId || searchParams.get("cid") || "RAL1").toUpperCase(),
     technicalSkills: {}, softSkills: {}, communicationSkills: {}, eiSkills: {},
     experience: {}, portfolioLevel: "none",
     year: ""
