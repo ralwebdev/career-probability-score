@@ -382,3 +382,19 @@ export async function deleteCollege(id: string, token: string) {
   }
   return response.json();
 }
+
+export async function changeCollegePassword(passwordData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/college/change-password`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(passwordData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to change password");
+  }
+  return response.json();
+}

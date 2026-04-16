@@ -150,9 +150,37 @@ const getPublicCollegeByCid = async (req, res) => {
   }
 };
 
+// @desc    Change college password
+// @route   POST /api/college/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+  const { previousPassword, newPassword } = req.body;
+
+  try {
+    const user = await College.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const isMatch = await user.matchPassword(previousPassword);
+
+    if (isMatch) {
+      user.password = newPassword;
+      await user.save();
+      res.json({ message: 'Password updated successfully' });
+    } else {
+      res.status(401).json({ message: 'Incorrect current password' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginCollegeUser,
   getStudents,
   getPublicCollegeByCid,
+  changePassword,
   protect
 };

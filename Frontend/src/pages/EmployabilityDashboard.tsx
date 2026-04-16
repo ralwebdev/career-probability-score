@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LogOut, GraduationCap, ShieldCheck, LayoutDashboard, Database,
-  TrendingUp, BarChart3, Award, Users, ArrowRight
+  TrendingUp, BarChart3, Award, Users, ArrowRight, Key, X, Lock, Save
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery } from "@tanstack/react-query";
-import { getCollegeStudents } from "@/lib/api";
+import { getCollegeStudents, changeCollegePassword } from "@/lib/api";
 import { toast } from "sonner";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis,
@@ -28,6 +28,15 @@ export default function EmployabilityDashboard() {
   const [activeTab, setActiveTab] = useState("assessments");
   const [selectedScoreRange, setSelectedScoreRange] = useState<{ min: number; max: number; label: string } | null>(null);
   const [selectedCareerRole, setSelectedCareerRole] = useState<string | null>(null);
+  
+  // Password Change State
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    previousPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("collegeUser");
@@ -199,6 +208,30 @@ export default function EmployabilityDashboard() {
     navigate("/college-login");
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      toast.error("New passwords do not match");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await changeCollegePassword({
+        previousPassword: passwordForm.previousPassword,
+        newPassword: passwordForm.newPassword
+      }, user.token);
+      
+      toast.success("Password updated successfully!");
+      setIsChangingPassword(false);
+      setPasswordForm({ previousPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error: any) {
+      toast.error(error.message || "Failed to update password");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   if (!user) return null;
 
   return (
@@ -226,12 +259,21 @@ export default function EmployabilityDashboard() {
               </div>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-2 rounded-xl border bg-card/80 backdrop-blur-md px-6 py-3 text-sm font-bold hover:bg-accent transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
-          >
-            <LogOut className="h-4 w-4" /> Sign Out
-          </button>
+          <div className="flex items-center gap-3">
+             <button
+              onClick={() => setIsChangingPassword(true)}
+              className="flex items-center gap-2 rounded-xl border border-primary/20 bg-primary/5 backdrop-blur-md px-4 py-3 text-sm font-bold text-primary hover:bg-primary/10 transition-all shadow-sm active:scale-[0.98]"
+              title="Change Password"
+            >
+              <Lock className="h-4 w-4" /> Password
+            </button>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 rounded-xl border bg-card/80 backdrop-blur-md px-6 py-3 text-sm font-bold hover:bg-accent transition-all shadow-sm hover:shadow-md hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <LogOut className="h-4 w-4" /> Sign Out
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -245,161 +287,6 @@ export default function EmployabilityDashboard() {
         ) : (
           <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-8">
             <h2 className="text-2xl font-bold tracking-tight">Student Database ({students.length})</h2>
-            {/* <TabsList className="bg-card/40 border backdrop-blur-xl p-1.5 rounded-2xl shadow-sm">
-              <TabsTrigger value="analytics" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
-                <LayoutDashboard className="h-4 w-4 mr-2" /> Performance Analytics
-              </TabsTrigger>
-              <TabsTrigger value="assessments" className="px-8 py-3 rounded-xl data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all font-bold">
-                <Database className="h-4 w-4 mr-2" /> Student Database ({students.length})
-              </TabsTrigger>
-            </TabsList> */}
-
-            {/* <TabsContent value="analytics" className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-              <StatsGrid dashboardData={summaryData} />
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-                <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h3 className="text-lg font-bold flex items-center gap-2">
-                        <Award className="h-5 w-5 text-primary" /> Popular Career Interests
-                      </h3>
-                      <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a role to filter individual candidates</p>
-                    </div>
-                    {selectedCareerRole && (
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedCareerRole(null)} className="h-8 text-xs font-bold text-primary hover:text-primary hover:bg-primary/10">
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={popularInterests} layout="vertical" onClick={handleCareerClick}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" horizontal={false} />
-                      <XAxis type="number" hide />
-                      <YAxis dataKey="name" type="category" width={100} tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="none" />
-                      <Tooltip
-                        contentStyle={{
-                          background: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "12px",
-                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                          fontSize: "12px",
-                          fontWeight: "600"
-                        }}
-                        cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
-                        itemStyle={{ color: "hsl(var(--primary))" }}
-                      />
-                      <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 6, 6, 0]} barSize={20} className="cursor-pointer">
-                        {popularInterests.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fillOpacity={selectedCareerRole ? (selectedCareerRole === entry.name ? 1 : 0.45) : 1}
-                            stroke={selectedCareerRole === entry.name ? "hsl(var(--primary))" : "none"}
-                            strokeWidth={2}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-
-                <div className="rounded-2xl border bg-card/50 backdrop-blur-sm p-8 shadow-sm hover:shadow-md transition-shadow">
-                  <div className="flex items-center justify-between mb-8">
-                    <div>
-                      <h3 className="text-lg font-bold flex items-center gap-2">
-                        <BarChart3 className="h-5 w-5 text-accent" /> CPS Score Distribution
-                      </h3>
-                      <p className="text-[10px] text-muted-foreground ml-7 font-medium">Click a bar to filter institutional summary</p>
-                    </div>
-                    {selectedScoreRange && (
-                      <Button variant="ghost" size="sm" onClick={() => setSelectedScoreRange(null)} className="h-8 text-xs font-bold text-accent hover:text-accent hover:bg-accent/10">
-                        Clear
-                      </Button>
-                    )}
-                  </div>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={scoreDistribution} onClick={handleScoreClick}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
-                      <XAxis dataKey="range" tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="hsl(var(--border))" />
-                      <YAxis tick={{ fill: "hsl(var(--foreground))", fontSize: 11, fontWeight: 700 }} stroke="hsl(var(--border))" />
-                      <Tooltip
-                        contentStyle={{
-                          background: "hsl(var(--card))",
-                          border: "1px solid hsl(var(--border))",
-                          borderRadius: "12px",
-                          boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1)",
-                          fontSize: "12px",
-                          fontWeight: "600"
-                        }}
-                        cursor={{ fill: "hsl(var(--primary) / 0.05)" }}
-                      />
-                      <Bar dataKey="count" radius={[6, 6, 0, 0]} className="cursor-pointer">
-                        {scoreDistribution.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={entry.color}
-                            fillOpacity={selectedScoreRange ? (selectedScoreRange.label === entry.range ? 1 : 0.5) : 1}
-                            stroke={selectedScoreRange?.label === entry.range ? entry.color : "none"}
-                            strokeWidth={2}
-                          />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="relative group space-y-4">
-                <div className="flex items-center justify-between px-2">
-                  <div className="space-y-1">
-                    <h3 className="text-xl font-bold flex items-center gap-2">
-                      <Database className="h-5 w-5 text-primary" />
-                      {selectedScoreRange || selectedCareerRole ? "Filtered Candidate Records" : "Institutional Talent Records"}
-                    </h3>
-                    <div className="flex items-center gap-2">
-                      {selectedCareerRole && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold border border-primary/20">
-                          Role: {selectedCareerRole}
-                        </span>
-                      )}
-                      {selectedScoreRange && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-accent/10 text-accent text-[10px] font-bold border border-accent/20">
-                          Score: {selectedScoreRange.label}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-[11px] font-bold text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border">
-                      Viewing {filteredStudents.length} of {students.length} Total
-                    </div>
-                    {(selectedScoreRange || selectedCareerRole) && (
-                      <Button variant="outline" size="sm" onClick={clearAllFilters} className="h-8 text-xs font-bold border-primary/20 hover:bg-primary/5">
-                        Reset All
-                      </Button>
-                    )}
-                  </div>
-                </div>
-
-                <AnimatePresence>
-                  {(selectedScoreRange || selectedCareerRole) && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      className="absolute -top-10 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-6 py-2 rounded-full bg-primary text-primary-foreground text-xs font-black uppercase tracking-widest shadow-2xl border border-white/10"
-                    >
-                      <Database className="h-4 w-4" />
-                      Dynamic Drill-Down Active
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-
-                <AssessmentsTable data={filteredStudents} />
-              </div>
-            </TabsContent> */}
-
             <TabsContent value="assessments" className="animate-in fade-in slide-in-from-bottom-4 duration-500">
               <AssessmentsTable data={students} />
             </TabsContent>
@@ -407,6 +294,93 @@ export default function EmployabilityDashboard() {
         )}
       </div>
 
+      <AnimatePresence>
+        {isChangingPassword && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="bg-card border rounded-2xl w-full max-w-md p-6 shadow-2xl relative"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <Key className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="text-xl font-bold">Change Password</h3>
+                </div>
+                <button 
+                  onClick={() => setIsChangingPassword(false)} 
+                  className="p-2 hover:bg-muted rounded-full transition-colors"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              <form onSubmit={handlePasswordChange} className="space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Current Password</label>
+                  <input
+                    required
+                    type="password"
+                    value={passwordForm.previousPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, previousPassword: e.target.value })}
+                    className="w-full bg-background border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    placeholder="Enter current password"
+                  />
+                </div>
+
+                <div className="space-y-2 border-t pt-4 mt-2">
+                  <label className="text-sm font-medium">New Password</label>
+                  <input
+                    required
+                    type="password"
+                    value={passwordForm.newPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
+                    className="w-full bg-background border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    placeholder="Minimum 6 characters recommended"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Confirm New Password</label>
+                  <input
+                    required
+                    type="password"
+                    value={passwordForm.confirmPassword}
+                    onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
+                    className="w-full bg-background border rounded-lg px-4 py-2.5 outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                    placeholder="Repeat new password"
+                  />
+                </div>
+
+                <div className="flex flex-col gap-3 pt-4">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="w-full flex items-center justify-center gap-2 bg-primary text-primary-foreground py-3 rounded-lg font-bold hover:bg-primary/90 shadow-lg active:scale-[0.98] transition-all disabled:opacity-50"
+                  >
+                    {isSubmitting ? (
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Change Password
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsChangingPassword(false)}
+                    className="w-full py-2.5 border rounded-lg text-sm font-medium hover:bg-muted transition-colors font-bold"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

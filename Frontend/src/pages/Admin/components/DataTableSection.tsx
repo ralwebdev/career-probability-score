@@ -28,7 +28,8 @@ interface PaginationProps {
     onLimitChange: (limit: number) => void;
 }
 
-function TablePagination({ pagination }: { pagination: PaginationProps }) {
+function TablePagination({ pagination }: { pagination?: PaginationProps }) {
+    if (!pagination) return null;
     const { page, limit, total, onPageChange, onLimitChange } = pagination;
     const totalPages = Math.ceil(total / limit);
 
@@ -107,7 +108,7 @@ function TablePagination({ pagination }: { pagination: PaginationProps }) {
     );
 }
 
-export function CounselingTable({ data, onRowClick, pagination }: { data: any[]; onRowClick: (req: any) => void; pagination: PaginationProps }) {
+export function CounselingTable({ data, onRowClick, pagination }: { data: any[]; onRowClick: (req: any) => void; pagination?: PaginationProps }) {
     return (
         <div className="space-y-4">
             <div className="flex justify-end">
@@ -177,7 +178,7 @@ export function CounselingTable({ data, onRowClick, pagination }: { data: any[];
     );
 }
 
-export function AssessmentsTable({ data, onRowClick, pagination }: { data: any[]; onRowClick?: (assessment: any) => void; pagination: PaginationProps }) {
+export function AssessmentsTable({ data, onRowClick, pagination }: { data: any[]; onRowClick?: (assessment: any) => void; pagination?: PaginationProps }) {
     return (
         <div className="space-y-4">
             <div className="flex justify-end">
@@ -259,7 +260,7 @@ export function AssessmentsTable({ data, onRowClick, pagination }: { data: any[]
     );
 }
 
-export function LeadsTable({ data, onRowClick, pagination }: { data: any[]; onRowClick: (lead: any) => void; pagination: PaginationProps }) {
+export function LeadsTable({ data, onRowClick, pagination }: { data: any[]; onRowClick: (lead: any) => void; pagination?: PaginationProps }) {
     return (
         <div className="space-y-4">
             <div className="flex justify-end">
