@@ -164,8 +164,37 @@ const getCourseScoreStats = async (req, res, next) => {
 // @route   GET /api/assessments
 const getAssessments = async (req, res, next) => {
   try {
-    const assessments = await Assessment.find({}).sort({ createdAt: -1 });
-    res.json(assessments);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 25;
+    const skip = (page - 1) * limit;
+
+    const query = {};
+    if (req.query.careerRole) {
+      query.careerRole = req.query.careerRole;
+    }
+    if (req.query.minScore || req.query.maxScore) {
+      query['scores.total'] = {};
+      if (req.query.minScore) query['scores.total'].$gte = parseInt(req.query.minScore);
+      if (req.query.maxScore) query['scores.total'].$lte = parseInt(req.query.maxScore);
+    }
+
+    const assessments = await Assessment.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Assessment.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: assessments,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     next(error);
   }

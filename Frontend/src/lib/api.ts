@@ -120,8 +120,8 @@ export async function getDashboardStats(token: string) {
   return response.json();
 }
 
-export async function getCounselingRequests(token: string) {
-  const response = await fetch(`${API_BASE_URL}/counseling`, {
+export async function getCounselingRequests(token: string, page = 1, limit = 25) {
+  const response = await fetch(`${API_BASE_URL}/counseling?page=${page}&limit=${limit}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },
@@ -134,8 +134,8 @@ export async function getCounselingRequests(token: string) {
   return response.json();
 }
 
-export async function getLeads(token: string) {
-  const response = await fetch(`${API_BASE_URL}/leads`, {
+export async function getLeads(token: string, page = 1, limit = 25) {
+  const response = await fetch(`${API_BASE_URL}/leads?page=${page}&limit=${limit}`, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },
@@ -147,8 +147,13 @@ export async function getLeads(token: string) {
 
   return response.json();
 }
-export async function getAssessments(token: string) {
-  const response = await fetch(`${API_BASE_URL}/assessments`, {
+export async function getAssessments(token: string, page = 1, limit = 25, filters: any = {}) {
+  let url = `${API_BASE_URL}/assessments?page=${page}&limit=${limit}`;
+  if (filters.careerRole) url += `&careerRole=${encodeURIComponent(filters.careerRole)}`;
+  if (filters.minScore) url += `&minScore=${filters.minScore}`;
+  if (filters.maxScore) url += `&maxScore=${filters.maxScore}`;
+
+  const response = await fetch(url, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },

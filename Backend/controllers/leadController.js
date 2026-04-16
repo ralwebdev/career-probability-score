@@ -16,8 +16,27 @@ const createLead = async (req, res, next) => {
 // @route   GET /api/leads
 const getLeads = async (req, res, next) => {
   try {
-    const leads = await Lead.find({}).sort({ createdAt: -1 });
-    res.json(leads);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 25;
+    const skip = (page - 1) * limit;
+
+    const leads = await Lead.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const total = await Lead.countDocuments();
+
+    res.json({
+      success: true,
+      data: leads,
+      pagination: {
+        total,
+        page,
+        limit,
+        pages: Math.ceil(total / limit)
+      }
+    });
   } catch (error) {
     next(error);
   }

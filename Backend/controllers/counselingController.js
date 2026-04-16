@@ -26,10 +26,26 @@ const submitCounseling = async (req, res) => {
 // @access  Private (Admin)
 const getCounselingRequests = async (req, res) => {
     try {
-        const counselingRequests = await Counseling.find().sort({ createdAt: -1 });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 25;
+        const skip = (page - 1) * limit;
+
+        const counselingRequests = await Counseling.find()
+            .sort({ createdAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        const total = await Counseling.countDocuments();
+
         res.status(200).json({
             success: true,
-            data: counselingRequests
+            data: counselingRequests,
+            pagination: {
+                total,
+                page,
+                limit,
+                pages: Math.ceil(total / limit)
+            }
         });
     } catch (error) {
         res.status(500).json({

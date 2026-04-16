@@ -41,6 +41,19 @@ export default function Admin() {
     const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
     const [selectedCounseling, setSelectedCounseling] = useState<any>(null);
     const [selectedLead, setSelectedLead] = useState<any>(null);
+    
+    // Pagination state
+    const [counselingPage, setCounselingPage] = useState(1);
+    const [counselingLimit, setCounselingLimit] = useState(25);
+    const [counselingTotal, setCounselingTotal] = useState(0);
+
+    const [assessmentsPage, setAssessmentsPage] = useState(1);
+    const [assessmentsLimit, setAssessmentsLimit] = useState(25);
+    const [assessmentsTotal, setAssessmentsTotal] = useState(0);
+
+    const [leadsPage, setLeadsPage] = useState(1);
+    const [leadsLimit, setLeadsLimit] = useState(25);
+    const [leadsTotal, setLeadsTotal] = useState(0);
 
     // Derived filtered assessments based on active analytics filters
     const filteredAssessments = useMemo(() => {
@@ -88,8 +101,15 @@ export default function Admin() {
     const clearFilters = () => {
         setSelectedScoreRange(null);
         setSelectedCareerRole(null);
+        setAssessmentsPage(1); // Reset to first page when filtering
         toast.success("Filters cleared");
     };
+
+    useEffect(() => {
+        if (selectedScoreRange || selectedCareerRole) {
+            setAssessmentsPage(1);
+        }
+    }, [selectedScoreRange, selectedCareerRole]);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -112,17 +132,28 @@ export default function Admin() {
     const fetchData = async (token: string) => {
         setDataLoading(true);
         try {
+            // Initial load of stats and first pages
             const [stats, counseling, assessments, leads, aStats] = await Promise.all([
                 getDashboardStats(token),
-                getCounselingRequests(token),
-                getAssessments(token),
-                getLeads(token),
+                getCounselingRequests(token, counselingPage, counselingLimit),
+                getAssessments(token, assessmentsPage, assessmentsLimit, {
+                    careerRole: selectedCareerRole,
+                    minScore: selectedScoreRange ? selectedScoreRange.range.split('-')[0] : null,
+                    maxScore: selectedScoreRange ? selectedScoreRange.range.split('-')[1] : null
+                }),
+                getLeads(token, leadsPage, leadsLimit),
                 getAssessmentStats(token)
             ]);
             setDashboardData(stats);
-            setCounselingData(counseling.data || counseling);
-            setAssessmentsData(assessments.data || assessments);
-            setLeadsData(leads.data || leads);
+            setCounselingData(counseling.data);
+            setCounselingTotal(counseling.pagination.total);
+            
+            setAssessmentsData(assessments.data);
+            setAssessmentsTotal(assessments.pagination.total);
+            
+            setLeadsData(leads.data);
+            setLeadsTotal(leads.pagination.total);
+            
             setAssessmentStats(aStats);
         } catch (error: any) {
             toast.error("Failed to fetch dashboard data");
@@ -130,6 +161,77 @@ export default function Admin() {
             setDataLoading(false);
         }
     };
+
+    // Granular fetchers for pagination changes
+    const fetchCounseling = async () => {
+        const token = localStorage.getItem("adminToken");
+        if (!token) return;
+        setDataLoading(true);
+        try {
+            const res = await getCounselingRequests(token, counselingPage, counselingLimit);
+            setCounselingData(res.data);
+            setCounselingTotal(res.pagination.total);
+        } catch (error) {
+            toast.error("Failed to fetch counseling requests");
+        } finally {
+            setDataLoading(false);
+        }
+    };
+
+    const fetchAssessments = async () => {
+        const token = localStorage.getItem("adminToken");
+        if (!token) return;
+        setDataLoading(true);
+        try {
+            const res = await getAssessments(token, assessmentsPage, assessmentsLimit, {
+                careerRole: selectedCareerRole,
+                minScore: selectedScoreRange ? selectedScoreRange.range.split('-')[0] : null,
+                maxScore: selectedScoreRange ? selectedScoreRange.range.split('-')[1] : null
+            });
+            setAssessmentsData(res.data);
+            setAssessmentsTotal(res.pagination.total);
+        } catch (error) {
+            toast.error("Failed to fetch assessments");
+        } finally {
+            setDataLoading(false);
+        }
+    };
+
+    const fetchLeads = async () => {
+        const token = localStorage.getItem("adminToken");
+        if (!token) return;
+        setDataLoading(true);
+        try {
+            const res = await getLeads(token, leadsPage, leadsLimit);
+            setLeadsData(res.data);
+            setLeadsTotal(res.pagination.total);
+        } catch (error) {
+            toast.error("Failed to fetch leads");
+        } finally {
+            setDataLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        const token = localStorage.getItem("adminToken");
+        if (isAuthenticated && token) {
+            fetchCounseling();
+        }
+    }, [counselingPage, counselingLimit]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("adminToken");
+        if (isAuthenticated && token) {
+            fetchAssessments();
+        }
+    }, [assessmentsPage, assessmentsLimit, selectedScoreRange, selectedCareerRole]);
+
+    useEffect(() => {
+        const token = localStorage.getItem("adminToken");
+        if (isAuthenticated && token) {
+            fetchLeads();
+        }
+    }, [leadsPage, leadsLimit]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -244,9 +346,9 @@ export default function Admin() {
                             <TabsList className="bg-card/50 border backdrop-blur-sm">
                                 <TabsTrigger value="dashboard">Analytics</TabsTrigger>
                                 <TabsTrigger value="assessment-stats">Assessment Stats</TabsTrigger>
-                                <TabsTrigger value="counseling">Counseling ({counselingData.length})</TabsTrigger>
-                                <TabsTrigger value="assessments">Assessments ({assessmentsData.length})</TabsTrigger>
-                                <TabsTrigger value="leads">Leads ({leadsData.length})</TabsTrigger>
+                                <TabsTrigger value="counseling">Counseling ({counselingTotal})</TabsTrigger>
+                                <TabsTrigger value="assessments">Assessments ({assessmentsTotal})</TabsTrigger>
+                                <TabsTrigger value="leads">Leads ({leadsTotal})</TabsTrigger>
                                 <TabsTrigger value="courses">Courses</TabsTrigger>
                                 <TabsTrigger value="webinars">Webinars</TabsTrigger>
                                 <TabsTrigger value="colleges">Colleges</TabsTrigger>
@@ -264,9 +366,9 @@ export default function Admin() {
                                         <StatsGrid dashboardData={dashboardData} />
                                         <ChartsSection
                                             dashboardData={dashboardData}
-                                            assessmentsCount={assessmentsData.length}
-                                            counselingCount={counselingData.length}
-                                            leadsCount={leadsData.length}
+                                            assessmentsCount={assessmentsTotal}
+                                            counselingCount={counselingTotal}
+                                            leadsCount={leadsTotal}
                                             onScoreClick={handleScoreClick}
                                             onCareerClick={handleCareerClick}
                                             selectedScoreRange={selectedScoreRange?.range}
@@ -283,7 +385,7 @@ export default function Admin() {
                                                 </div>
                                                 <div className="flex items-center gap-4">
                                                     <div className="text-[11px] font-bold text-muted-foreground bg-muted/50 px-3 py-1 rounded-full border">
-                                                        Viewing {filteredAssessments.length} of {assessmentsData.length} candidates
+                                                        Viewing {assessmentsData.length} of {assessmentsTotal} candidates
                                                     </div>
                                                     {(selectedScoreRange || selectedCareerRole) && (
                                                         <button 
@@ -311,7 +413,17 @@ export default function Admin() {
                                                 </div>
                                             ) : null}
 
-                                            <AssessmentsTable data={filteredAssessments} onRowClick={setSelectedAssessment} />
+                                            <AssessmentsTable 
+                                                data={assessmentsData} 
+                                                onRowClick={setSelectedAssessment} 
+                                                pagination={{
+                                                    page: assessmentsPage,
+                                                    limit: assessmentsLimit,
+                                                    total: assessmentsTotal,
+                                                    onPageChange: setAssessmentsPage,
+                                                    onLimitChange: setAssessmentsLimit
+                                                }}
+                                            />
                                         </div>
                                     </>
                                 )}
@@ -322,15 +434,45 @@ export default function Admin() {
                             </TabsContent>
 
                             <TabsContent value="counseling">
-                                <CounselingTable data={counselingData} onRowClick={setSelectedCounseling} />
+                                <CounselingTable 
+                                    data={counselingData} 
+                                    onRowClick={setSelectedCounseling} 
+                                    pagination={{
+                                        page: counselingPage,
+                                        limit: counselingLimit,
+                                        total: counselingTotal,
+                                        onPageChange: setCounselingPage,
+                                        onLimitChange: setCounselingLimit
+                                    }}
+                                />
                             </TabsContent>
 
                             <TabsContent value="assessments">
-                                <AssessmentsTable data={assessmentsData} onRowClick={setSelectedAssessment} />
+                                <AssessmentsTable 
+                                    data={assessmentsData} 
+                                    onRowClick={setSelectedAssessment} 
+                                    pagination={{
+                                        page: assessmentsPage,
+                                        limit: assessmentsLimit,
+                                        total: assessmentsTotal,
+                                        onPageChange: setAssessmentsPage,
+                                        onLimitChange: setAssessmentsLimit
+                                    }}
+                                />
                             </TabsContent>
 
                             <TabsContent value="leads">
-                                <LeadsTable data={leadsData} onRowClick={setSelectedLead} />
+                                <LeadsTable 
+                                    data={leadsData} 
+                                    onRowClick={setSelectedLead} 
+                                    pagination={{
+                                        page: leadsPage,
+                                        limit: leadsLimit,
+                                        total: leadsTotal,
+                                        onPageChange: setLeadsPage,
+                                        onLimitChange: setLeadsLimit
+                                    }}
+                                />
                             </TabsContent>
 
                             <TabsContent value="courses">
