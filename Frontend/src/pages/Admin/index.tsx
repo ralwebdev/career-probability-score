@@ -1,11 +1,11 @@
 import { useState, useEffect, useMemo } from "react";
-import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { Lock, LogOut, Database, Building2, LayoutDashboard, RefreshCw, Clock } from "lucide-react";
 import { adminLogin, verifyAdmin, getDashboardStats, getCounselingRequests, getLeads, getAssessments, getAssessmentStats, getColleges } from "@/lib/api";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
     AssessmentModal,
@@ -32,12 +32,6 @@ export default function Admin() {
     const [isLoggingIn, setIsLoggingIn] = useState(false);
 
     const [activeTab, setActiveTab] = useState("dashboard");
-    const [dashboardData, setDashboardData] = useState<any>(null);
-    const [counselingData, setCounselingData] = useState<any[]>([]);
-    const [assessmentsData, setAssessmentsData] = useState<any[]>([]);
-    const [leadsData, setLeadsData] = useState<any[]>([]);
-    const [assessmentStats, setAssessmentStats] = useState<any[]>([]);
-    const [dataLoading, setDataLoading] = useState(false);
     const [selectedScoreRange, setSelectedScoreRange] = useState<any>(null);
     const [selectedCareerRole, setSelectedCareerRole] = useState<string | null>(null);
     const [selectedAssessment, setSelectedAssessment] = useState<any>(null);
@@ -45,25 +39,105 @@ export default function Admin() {
     const [selectedLead, setSelectedLead] = useState<any>(null);
 
     // College Filter state
-    const [colleges, setColleges] = useState<any[]>([]);
     const [selectedCollegeId, setSelectedCollegeId] = useState<string>("all");
-    
-    // Refresh & Timing state
-    const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
-    const [isRefreshing, setIsRefreshing] = useState(false);
 
     // Pagination state
     const [counselingPage, setCounselingPage] = useState(1);
     const [counselingLimit, setCounselingLimit] = useState(25);
-    const [counselingTotal, setCounselingTotal] = useState(0);
 
     const [assessmentsPage, setAssessmentsPage] = useState(1);
     const [assessmentsLimit, setAssessmentsLimit] = useState(25);
-    const [assessmentsTotal, setAssessmentsTotal] = useState(0);
 
     const [leadsPage, setLeadsPage] = useState(1);
     const [leadsLimit, setLeadsLimit] = useState(25);
-    const [leadsTotal, setLeadsTotal] = useState(0);
+
+    // Last updated timer state
+    const [lastUpdateTimeStr, setLastUpdateTimeStr] = useState("just now");
+
+    const queryClient = useQueryClient();
+    const token = localStorage.getItem("adminToken");
+
+    // Derived filtered assessments based on active analytics filters
+    const clearFilters = () => {
+        setSelectedScoreRange(null);
+        setSelectedCareerRole(null);
+        setAssessmentsPage(1); // Reset to first page when filtering
+        toast.success("Filters cleared");
+    };
+
+    useEffect(() => {
+        const checkAuth = async () => {
+            const token = localStorage.getItem("adminToken");
+            if (token) {
+                try {
+                    await verifyAdmin(token);
+                    setIsAuthenticated(true);
+                } catch (error) {
+                    localStorage.removeItem("adminToken");
+                    setIsAuthenticated(false);
+                }
+            }
+            setIsLoading(false);
+        };
+        checkAuth();
+    }, []);
+
+    useEffect(() => {
+        if (selectedScoreRange || selectedCareerRole) {
+            setAssessmentsPage(1);
+        }
+    }, [selectedScoreRange, selectedCareerRole]);
+
+    // Combined data fetching with React Query
+    const { data: colleges = [] } = useQuery({
+        queryKey: ["colleges"],
+        queryFn: () => getColleges(token!),
+        enabled: !!token && isAuthenticated,
+    });
+
+    const { data: dashboardData, isLoading: dashboardLoading, dataUpdatedAt: statsUpdatedAt } = useQuery({
+        queryKey: ["dashboardStats", selectedCollegeId],
+        queryFn: () => getDashboardStats(token!, selectedCollegeId),
+        enabled: !!token && isAuthenticated,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const { data: assessmentStatsData, isLoading: aStatsLoading } = useQuery({
+        queryKey: ["assessmentStats", selectedCollegeId],
+        queryFn: () => getAssessmentStats(token!, selectedCollegeId),
+        enabled: !!token && isAuthenticated,
+        staleTime: 1000 * 60 * 5,
+    });
+
+    const { data: counselingRes, isLoading: counselingLoading } = useQuery({
+        queryKey: ["counseling", counselingPage, counselingLimit],
+        queryFn: () => getCounselingRequests(token!, counselingPage, counselingLimit),
+        enabled: !!token && isAuthenticated,
+    });
+
+    const { data: assessmentsRes, isLoading: assessmentsLoading, isFetching: assessmentsRefreshing, dataUpdatedAt: assessmentsUpdatedAt } = useQuery({
+        queryKey: ["assessments", assessmentsPage, assessmentsLimit, selectedCollegeId, selectedCareerRole, selectedScoreRange],
+        queryFn: () => getAssessments(token!, assessmentsPage, assessmentsLimit, {
+            careerRole: selectedCareerRole,
+            collegeId: selectedCollegeId,
+            minScore: selectedScoreRange ? selectedScoreRange.range.split('-')[0] : null,
+            maxScore: selectedScoreRange ? selectedScoreRange.range.split('-')[1] : null
+        }),
+        enabled: !!token && isAuthenticated,
+    });
+
+    const { data: leadsRes, isLoading: leadsLoading } = useQuery({
+        queryKey: ["leads", leadsPage, leadsLimit],
+        queryFn: () => getLeads(token!, leadsPage, leadsLimit),
+        enabled: !!token && isAuthenticated,
+    });
+
+    const assessmentsData = assessmentsRes?.data || [];
+    const assessmentsTotal = assessmentsRes?.pagination?.total || 0;
+    const counselingData = counselingRes?.data || [];
+    const counselingTotal = counselingRes?.pagination?.total || 0;
+    const leadsData = leadsRes?.data || [];
+    const leadsTotal = leadsRes?.pagination?.total || 0;
 
     // Derived filtered assessments based on active analytics filters
     const filteredAssessments = useMemo(() => {
@@ -71,14 +145,14 @@ export default function Admin() {
 
         if (selectedScoreRange) {
             const [min, max] = selectedScoreRange.range.split('-').map(Number);
-            result = result.filter(s => {
+            result = result.filter((s: any) => {
                 const score = s.scores?.total || 0;
                 return score >= min && score <= max;
             });
         }
 
         if (selectedCareerRole) {
-            result = result.filter(s => s.careerRole === selectedCareerRole);
+            result = result.filter((s: any) => s.careerRole === selectedCareerRole);
         }
 
         return result;
@@ -108,210 +182,25 @@ export default function Admin() {
         }
     };
 
-    const clearFilters = () => {
-        setSelectedScoreRange(null);
-        setSelectedCareerRole(null);
-        setAssessmentsPage(1); // Reset to first page when filtering
-        toast.success("Filters cleared");
-    };
+    // Last updated logic (most recent from stats or assessments)
+    const latestUpdate = Math.max(statsUpdatedAt || 0, assessmentsUpdatedAt || 0);
 
     useEffect(() => {
-        if (selectedScoreRange || selectedCareerRole) {
-            setAssessmentsPage(1);
-        }
-    }, [selectedScoreRange, selectedCareerRole]);
-
-    useEffect(() => {
-        const checkAuth = async () => {
-            const token = localStorage.getItem("adminToken");
-            if (token) {
-                try {
-                    await verifyAdmin(token);
-                    setIsAuthenticated(true);
-                    fetchData(token);
-                } catch (error) {
-                    localStorage.removeItem("adminToken");
-                    setIsAuthenticated(false);
-                }
-            }
-            setIsLoading(false);
+        if (!latestUpdate) return;
+        const updateTime = () => {
+            const seconds = Math.floor((Date.now() - latestUpdate) / 1000);
+            if (seconds < 5) setLastUpdateTimeStr("just now");
+            else if (seconds < 60) setLastUpdateTimeStr(`${seconds}s ago`);
+            else setLastUpdateTimeStr(`${Math.floor(seconds / 60)}m ago`);
         };
-        checkAuth();
-    }, []);
-
-    const fetchData = async (token: string) => {
-        setDataLoading(true);
-        try {
-            // Initial load of stats and first pages
-            const [stats, counseling, assessments, leads, aStats, collegesList] = await Promise.all([
-                getDashboardStats(token, selectedCollegeId),
-                getCounselingRequests(token, counselingPage, counselingLimit),
-                getAssessments(token, assessmentsPage, assessmentsLimit, {
-                    careerRole: selectedCareerRole,
-                    collegeId: selectedCollegeId,
-                    minScore: selectedScoreRange ? selectedScoreRange.range.split('-')[0] : null,
-                    maxScore: selectedScoreRange ? selectedScoreRange.range.split('-')[1] : null
-                }),
-                getLeads(token, leadsPage, leadsLimit),
-                getAssessmentStats(token, selectedCollegeId),
-                getColleges(token)
-            ]);
-            setDashboardData(stats);
-            setCounselingData(counseling.data);
-            setCounselingTotal(counseling.pagination.total);
-
-            setAssessmentsData(assessments.data);
-            setAssessmentsTotal(assessments.pagination.total);
-
-            setLeadsData(leads.data);
-            setLeadsTotal(leads.pagination.total);
-
-            setAssessmentStats(aStats);
-            setColleges(collegesList);
-            setLastUpdated(new Date());
-        } catch (error: any) {
-            toast.error("Failed to fetch dashboard data");
-        } finally {
-            setDataLoading(false);
-            setIsRefreshing(false);
-        }
-    };
-
-    // Granular fetchers for pagination changes
-    const fetchCounseling = async () => {
-        const token = localStorage.getItem("adminToken");
-        if (!token) return;
-        setDataLoading(true);
-        try {
-            const res = await getCounselingRequests(token, counselingPage, counselingLimit);
-            setCounselingData(res.data);
-            setCounselingTotal(res.pagination.total);
-        } catch (error) {
-            toast.error("Failed to fetch counseling requests");
-        } finally {
-            setDataLoading(false);
-        }
-    };
-
-    const fetchAssessments = async () => {
-        const token = localStorage.getItem("adminToken");
-        if (!token) return;
-        setDataLoading(true);
-        try {
-            const res = await getAssessments(token, assessmentsPage, assessmentsLimit, {
-                careerRole: selectedCareerRole,
-                collegeId: selectedCollegeId,
-                minScore: selectedScoreRange ? selectedScoreRange.range.split('-')[0] : null,
-                maxScore: selectedScoreRange ? selectedScoreRange.range.split('-')[1] : null
-            });
-            setAssessmentsData(res.data);
-            setAssessmentsTotal(res.pagination.total);
-        } catch (error) {
-            toast.error("Failed to fetch assessments");
-        } finally {
-            setDataLoading(false);
-        }
-    };
-
-    const fetchLeads = async () => {
-        const token = localStorage.getItem("adminToken");
-        if (!token) return;
-        setDataLoading(true);
-        try {
-            const res = await getLeads(token, leadsPage, leadsLimit);
-            setLeadsData(res.data);
-            setLeadsTotal(res.pagination.total);
-        } catch (error) {
-            toast.error("Failed to fetch leads");
-        } finally {
-            setDataLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        const token = localStorage.getItem("adminToken");
-        if (isAuthenticated && token) {
-            fetchCounseling();
-        }
-    }, [counselingPage, counselingLimit]);
-
-    useEffect(() => {
-        const token = localStorage.getItem("adminToken");
-        if (isAuthenticated && token) {
-            fetchAssessments();
-        }
-    }, [assessmentsPage, assessmentsLimit, selectedScoreRange, selectedCareerRole]);
-
-    useEffect(() => {
-        const token = localStorage.getItem("adminToken");
-        if (isAuthenticated && token) {
-            fetchLeads();
-        }
-    }, [leadsPage, leadsLimit]);
-
-    // Handle re-fetching all stats when college filter changes
-    useEffect(() => {
-        const token = localStorage.getItem("adminToken");
-        if (isAuthenticated && token) {
-            const refreshStats = async () => {
-                setDataLoading(true);
-                try {
-                    const [stats, aStats] = await Promise.all([
-                        getDashboardStats(token, selectedCollegeId),
-                        getAssessmentStats(token, selectedCollegeId)
-                    ]);
-                    setDashboardData(stats);
-                    setAssessmentStats(aStats);
-                    setLastUpdated(new Date());
-                    
-                    // Reset assessment pagination and re-fetch filtered list
-                    setAssessmentsPage(1);
-                    const res = await getAssessments(token, 1, assessmentsLimit, {
-                        careerRole: selectedCareerRole,
-                        collegeId: selectedCollegeId,
-                        minScore: selectedScoreRange ? selectedScoreRange.range.split('-')[0] : null,
-                        maxScore: selectedScoreRange ? selectedScoreRange.range.split('-')[1] : null
-                    });
-                    setAssessmentsData(res.data);
-                    setAssessmentsTotal(res.pagination.total);
-                } catch (error) {
-                    toast.error("Failed to refresh filtered data");
-                } finally {
-                    setDataLoading(false);
-                }
-            };
-            refreshStats();
-        }
-    }, [selectedCollegeId]);
-
-    // Re-fetch on Window Focus (Strategy 3)
-    useEffect(() => {
-        const onFocus = () => {
-            const token = localStorage.getItem("adminToken");
-            if (!isAuthenticated || !token) return;
-
-            // Only refresh if data is older than 5 minutes
-            const now = new Date();
-            const diffInMinutes = (now.getTime() - lastUpdated.getTime()) / 60000;
-            
-            if (diffInMinutes > 5) {
-                console.log("Data is stale, refreshing...");
-                fetchData(token);
-                toast.info("Dashboard refreshed automatically");
-            }
-        };
-
-        window.addEventListener('focus', onFocus);
-        return () => window.removeEventListener('focus', onFocus);
-    }, [isAuthenticated, lastUpdated]);
+        updateTime();
+        const interval = setInterval(updateTime, 10000);
+        return () => clearInterval(interval);
+    }, [latestUpdate]);
 
     const handleRefreshData = () => {
-        const token = localStorage.getItem("adminToken");
-        if (token) {
-            setIsRefreshing(true);
-            fetchData(token);
-            toast.success("Refreshing dashboard...");
-        }
+        queryClient.invalidateQueries();
+        toast.success("Refreshing dashboard records...");
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -321,7 +210,6 @@ export default function Admin() {
             const data = await adminLogin({ username, password });
             localStorage.setItem("adminToken", data.token);
             setIsAuthenticated(true);
-            fetchData(data.token);
             toast.success("Welcome back, Admin!");
         } catch (error: any) {
             toast.error(error.message || "Invalid credentials");
@@ -443,17 +331,17 @@ export default function Admin() {
                                     <div className="hidden md:flex flex-col items-end">
                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border/50">
                                             <Clock className="h-3 w-3" />
-                                            Last updated: {format(lastUpdated, "HH:mm:ss")}
+                                            Updated {lastUpdateTimeStr}
                                         </div>
                                     </div>
                                     
                                     <button
                                         onClick={handleRefreshData}
-                                        disabled={dataLoading || isRefreshing}
-                                        className={`p-2 rounded-lg border bg-card hover:bg-accent transition-all ${isRefreshing ? 'bg-primary/5' : ''}`}
+                                        disabled={assessmentsRefreshing}
+                                        className={`p-2 rounded-lg border bg-card hover:bg-accent transition-all ${assessmentsRefreshing ? 'bg-primary/5' : ''}`}
                                         title="Refresh Dashboard"
                                     >
-                                        <RefreshCw className={`h-4 w-4 text-primary ${isRefreshing ? 'animate-spin' : ''}`} />
+                                        <RefreshCw className={`h-4 w-4 text-primary ${assessmentsRefreshing ? 'animate-spin' : ''}`} />
                                     </button>
 
                                     <button
@@ -480,7 +368,7 @@ export default function Admin() {
 
 
                                 <TabsContent value="dashboard" className="space-y-8">
-                                    {dataLoading || !dashboardData ? (
+                                    {(dashboardLoading || assessmentsLoading) && !dashboardData ? (
                                         <div className="h-[400px] flex items-center justify-center">
                                             <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
                                         </div>
@@ -553,7 +441,7 @@ export default function Admin() {
                                 </TabsContent>
 
                                 <TabsContent value="assessment-stats">
-                                    <AssessmentStats data={assessmentStats} />
+                                    <AssessmentStats data={assessmentStatsData || []} />
                                 </TabsContent>
 
                                 <TabsContent value="counseling">
