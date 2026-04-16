@@ -102,10 +102,72 @@ const getColleges = async (req, res) => {
   }
 };
 
+// @desc    Update college
+// @route   PUT /api/admin/colleges/:id
+// @access  Private
+const updateCollege = async (req, res) => {
+  try {
+    const college = await College.findById(req.params.id);
+
+    if (!college) {
+      return res.status(404).json({ message: 'College not found' });
+    }
+
+    // Check if new email or collegeId is already taken by ANOTHER college
+    if (req.body.email && req.body.email !== college.email) {
+      const emailExists = await College.findOne({ email: req.body.email });
+      if (emailExists) {
+        return res.status(400).json({ message: 'Email already exists' });
+      }
+      college.email = req.body.email;
+    }
+
+    if (req.body.collegeId && req.body.collegeId !== college.collegeId) {
+      const idExists = await College.findOne({ collegeId: req.body.collegeId });
+      if (idExists) {
+        return res.status(400).json({ message: 'College ID already exists' });
+      }
+      college.collegeId = req.body.collegeId;
+    }
+
+    college.name = req.body.name || college.name;
+    college.location = req.body.location || college.location;
+    
+    if (req.body.password) {
+      college.password = req.body.password;
+    }
+
+    const updatedCollege = await college.save();
+    res.json(updatedCollege);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// @desc    Delete college
+// @route   DELETE /api/admin/colleges/:id
+// @access  Private
+const deleteCollege = async (req, res) => {
+  try {
+    const college = await College.findById(req.params.id);
+
+    if (!college) {
+      return res.status(404).json({ message: 'College not found' });
+    }
+
+    await college.deleteOne();
+    res.json({ message: 'College removed' });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   loginAdmin,
   verifyAdmin,
   createCollege,
   getColleges,
+  updateCollege,
+  deleteCollege,
 };
 

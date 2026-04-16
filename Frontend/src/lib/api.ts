@@ -352,3 +352,33 @@ export async function createCollege(collegeData: any, token: string) {
   }
   return response.json();
 }
+
+export async function updateCollege(id: string, collegeData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/colleges/${id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
+    body: JSON.stringify(collegeData),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to update college");
+  }
+  return response.json();
+}
+
+export async function deleteCollege(id: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/admin/colleges/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to delete college");
+  }
+  return response.json();
+}
