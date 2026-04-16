@@ -106,8 +106,13 @@ export async function submitCounseling(counselingData: any) {
   return response.json();
 }
 
-export async function getDashboardStats(token: string) {
-  const response = await fetch(`${API_BASE_URL}/assessments/analytics/stats`, {
+export async function getDashboardStats(token: string, collegeId?: string) {
+  let url = `${API_BASE_URL}/assessments/analytics/stats`;
+  if (collegeId && collegeId !== 'all') {
+    url += `?collegeId=${collegeId}`;
+  }
+  
+  const response = await fetch(url, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },
@@ -150,6 +155,7 @@ export async function getLeads(token: string, page = 1, limit = 25) {
 export async function getAssessments(token: string, page = 1, limit = 25, filters: any = {}) {
   let url = `${API_BASE_URL}/assessments?page=${page}&limit=${limit}`;
   if (filters.careerRole) url += `&careerRole=${encodeURIComponent(filters.careerRole)}`;
+  if (filters.collegeId && filters.collegeId !== 'all') url += `&collegeId=${filters.collegeId}`;
   if (filters.minScore) url += `&minScore=${filters.minScore}`;
   if (filters.maxScore) url += `&maxScore=${filters.maxScore}`;
 
@@ -166,8 +172,13 @@ export async function getAssessments(token: string, page = 1, limit = 25, filter
   return response.json();
 }
 
-export async function getAssessmentStats(token: string) {
-  const response = await fetch(`${API_BASE_URL}/assessments/stats/course-scores`, {
+export async function getAssessmentStats(token: string, collegeId?: string) {
+  let url = `${API_BASE_URL}/assessments/stats/course-scores`;
+  if (collegeId && collegeId !== 'all') {
+    url += `?collegeId=${collegeId}`;
+  }
+
+  const response = await fetch(url, {
     headers: {
       "Authorization": `Bearer ${token}`,
     },

@@ -29,15 +29,23 @@ const createAssessment = async (req, res, next) => {
 // @route   GET /api/assessments/analytics/stats
 const getAnalytics = async (req, res, next) => {
   try {
-    const totalUsers = await Assessment.countDocuments();
+    const { collegeId } = req.query;
+    const matchQuery = {};
+    if (collegeId && collegeId !== 'all') {
+      matchQuery.collegeId = collegeId;
+    }
+
+    const totalUsers = await Assessment.countDocuments(matchQuery);
     
     // Aggregation for Average CPS
     const avgStats = await Assessment.aggregate([
+      { $match: matchQuery },
       { $group: { _id: null, avgCps: { $avg: "$scores.total" } } }
     ]);
 
     // Popular Careers (by careerRole)
     const popularCareers = await Assessment.aggregate([
+      { $match: matchQuery },
       { $group: { _id: "$careerRole", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 8 },
@@ -46,6 +54,7 @@ const getAnalytics = async (req, res, next) => {
 
     // Score Distribution
     const scoreDistribution = await Assessment.aggregate([
+      { $match: matchQuery },
       {
         $bucket: {
           groupBy: "$scores.total",
@@ -90,6 +99,7 @@ const getAnalytics = async (req, res, next) => {
 
     // Top Countries
     const topCountries = await Assessment.aggregate([
+      { $match: matchQuery },
       { $group: { _id: "$country", users: { $sum: 1 } } },
       { $sort: { users: -1 } },
       { $limit: 5 },
@@ -99,9 +109,8 @@ const getAnalytics = async (req, res, next) => {
     // Assessments Today
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const assessmentsToday = await Assessment.countDocuments({
-      createdAt: { $gte: today }
-    });
+    const todayMatch = { ...matchQuery, createdAt: { $gte: today } };
+    const assessmentsToday = await Assessment.countDocuments(todayMatch);
     
     res.json({
       totalUsers,
@@ -120,7 +129,14 @@ const getAnalytics = async (req, res, next) => {
 // @route   GET /api/assessments/stats/course-scores
 const getCourseScoreStats = async (req, res, next) => {
   try {
+    const { collegeId } = req.query;
+    const matchQuery = {};
+    if (collegeId && collegeId !== 'all') {
+      matchQuery.collegeId = collegeId;
+    }
+
     const stats = await Assessment.aggregate([
+      { $match: matchQuery },
       {
         $group: {
           _id: "$careerRole",
@@ -171,6 +187,9 @@ const getAssessments = async (req, res, next) => {
     const query = {};
     if (req.query.careerRole) {
       query.careerRole = req.query.careerRole;
+    }
+    if (req.query.collegeId && req.query.collegeId !== 'all') {
+      query.collegeId = req.query.collegeId;
     }
     if (req.query.minScore || req.query.maxScore) {
       query['scores.total'] = {};
