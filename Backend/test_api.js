@@ -40,6 +40,17 @@ function request(method, path, body = null) {
 
 async function testApi() {
   try {
+    // Check if server is running before starting tests
+    try {
+      await request('GET', '/');
+    } catch (e) {
+      if (e.code === 'ECONNREFUSED') {
+        console.error('Error: Backend server is not running on http://localhost:5000');
+        console.log('Please run "npm start" in the Backend directory first.');
+        process.exit(1);
+      }
+    }
+
     console.log('Testing GET /api/assessments/analytics/stats...');
     const statsRes = await request('GET', '/api/assessments/analytics/stats');
     console.log('Stats Response:', statsRes.status, statsRes.data);

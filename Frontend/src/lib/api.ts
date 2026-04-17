@@ -40,7 +40,19 @@ export async function getAssessment(id: string) {
   return response.json();
 }
 
-export async function submitLead(leadData: any) {
+export interface LeadData {
+  name: string;
+  email: string;
+  phone: string;
+  city: string;
+  state: string;
+  country: string;
+  educationLevel: string;
+  fieldOfStudy: string;
+  source?: string;
+}
+
+export async function submitLead(leadData: LeadData) {
   const response = await fetch(`${API_BASE_URL}/leads`, {
     method: "POST",
     headers: {
@@ -57,7 +69,12 @@ export async function submitLead(leadData: any) {
   return response.json();
 }
 
-export async function adminLogin(credentials: any) {
+export interface AdminCredentials {
+  username: string;
+  password?: string;
+}
+
+export async function adminLogin(credentials: AdminCredentials) {
   const response = await fetch(`${API_BASE_URL}/admin/login`, {
     method: "POST",
     headers: {
@@ -89,7 +106,16 @@ export async function verifyAdmin(token: string) {
   return response.json();
 }
 
-export async function submitCounseling(counselingData: any) {
+export interface CounselingData {
+  name: string;
+  email: string;
+  phone: string;
+  preferredDate: string;
+  preferredTime: string;
+  message?: string;
+}
+
+export async function submitCounseling(counselingData: CounselingData) {
   const response = await fetch(`${API_BASE_URL}/counseling`, {
     method: "POST",
     headers: {

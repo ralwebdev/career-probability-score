@@ -286,7 +286,9 @@ export default function AdminCourseManagement({ token }: { token: string }) {
                     onChange={(e) => {
                       try {
                         setCurrentCourse({ ...currentCourse, modules: JSON.parse(e.target.value) });
-                      } catch (err) {}
+                      } catch (err) {
+                        // Suppress parse error while typing
+                      }
                     }}
                     className="w-full bg-background border rounded-lg px-3 py-2 font-mono text-[10px]"
                     rows={5}
