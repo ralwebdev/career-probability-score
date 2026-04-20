@@ -135,6 +135,18 @@ const protect = async (req, res, next) => {
   }
 };
 
+// @desc    Get all public colleges
+// @route   GET /api/college/public
+// @access  Public
+const getPublicColleges = async (req, res) => {
+  try {
+    const colleges = await College.find({ active: true }).select('name collegeId').sort({ name: 1 });
+    res.json(colleges);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // @desc    Get public college info by cid
 // @route   GET /api/college/public/:cid
 // @access  Public
@@ -180,6 +192,7 @@ const changePassword = async (req, res) => {
 module.exports = {
   loginCollegeUser,
   getStudents,
+  getPublicColleges,
   getPublicCollegeByCid,
   changePassword,
   protect

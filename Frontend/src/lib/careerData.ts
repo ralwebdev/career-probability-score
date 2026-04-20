@@ -2094,6 +2094,7 @@ export type AssessmentData = {
   portfolioLevel: "none" | "basic" | "strong";
   year?: string;
   collegeId?: string;
+  collegeName?: string;
 };
 
 // Career Timeline derived intelligence

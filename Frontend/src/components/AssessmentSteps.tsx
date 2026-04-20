@@ -19,7 +19,7 @@ import {
   type AssessmentData,
   calculateCPS,
 } from "@/lib/careerData";
-import { submitAssessment, getPublicCollegeByCid } from "@/lib/api";
+import { submitAssessment, getPublicCollegeByCid, getPublicColleges } from "@/lib/api";
 import {
   masterEducationLevels, fieldsByEducation, domainsByField,
   rolesByDomain, formatLabel, hasSubdomains, getSubdomains,
@@ -204,6 +204,21 @@ export function AssessmentSteps() {
     year: ""
   });
   const [collegeName, setCollegeName] = useState<string | null>(null);
+  const [collegesList, setCollegesList] = useState<{ name: string; collegeId: string }[]>([]);
+  const [isOtherCollege, setIsOtherCollege] = useState(false);
+  const [otherCollegeName, setOtherCollegeName] = useState("");
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const colleges = await getPublicColleges();
+        setCollegesList(colleges);
+      } catch (error) {
+        console.error("Failed to fetch colleges list:", error);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   useEffect(() => {
     const fetchCollege = async () => {
@@ -269,6 +284,13 @@ export function AssessmentSteps() {
           if (needsSpecialization && !data.specialization) newErrors.specialization = "Specialization is required";
           if (!data.careerRole) newErrors.careerRole = "Please select a career role";
         }
+      }
+
+      if (!isOtherCollege && !data.collegeId) {
+        newErrors.collegeId = "Please select your college";
+      }
+      if (isOtherCollege && !otherCollegeName.trim()) {
+        newErrors.collegeName = "Please enter your college name";
       }
     }
 
@@ -393,6 +415,16 @@ export function AssessmentSteps() {
 
     const submissionData = { ...trimmedData };
     if (!submissionData.year) delete submissionData.year;
+    
+    if (isOtherCollege) {
+      submissionData.collegeName = otherCollegeName.trim();
+      submissionData.collegeId = "OTHER";
+    } else if (data.collegeId) {
+      const selected = collegesList.find(c => c.collegeId === data.collegeId);
+      if (selected) {
+        submissionData.collegeName = selected.name;
+      }
+    }
 
     try {
       const result = await submitAssessment(submissionData);
@@ -507,6 +539,61 @@ export function AssessmentSteps() {
             </SelectContent>
           </Select>
           {errors.year && <p className="text-[10px] font-medium text-destructive">{errors.year}</p>}
+        </div>
+      )}
+      {data.educationLevel && data.fieldOfStudy && (
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">College/Institution *</Label>
+            <Select
+              value={isOtherCollege ? "other" : data.collegeId}
+              onValueChange={v => {
+                if (v === "other") {
+                  setIsOtherCollege(true);
+                  update({ collegeId: "" });
+                } else {
+                  setIsOtherCollege(false);
+                  update({ collegeId: v });
+                  const selected = collegesList.find(c => c.collegeId === v);
+                  if (selected) {
+                    setCollegeName(selected.name);
+                  }
+                }
+              }}
+            >
+              <SelectTrigger className={`h-11 ${errors.collegeId ? "border-destructive ring-1 ring-destructive/50" : ""}`}>
+                <SelectValue placeholder="Select your college" />
+              </SelectTrigger>
+              <SelectContent className="max-h-60">
+                {collegesList.map(c => (
+                  <SelectItem key={c.collegeId} value={c.collegeId}>
+                    {c.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value="other" className="font-bold border-t mt-1">
+                  Other / Join via Open Registration
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            {errors.collegeId && <p className="text-[10px] font-medium text-destructive">{errors.collegeId}</p>}
+          </div>
+
+          {isOtherCollege && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="space-y-1.5"
+            >
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Enter College Name *</Label>
+              <Input
+                value={otherCollegeName}
+                onChange={e => setOtherCollegeName(e.target.value)}
+                placeholder="Type your college name here"
+                className={`h-11 ${errors.collegeName ? "border-destructive ring-1 ring-destructive/50" : ""}`}
+              />
+              {errors.collegeName && <p className="text-[10px] font-medium text-destructive">{errors.collegeName}</p>}
+            </motion.div>
+          )}
         </div>
       )}
       {/* Career Domain — shows when field+education have available domains */}

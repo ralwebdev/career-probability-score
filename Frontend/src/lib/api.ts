@@ -327,6 +327,14 @@ export async function getPublicCollegeByCid(cid: string) {
   return response.json();
 }
 
+export async function getPublicColleges() {
+  const response = await fetch(`${API_BASE_URL}/college/public`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch colleges");
+  }
+  return response.json();
+}
+
 // Admin College Management
 export async function getColleges(token: string) {
   const response = await fetch(`${API_BASE_URL}/admin/colleges`, {
