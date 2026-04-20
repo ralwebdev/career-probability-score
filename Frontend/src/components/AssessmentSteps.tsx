@@ -584,7 +584,7 @@ export function AssessmentSteps() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-1.5"
             >
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Enter College Name *</Label>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Enter College/Institution Name *</Label>
               <Input
                 value={otherCollegeName}
                 onChange={e => setOtherCollegeName(e.target.value)}
