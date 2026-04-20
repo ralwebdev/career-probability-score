@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Plus, Edit, Trash2, X, Check, Save, Copy, ExternalLink, School } from "lucide-react";
+import { Plus, Edit, Trash2, X, Check, Save, Copy, ExternalLink, School, Eye, EyeOff } from "lucide-react";
 import { getColleges, createCollege, updateCollege, deleteCollege } from "@/lib/api";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
@@ -15,6 +15,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
     location: "",
     email: "",
     password: "",
+    active: true,
   });
 
 
@@ -81,6 +82,17 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
     }
   };
 
+  const toggleActive = async (college: any) => {
+    try {
+      const updatedCollege = { ...college, active: !college.active };
+      await updateCollege(college._id, { active: !college.active }, token);
+      toast.success(`College ${!college.active ? "shown" : "hidden"} successfully`);
+      fetchColleges();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
   const openEditModal = (college: any) => {
     setEditingCollege(college);
     setFormData({
@@ -88,7 +100,8 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
       collegeId: college.collegeId,
       location: college.location || "",
       email: college.email,
-      password: "", // Don't show existing hashed password, leave empty for no change
+      password: "",
+      active: college.active ?? true,
     });
     setIsAdding(true);
   };
@@ -96,7 +109,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
   const closeModal = () => {
     setIsAdding(false);
     setEditingCollege(null);
-    setFormData({ name: "", collegeId: "", location: "", email: "", password: "" });
+    setFormData({ name: "", collegeId: "", location: "", email: "", password: "", active: true });
   };
 
   const copyLink = (collegeId: string) => {
@@ -150,6 +163,13 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
             >
               <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
+                  onClick={() => toggleActive(college)}
+                  className={`p-1.5 h-8 w-8 flex items-center justify-center bg-background border rounded-lg transition-all shadow-sm ${college.active ? "text-muted-foreground hover:text-amber-500 hover:border-amber-500" : "text-amber-500 border-amber-500 hover:text-primary hover:border-primary"}`}
+                  title={college.active ? "Hide from Dropdown" : "Show in Dropdown"}
+                >
+                  {college.active ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}
+                </button>
+                <button
                   onClick={() => openEditModal(college)}
                   className="p-1.5 h-8 w-8 flex items-center justify-center bg-background border rounded-lg text-muted-foreground hover:text-primary hover:border-primary transition-all shadow-sm"
                   title="Edit Credentials"
@@ -166,8 +186,15 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
               </div>
 
               <div className="flex justify-between items-start mb-4 pr-12">
-                <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-                  <School className="h-5 w-5" />
+                <div className="flex items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                    <School className="h-5 w-5" />
+                  </div>
+                  {!college.active && (
+                    <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200">
+                      Hidden
+                    </span>
+                  )}
                 </div>
                 <div className="text-[10px] font-bold font-mono text-primary px-2 py-1 bg-primary/5 rounded-full border border-primary/20">
                   {college.collegeId}
@@ -301,6 +328,23 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                       placeholder={editingCollege ? "••••••••" : "Enter password"}
                     />
                   </div>
+                </div>
+
+                <div className="flex items-center gap-3 p-4 bg-muted/30 rounded-xl border border-dashed">
+                  <div className="flex-1">
+                    <div className="text-sm font-bold leading-none mb-1">Public Visibility</div>
+                    <p className="text-[10px] text-muted-foreground italic">If disabled, this college won't appear in the assessment selection dropdown.</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, active: !prev.active }))}
+                    className={`w-12 h-6 rounded-full relative transition-colors ${formData.active ? "bg-primary" : "bg-muted-foreground/30"}`}
+                  >
+                    <motion.div
+                      animate={{ x: formData.active ? 24 : 4 }}
+                      className="absolute top-1 w-4 h-4 rounded-full bg-white shadow-sm"
+                    />
+                  </button>
                 </div>
 
 

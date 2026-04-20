@@ -64,7 +64,7 @@ const verifyAdmin = async (req, res) => {
 // @route   POST /api/admin/colleges
 // @access  Private
 const createCollege = async (req, res) => {
-  const { name, collegeId, location, email, password } = req.body;
+  const { name, collegeId, location, email, password, active } = req.body;
 
   try {
     const normalizedCollegeId = collegeId.toUpperCase().trim();
@@ -84,6 +84,7 @@ const createCollege = async (req, res) => {
       location,
       email,
       password,
+      active: active !== undefined ? active : true,
     });
 
     res.status(201).json(college);
@@ -138,6 +139,10 @@ const updateCollege = async (req, res) => {
     
     if (req.body.password) {
       college.password = req.body.password;
+    }
+
+    if (req.body.active !== undefined) {
+      college.active = req.body.active;
     }
 
     const updatedCollege = await college.save();

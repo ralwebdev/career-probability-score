@@ -415,7 +415,7 @@ export function AssessmentSteps() {
 
     const submissionData = { ...trimmedData };
     if (!submissionData.year) delete submissionData.year;
-    
+
     if (isOtherCollege) {
       submissionData.collegeName = otherCollegeName.trim();
       submissionData.collegeId = "OTHER";
@@ -570,8 +570,8 @@ export function AssessmentSteps() {
                     {c.name}
                   </SelectItem>
                 ))}
-                <SelectItem value="other" className="font-bold border-t mt-1">
-                  Other / Join via Open Registration
+                <SelectItem value="other">
+                  Other
                 </SelectItem>
               </SelectContent>
             </Select>
