@@ -588,7 +588,7 @@ export function AssessmentSteps() {
               <Input
                 value={otherCollegeName}
                 onChange={e => setOtherCollegeName(e.target.value)}
-                placeholder="Type your college name here"
+                placeholder="Type your college/institution name here"
                 className={`h-11 ${errors.collegeName ? "border-destructive ring-1 ring-destructive/50" : ""}`}
               />
               {errors.collegeName && <p className="text-[10px] font-medium text-destructive">{errors.collegeName}</p>}
