@@ -234,6 +234,8 @@ export function AssessmentSteps() {
     fetchCollege();
   }, [data.collegeId]);
 
+  const isBrandedLink = !!collegeId;
+
   const update = (partial: Partial<AssessmentData>) => {
     setData(prev => ({ ...prev, ...partial }));
     // Clear error for updated field
@@ -267,6 +269,12 @@ export function AssessmentSteps() {
       if (!data.country) newErrors.country = "Country is required";
       if (!data.state) newErrors.state = "State is required";
       if (!data.city) newErrors.city = "City is required";
+      if (!isOtherCollege && !data.collegeId) {
+        newErrors.collegeId = "Please select your college";
+      }
+      if (isOtherCollege && !otherCollegeName.trim()) {
+        newErrors.collegeName = "Please enter your college name";
+      }
     }
 
     if (currentStep === 1) {
@@ -284,13 +292,6 @@ export function AssessmentSteps() {
           if (needsSpecialization && !data.specialization) newErrors.specialization = "Specialization is required";
           if (!data.careerRole) newErrors.careerRole = "Please select a career role";
         }
-      }
-
-      if (!isOtherCollege && !data.collegeId) {
-        newErrors.collegeId = "Please select your college";
-      }
-      if (isOtherCollege && !otherCollegeName.trim()) {
-        newErrors.collegeName = "Please enter your college name";
       }
     }
 
@@ -457,6 +458,7 @@ export function AssessmentSteps() {
         <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Name of Your College/Institution *</Label>
           <Select
+            disabled={isBrandedLink}
             value={isOtherCollege ? "other" : data.collegeId}
             onValueChange={v => {
               if (v === "other") {
