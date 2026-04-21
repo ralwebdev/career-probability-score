@@ -322,11 +322,12 @@ export default function Admin() {
                                                             : college.name) + " (" + college.collegeId + ")"}
                                                     </SelectItem>
                                                 ))}
+                                                <SelectItem value="OTHER">Other Institutions</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex items-center gap-4">
                                     <div className="hidden md:flex flex-col items-end">
                                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-muted-foreground bg-muted/30 px-2 py-1 rounded-md border border-border/50">
@@ -334,7 +335,7 @@ export default function Admin() {
                                             Updated {lastUpdateTimeStr}
                                         </div>
                                     </div>
-                                    
+
                                     <button
                                         onClick={handleRefreshData}
                                         disabled={assessmentsRefreshing}
