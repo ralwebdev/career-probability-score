@@ -198,7 +198,7 @@ export function AssessmentSteps() {
     educationLevel: "", fieldOfStudy: "",
     careerDomain: "", careerRole: "",
     specialization: "",
-    collegeId: (collegeId || searchParams.get("cid") || "RAL1").toUpperCase(),
+    collegeId: (collegeId || searchParams.get("cid") || "none").toUpperCase(),
     technicalSkills: {}, softSkills: {}, communicationSkills: {}, eiSkills: {},
     experience: {}, portfolioLevel: "none",
     year: ""
@@ -222,7 +222,7 @@ export function AssessmentSteps() {
 
   useEffect(() => {
     const fetchCollege = async () => {
-      if (data.collegeId) {
+      if (data.collegeId && data.collegeId !== "NONE") {
         try {
           const college = await getPublicCollegeByCid(data.collegeId);
           setCollegeName(college.name);
@@ -269,7 +269,7 @@ export function AssessmentSteps() {
       if (!data.country) newErrors.country = "Country is required";
       if (!data.state) newErrors.state = "State is required";
       if (!data.city) newErrors.city = "City is required";
-      if (!isOtherCollege && !data.collegeId) {
+      if (!isOtherCollege && (!data.collegeId || data.collegeId === "NONE")) {
         newErrors.collegeId = "Please select your college";
       }
       if (isOtherCollege && !otherCollegeName.trim()) {
@@ -474,10 +474,13 @@ export function AssessmentSteps() {
               }
             }}
           >
-            <SelectTrigger className={`h-11 ${errors.collegeId ? "border-destructive ring-1 ring-destructive/50" : ""}`}>
+            <SelectTrigger className={`h-11 ${errors.collegeId ? "border-destructive ring-1 ring-destructive/50" : ""} ${data.collegeId === "NONE" && !isOtherCollege ? "text-muted-foreground" : ""}`}>
               <SelectValue placeholder="Select your college" />
             </SelectTrigger>
             <SelectContent className="max-h-60">
+              <SelectItem value="NONE" disabled>
+                Select Your College/Institution
+              </SelectItem>
               {collegesList.map(c => (
                 <SelectItem key={c.collegeId} value={c.collegeId}>
                   {c.name}
