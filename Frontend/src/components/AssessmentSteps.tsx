@@ -977,7 +977,7 @@ export function AssessmentSteps() {
       <CelebrationBurst active={celebrating} />
 
       <div className="w-full max-w-2xl">
-        {collegeName && (
+        {collegeName && !isOtherCollege && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
