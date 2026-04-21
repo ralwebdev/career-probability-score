@@ -61,7 +61,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
         await createCollege(formData, token);
         toast.success("College added successfully");
       }
-      
+
       closeModal();
       fetchColleges();
 
@@ -161,7 +161,7 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
               key={college._id}
               className="group rounded-2xl border bg-card/40 backdrop-blur-md p-5 hover:border-primary/50 transition-all hover:shadow-xl hover:-translate-y-1 relative"
             >
-              <div className="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+              <div className="absolute top-4 right-4 flex gap-1 group-hover:opacity-100">
                 <button
                   onClick={() => toggleActive(college)}
                   className={`p-1.5 h-8 w-8 flex items-center justify-center bg-background border rounded-lg transition-all shadow-sm ${college.active ? "text-muted-foreground hover:text-amber-500 hover:border-amber-500" : "text-amber-500 border-amber-500 hover:text-primary hover:border-primary"}`}
@@ -187,8 +187,11 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
 
               <div className="flex justify-between items-start mb-4 pr-12">
                 <div className="flex items-center gap-2">
-                  <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+                  {/* <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
                     <School className="h-5 w-5" />
+                  </div> */}
+                  <div className="text-[10px] font-bold font-mono text-primary px-2 py-1 bg-primary/5 rounded-full border border-primary/20">
+                    {college.collegeId}
                   </div>
                   {!college.active && (
                     <span className="text-[9px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded border border-amber-200">
@@ -196,9 +199,9 @@ export default function AdminCollegeManagement({ token }: { token: string }) {
                     </span>
                   )}
                 </div>
-                <div className="text-[10px] font-bold font-mono text-primary px-2 py-1 bg-primary/5 rounded-full border border-primary/20">
+                {/* <div className="text-[10px] font-bold font-mono text-primary px-2 py-1 bg-primary/5 rounded-full border border-primary/20">
                   {college.collegeId}
-                </div>
+                </div> */}
               </div>
 
               <h3 className="font-bold text-lg leading-tight mb-1">{college.name}</h3>
