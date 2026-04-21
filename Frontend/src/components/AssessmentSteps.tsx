@@ -453,6 +453,59 @@ export function AssessmentSteps() {
   const stepContent = [
     // Step 0: Profile (streamlined — just name, email, location in one clean card)
     <div key="profile" className="space-y-5">
+      <div className="space-y-4">
+        <div className="space-y-1.5">
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">Name of Your College/Institution *</Label>
+          <Select
+            value={isOtherCollege ? "other" : data.collegeId}
+            onValueChange={v => {
+              if (v === "other") {
+                setIsOtherCollege(true);
+                update({ collegeId: "" });
+              } else {
+                setIsOtherCollege(false);
+                update({ collegeId: v });
+                const selected = collegesList.find(c => c.collegeId === v);
+                if (selected) {
+                  setCollegeName(selected.name);
+                }
+              }
+            }}
+          >
+            <SelectTrigger className={`h-11 ${errors.collegeId ? "border-destructive ring-1 ring-destructive/50" : ""}`}>
+              <SelectValue placeholder="Select your college" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {collegesList.map(c => (
+                <SelectItem key={c.collegeId} value={c.collegeId}>
+                  {c.name}
+                </SelectItem>
+              ))}
+              <SelectItem value="other">
+                Other
+              </SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.collegeId && <p className="text-[10px] font-medium text-destructive">{errors.collegeId}</p>}
+        </div>
+
+        {isOtherCollege && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-1.5"
+          >
+            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Enter College/Institution Name *</Label>
+            <Input
+              value={otherCollegeName}
+              onChange={e => setOtherCollegeName(e.target.value)}
+              placeholder="Type your college/institution name here"
+              className={`h-11 ${errors.collegeName ? "border-destructive ring-1 ring-destructive/50" : ""}`}
+            />
+            {errors.collegeName && <p className="text-[10px] font-medium text-destructive">{errors.collegeName}</p>}
+          </motion.div>
+        )}
+      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs uppercase tracking-wider text-muted-foreground">Full Name *</Label>
@@ -541,61 +594,10 @@ export function AssessmentSteps() {
           {errors.year && <p className="text-[10px] font-medium text-destructive">{errors.year}</p>}
         </div>
       )}
-      {data.educationLevel && data.fieldOfStudy && (
-        <div className="space-y-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">College/Institution *</Label>
-            <Select
-              value={isOtherCollege ? "other" : data.collegeId}
-              onValueChange={v => {
-                if (v === "other") {
-                  setIsOtherCollege(true);
-                  update({ collegeId: "" });
-                } else {
-                  setIsOtherCollege(false);
-                  update({ collegeId: v });
-                  const selected = collegesList.find(c => c.collegeId === v);
-                  if (selected) {
-                    setCollegeName(selected.name);
-                  }
-                }
-              }}
-            >
-              <SelectTrigger className={`h-11 ${errors.collegeId ? "border-destructive ring-1 ring-destructive/50" : ""}`}>
-                <SelectValue placeholder="Select your college" />
-              </SelectTrigger>
-              <SelectContent className="max-h-60">
-                {collegesList.map(c => (
-                  <SelectItem key={c.collegeId} value={c.collegeId}>
-                    {c.name}
-                  </SelectItem>
-                ))}
-                <SelectItem value="other">
-                  Other
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {errors.collegeId && <p className="text-[10px] font-medium text-destructive">{errors.collegeId}</p>}
-          </div>
-
-          {isOtherCollege && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-1.5"
-            >
-              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Enter College/Institution Name *</Label>
-              <Input
-                value={otherCollegeName}
-                onChange={e => setOtherCollegeName(e.target.value)}
-                placeholder="Type your college/institution name here"
-                className={`h-11 ${errors.collegeName ? "border-destructive ring-1 ring-destructive/50" : ""}`}
-              />
-              {errors.collegeName && <p className="text-[10px] font-medium text-destructive">{errors.collegeName}</p>}
-            </motion.div>
-          )}
-        </div>
-      )}
+      {/* {data.educationLevel && data.fieldOfStudy && (
+        
+      )
+      } */}
       {/* Career Domain — shows when field+education have available domains */}
       {data.educationLevel && data.fieldOfStudy && availableDomains.length > 0 && (
         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} className="space-y-3">
