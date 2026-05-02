@@ -44,6 +44,15 @@ const STATUS_COLORS: Record<InterestStatus, string> = {
   rejected: "bg-red-500/15 text-red-700",
 };
 
+const DOMAIN_SKILL_MAP: Record<string, string[]> = {
+  Technology: ["JavaScript", "Python", "SQL", "React", "Java", "Cloud", "Problem Solving", "Teamwork"],
+  "Data/AI": ["Python", "SQL", "Machine Learning", "Data Analysis", "Problem Solving", "Communication"],
+  Design: ["UI/UX", "Communication", "Project Management", "Problem Solving", "Teamwork"],
+  Business: ["Communication", "Leadership", "Excel", "Project Management", "Data Analysis", "Teamwork"],
+  Healthcare: ["Communication", "Leadership", "Data Analysis", "Problem Solving", "Teamwork"],
+  Engineering: ["Java", "Python", "Problem Solving", "Project Management", "Leadership", "Teamwork"],
+};
+
 export default function RecruiterDashboard() {
   const navigate = useNavigate();
   const [recruiterUser, setRecruiterUser] = useState<RecruiterUser | null>(null);
@@ -64,7 +73,7 @@ export default function RecruiterDashboard() {
     if (recruiterUser?.token) {
       getRecruiterShortlists(recruiterUser.token).then(setShortlists).catch(console.error);
       getRecruiterInterests(recruiterUser.token).then(setApiInterests).catch(console.error);
-      
+
       getRecruiterCandidates(recruiterUser.token).then((rawCandidates: any[]) => {
         const mappedCandidates: Candidate[] = rawCandidates.map((a: any) => {
           const skills: Record<string, number> = {
@@ -111,6 +120,8 @@ export default function RecruiterDashboard() {
 
   const [locationSearch, setLocationSearch] = useState("");
   const [cpsRange, setCpsRange] = useState([0, 100]);
+  const [selectedDomain, setSelectedDomain] = useState("all");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [detailCandidate, setDetailCandidate] = useState<RankedCandidate | null>(null);
   const [saved, setSaved] = useState<string[]>(() => getSavedCandidates());
   const [shortlists, setShortlists] = useState<Shortlist[]>(() => getShortlists());
@@ -124,14 +135,36 @@ export default function RecruiterDashboard() {
     setTimeout(() => setLoading(false), 800);
   });
 
+  const availableSkills = useMemo(() => {
+    if (selectedDomain !== "all" && DOMAIN_SKILL_MAP[selectedDomain]) {
+      return DOMAIN_SKILL_MAP[selectedDomain];
+    }
+    const skills = new Set<string>();
+    candidates.forEach((candidate) => {
+      Object.keys(candidate.skills || {}).forEach((skill) => skills.add(skill));
+      (candidate.topSkills || []).forEach((skill) => skills.add(skill));
+    });
+    return Array.from(skills).sort((a, b) => a.localeCompare(b));
+  }, [candidates, selectedDomain]);
+
+  useEffect(() => {
+    setSelectedSkills((prev) => prev.filter((skill) => availableSkills.includes(skill)));
+  }, [availableSkills]);
+
   const ranked = useMemo(() => {
     let filtered = candidates.filter(c => {
       if (c.cps < cpsRange[0] || c.cps > cpsRange[1]) return false;
       if (locationSearch && !c.location.toLowerCase().includes(locationSearch.toLowerCase())) return false;
+      if (selectedDomain !== "all" && c.domain !== selectedDomain) return false;
+      if (selectedSkills.length > 0) {
+        const candidateSkills = new Set([...Object.keys(c.skills || {}), ...(c.topSkills || [])]);
+        const hasAllSelectedSkills = selectedSkills.every((skill) => candidateSkills.has(skill));
+        if (!hasAllSelectedSkills) return false;
+      }
       return true;
     });
     return rankCandidates(filtered, [], "");
-  }, [candidates, locationSearch, cpsRange]);
+  }, [candidates, locationSearch, cpsRange, selectedDomain, selectedSkills]);
 
   const toggleSave = useCallback(async (id: string) => {
     if (recruiterUser?.token) {
@@ -370,7 +403,7 @@ export default function RecruiterDashboard() {
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Filter by location (e.g. Bangalore, Delhi)" value={locationSearch} onChange={e => setLocationSearch(e.target.value)} className="pl-10" />
               </div>
-              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2"><Filter className="h-4 w-4" />CPS Filter</Button>
+              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2"><Filter className="h-4 w-4" />Apply Filter</Button>
             </div>
 
             <AnimatePresence>
@@ -381,6 +414,40 @@ export default function RecruiterDashboard() {
                       <div>
                         <label className="text-xs font-medium text-muted-foreground mb-2 block">CPS Range: {cpsRange[0]}–{cpsRange[1]}</label>
                         <Slider min={0} max={100} step={5} value={cpsRange} onValueChange={setCpsRange} />
+                      </div>
+                      <div className="mt-4">
+                        <label className="text-xs font-medium text-muted-foreground mb-2 block">Preferred Domain</label>
+                        <div className="flex flex-wrap gap-2">
+                          {["all", "Technology", "Data/AI", "Design", "Business", "Healthcare", "Engineering"].map((domain) => (
+                            <Badge
+                              key={domain}
+                              variant={selectedDomain === domain ? "default" : "outline"}
+                              className="cursor-pointer px-2.5 py-1 text-[11px]"
+                              onClick={() => setSelectedDomain(domain)}
+                            >
+                              {domain === "all" ? "All" : domain}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="mt-4">
+                        <label className="text-xs font-medium text-muted-foreground mb-2 block">Required Skills</label>
+                        <div className="flex flex-wrap gap-2">
+                          {availableSkills.map((skill) => (
+                            <Badge
+                              key={skill}
+                              variant={selectedSkills.includes(skill) ? "default" : "outline"}
+                              className="cursor-pointer px-2.5 py-1 text-[11px]"
+                              onClick={() =>
+                                setSelectedSkills((prev) =>
+                                  prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+                                )
+                              }
+                            >
+                              {skill}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -489,9 +556,51 @@ export default function RecruiterDashboard() {
                   <label className="text-sm font-medium text-foreground mb-2 block">CPS Range: {cpsRange[0]}–{cpsRange[1]}</label>
                   <Slider min={0} max={100} step={5} value={cpsRange} onValueChange={setCpsRange} />
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Only CPS score is used in filtering.
-                </p>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-3 block">Preferred Domain</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["all", "Technology", "Data/AI", "Design", "Business", "Healthcare", "Engineering"].map((domain) => (
+                      <Badge
+                        key={domain}
+                        variant={selectedDomain === domain ? "default" : "outline"}
+                        className="cursor-pointer px-3 py-1.5"
+                        onClick={() => setSelectedDomain(domain)}
+                      >
+                        {domain === "all" ? "All" : domain}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground mb-3 block">Required Skills</label>
+                  <div className="flex flex-wrap gap-2">
+                    {availableSkills.map((skill) => (
+                      <Badge
+                        key={skill}
+                        variant={selectedSkills.includes(skill) ? "default" : "outline"}
+                        className="cursor-pointer px-3 py-1.5"
+                        onClick={() =>
+                          setSelectedSkills((prev) =>
+                            prev.includes(skill) ? prev.filter((s) => s !== skill) : [...prev, skill]
+                          )
+                        }
+                      >
+                        {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                  {selectedSkills.length > 0 && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="mt-2 px-0 text-xs"
+                      onClick={() => setSelectedSkills([])}
+                    >
+                      Clear skills filter
+                    </Button>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
@@ -690,3 +799,4 @@ export default function RecruiterDashboard() {
     </div>
   );
 }
+
