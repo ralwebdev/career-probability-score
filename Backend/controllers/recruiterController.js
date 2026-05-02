@@ -94,10 +94,23 @@ const loginRecruiter = async (req, res) => {
 // @access  Private/Recruiter
 const getCandidates = async (req, res) => {
   try {
-    // In a real scenario, this would query Assessment models based on CPS, testPassed, etc.
-    // For now, we'll return all assessments that might match some criteria, or just all.
-    const candidates = await Assessment.find({}).limit(10);
-    res.json(candidates);
+    const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+    const limit = Math.max(parseInt(req.query.limit, 10) || 9, 1);
+    const skip = (page - 1) * limit;
+
+    const totalCandidates = await Assessment.countDocuments({});
+    const candidates = await Assessment.find({})
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    res.json({
+      candidates,
+      page,
+      limit,
+      totalCandidates,
+      totalPages: Math.max(1, Math.ceil(totalCandidates / limit))
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -292,3 +305,5 @@ module.exports = {
   requestCV,
   trackCandidateView
 };
+
+

@@ -445,8 +445,8 @@ export async function loginRecruiterApi(credentials: any) {
   return response.json();
 }
 
-export async function getRecruiterCandidates(token: string) {
-  const response = await fetch(`${API_BASE_URL}/recruiter/candidates`, {
+export async function getRecruiterCandidates(token: string, page = 1, limit = 9) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/candidates?page=${page}&limit=${limit}`, {
     headers: { 'Authorization': `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Failed to fetch candidates');
@@ -547,3 +547,5 @@ export async function trackCandidateView(token: string) {
   if (!response.ok) throw new Error('Failed to track view');
   return response.json();
 }
+
+

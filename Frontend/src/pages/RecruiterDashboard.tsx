@@ -56,6 +56,23 @@ const DOMAIN_SKILL_MAP: Record<string, string[]> = {
 export default function RecruiterDashboard() {
   const navigate = useNavigate();
   const [recruiterUser, setRecruiterUser] = useState<RecruiterUser | null>(null);
+  const [apiInterests, setApiInterests] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [cpsRange, setCpsRange] = useState([0, 100]);
+  const [selectedDomain, setSelectedDomain] = useState("all");
+  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCandidates, setTotalCandidates] = useState(0);
+  const [detailCandidate, setDetailCandidate] = useState<RankedCandidate | null>(null);
+  const [saved, setSaved] = useState<string[]>(() => getSavedCandidates());
+  const [shortlists, setShortlists] = useState<Shortlist[]>(() => getShortlists());
+  const [newListName, setNewListName] = useState("");
+  const [activity, setActivity] = useState(() => getActivity());
+  const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [interestRefresh, setInterestRefresh] = useState(0);
 
   useEffect(() => {
     const session = getRecruiterSession();
@@ -66,15 +83,15 @@ export default function RecruiterDashboard() {
     }
   }, [navigate]);
 
-  const [apiInterests, setApiInterests] = useState<any[]>([]);
-  const [candidates, setCandidates] = useState<Candidate[]>([]);
-
   useEffect(() => {
     if (recruiterUser?.token) {
       getRecruiterShortlists(recruiterUser.token).then(setShortlists).catch(console.error);
       getRecruiterInterests(recruiterUser.token).then(setApiInterests).catch(console.error);
 
-      getRecruiterCandidates(recruiterUser.token).then((rawCandidates: any[]) => {
+      getRecruiterCandidates(recruiterUser.token, currentPage, 9).then((response: any) => {
+        const rawCandidates = response.candidates || [];
+        setTotalPages(response.totalPages || 1);
+        setTotalCandidates(response.totalCandidates || 0);
         const mappedCandidates: Candidate[] = rawCandidates.map((a: any) => {
           const skills: Record<string, number> = {
             ...(a.technicalSkills || {}),
@@ -116,20 +133,9 @@ export default function RecruiterDashboard() {
         setCandidates(mappedCandidates);
       }).catch(console.error);
     }
-  }, [recruiterUser]);
+  }, [recruiterUser, currentPage]);
 
-  const [locationSearch, setLocationSearch] = useState("");
-  const [cpsRange, setCpsRange] = useState([0, 100]);
-  const [selectedDomain, setSelectedDomain] = useState("all");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [detailCandidate, setDetailCandidate] = useState<RankedCandidate | null>(null);
-  const [saved, setSaved] = useState<string[]>(() => getSavedCandidates());
-  const [shortlists, setShortlists] = useState<Shortlist[]>(() => getShortlists());
-  const [newListName, setNewListName] = useState("");
-  const [activity, setActivity] = useState(() => getActivity());
-  const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [interestRefresh, setInterestRefresh] = useState(0);
+
 
   useState(() => {
     setTimeout(() => setLoading(false), 800);
@@ -148,7 +154,13 @@ export default function RecruiterDashboard() {
   }, [candidates, selectedDomain]);
 
   useEffect(() => {
-    setSelectedSkills((prev) => prev.filter((skill) => availableSkills.includes(skill)));
+    setSelectedSkills((prev) => {
+      const next = prev.filter((skill) => availableSkills.includes(skill));
+      if (next.length === prev.length && next.every((skill, i) => skill === prev[i])) {
+        return prev;
+      }
+      return next;
+    });
   }, [availableSkills]);
 
   const ranked = useMemo(() => {
@@ -165,6 +177,22 @@ export default function RecruiterDashboard() {
     });
     return rankCandidates(filtered, [], "");
   }, [candidates, locationSearch, cpsRange, selectedDomain, selectedSkills]);
+
+  const filteredCount = ranked.length;
+  const filteredTotalPages = Math.max(1, Math.ceil(filteredCount / 9));
+  const canGoPrev = currentPage > 1;
+  const canGoNext = filteredCount === 9 && currentPage < totalPages;
+
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [locationSearch, cpsRange, selectedDomain, selectedSkills]);
+
+  useEffect(() => {
+    if (currentPage > totalPages) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
 
   const toggleSave = useCallback(async (id: string) => {
     if (recruiterUser?.token) {
@@ -237,7 +265,7 @@ export default function RecruiterDashboard() {
     } catch (e) {
       console.error("Express interest failed", e);
     }
-  }, [recruiterUser]);
+  }, [recruiterUser, currentPage]);
 
   const handleCVRequest = useCallback(async (candidateId: string) => {
     if (!recruiterUser?.token) return;
@@ -250,7 +278,7 @@ export default function RecruiterDashboard() {
     } catch (e) {
       console.error("CV request failed", e);
     }
-  }, [recruiterUser]);
+  }, [recruiterUser, currentPage]);
 
   const conversionRate = activity.candidatesViewed > 0
     ? Math.round((activity.candidatesShortlisted / activity.candidatesViewed) * 100)
@@ -403,7 +431,7 @@ export default function RecruiterDashboard() {
                 <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Filter by location (e.g. Bangalore, Delhi)" value={locationSearch} onChange={e => setLocationSearch(e.target.value)} className="pl-10" />
               </div>
-              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2"><Filter className="h-4 w-4" />Apply Filter</Button>
+              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2"><Filter className="h-4 w-4" />Add Filter</Button>
             </div>
 
             <AnimatePresence>
@@ -415,7 +443,7 @@ export default function RecruiterDashboard() {
                         <label className="text-xs font-medium text-muted-foreground mb-2 block">CPS Range: {cpsRange[0]}–{cpsRange[1]}</label>
                         <Slider min={0} max={100} step={5} value={cpsRange} onValueChange={setCpsRange} />
                       </div>
-                      <div className="mt-4">
+                      {/* <div className="mt-4">
                         <label className="text-xs font-medium text-muted-foreground mb-2 block">Preferred Domain</label>
                         <div className="flex flex-wrap gap-2">
                           {["all", "Technology", "Data/AI", "Design", "Business", "Healthcare", "Engineering"].map((domain) => (
@@ -429,7 +457,7 @@ export default function RecruiterDashboard() {
                             </Badge>
                           ))}
                         </div>
-                      </div>
+                      </div> */}
                       <div className="mt-4">
                         <label className="text-xs font-medium text-muted-foreground mb-2 block">Required Skills</label>
                         <div className="flex flex-wrap gap-2">
@@ -455,10 +483,10 @@ export default function RecruiterDashboard() {
               )}
             </AnimatePresence>
 
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">{ranked.length} candidates found</p>
+            {/* <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">{filteredCount} candidates found</p>
               <p className="text-[10px] text-muted-foreground">Limited verified candidates available</p>
-            </div>
+            </div> */}
 
             {loading ? (
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -474,6 +502,19 @@ export default function RecruiterDashboard() {
 
             {!loading && ranked.length === 0 && (
               <Card><CardContent className="p-12 text-center"><UserCheck className="h-12 w-12 text-muted-foreground mx-auto mb-3" /><p className="text-muted-foreground">No candidates match your filters. Try adjusting your criteria.</p></CardContent></Card>
+            )}
+            {!loading && ranked.length > 0 && (
+              <div className="flex items-center justify-between pt-2">
+                <p className="text-xs text-muted-foreground">Page {currentPage} of {filteredTotalPages}</p>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={!canGoPrev}>
+                    Previous
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))} disabled={!canGoNext}>
+                    Next
+                  </Button>
+                </div>
+              </div>
             )}
           </TabsContent>
 
@@ -799,4 +840,5 @@ export default function RecruiterDashboard() {
     </div>
   );
 }
+
 
