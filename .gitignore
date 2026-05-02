@@ -53,4 +53,5 @@ Backend*.njsproj
 Backend*.sln
 Backend*.sw?
 Backend/*.md
+/temp
 

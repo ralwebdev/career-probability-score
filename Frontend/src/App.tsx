@@ -19,6 +19,8 @@ import CollegeLogin from "./pages/CollegeLogin";
 import EmployabilityDashboard from "./pages/EmployabilityDashboard";
 import NotFound from "./pages/NotFound";
 import Downtime from "./pages/Downtime";
+import RecruiterLogin from "./pages/RecruiterLogin";
+import RecruiterDashboard from "./pages/RecruiterDashboard";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,8 @@ const App = () => {
               {/* <Route path="/college-dashboard" element={<CollegeDashboard />} /> */}
               <Route path="/college-login" element={<CollegeLogin />} />
               <Route path="/employability-dashboard" element={<EmployabilityDashboard />} />
+              <Route path="/recruiter-login" element={<RecruiterLogin />} />
+              <Route path="/recruiter-dashboard" element={<RecruiterDashboard />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
