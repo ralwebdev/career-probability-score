@@ -16,15 +16,19 @@ import {
   generateMockCandidates, rankCandidates, calcShortlistScore,
   getCandidateLevel, getCandidatePool, getShortlists, saveShortlists, getSavedCandidates,
   saveSavedCandidates, getActivity, updateActivity,
-  type RankedCandidate, type Shortlist, type CandidateLevel, type CandidatePool, type TrustBadgeStatus,
+  type Candidate, type RankedCandidate, type Shortlist, type CandidateLevel, type CandidatePool, type TrustBadgeStatus,
 } from "@/lib/recruiterEngine";
 import {
-  expressInterest, requestCV, getInterestStatus, isFullProfileVisible,
-  isCandidateDiscoverable, isRevenueCleared, maskName, maskEmail,
-  getCandidateVisibility, seedMockInterests,
+  isRevenueCleared,
   type InterestStatus,
 } from "@/lib/recruiterAccessEngine";
 import { getRecruiterSession, type RecruiterUser } from "@/pages/RecruiterLogin";
+import {
+  getRecruiterShortlists, createRecruiterShortlist, addToRecruiterShortlist,
+  removeFromRecruiterShortlist, toggleSavedCandidate, getRecruiterInterests,
+  expressRecruiterInterest, requestCandidateCV, trackCandidateView as apiTrackView,
+  getRecruiterCandidates
+} from "@/lib/api";
 
 const LEVEL_COLORS: Record<CandidateLevel, string> = {
   "Pre-Screened": "bg-emerald-500/15 text-emerald-700 border-emerald-200",
@@ -40,9 +44,6 @@ const STATUS_COLORS: Record<InterestStatus, string> = {
   rejected: "bg-red-500/15 text-red-700",
 };
 
-const ALL_SKILLS = ["JavaScript", "Python", "SQL", "Communication", "Problem Solving", "Data Analysis", "UI/UX", "Machine Learning", "Leadership", "Excel", "React", "Java", "Cloud", "Teamwork", "Project Management"];
-const ALL_DOMAINS = ["Technology", "Data/AI", "Design", "Business", "Healthcare", "Engineering"];
-
 export default function RecruiterDashboard() {
   const navigate = useNavigate();
   const [recruiterUser, setRecruiterUser] = useState<RecruiterUser | null>(null);
@@ -56,17 +57,60 @@ export default function RecruiterDashboard() {
     }
   }, [navigate]);
 
-  const RECRUITER_ID = recruiterUser?.id || "rec_current";
-  const [candidates] = useState(() => generateMockCandidates(25));
-  const [search, setSearch] = useState("");
+  const [apiInterests, setApiInterests] = useState<any[]>([]);
+  const [candidates, setCandidates] = useState<Candidate[]>([]);
+
+  useEffect(() => {
+    if (recruiterUser?.token) {
+      getRecruiterShortlists(recruiterUser.token).then(setShortlists).catch(console.error);
+      getRecruiterInterests(recruiterUser.token).then(setApiInterests).catch(console.error);
+      
+      getRecruiterCandidates(recruiterUser.token).then((rawCandidates: any[]) => {
+        const mappedCandidates: Candidate[] = rawCandidates.map((a: any) => {
+          const skills: Record<string, number> = {
+            ...(a.technicalSkills || {}),
+            ...(a.softSkills || {}),
+            ...(a.communicationSkills || {})
+          };
+          const sortedSkills = Object.entries(skills).sort(([, v1], [, v2]) => Number(v2) - Number(v1));
+          const topSkills = sortedSkills.slice(0, 3).map(([k]) => k);
+          const weakSkills = sortedSkills.slice(-3).map(([k]) => k).reverse();
+
+          return {
+            id: a._id,
+            name: a.name || 'Unknown',
+            email: a.email || '',
+            education: a.educationLevel || 'N/A',
+            fieldOfStudy: a.fieldOfStudy || 'N/A',
+            domain: a.careerDomain || 'Technology',
+            cps: a.scores?.total || 50,
+            qpi: a.scores?.qpi || 50,
+            skills: Object.keys(skills).length > 0 ? skills : { "Communication": 70, "Problem Solving": 65 },
+            topSkills: topSkills.length ? topSkills : ["Communication"],
+            weakSkills: weakSkills.length ? weakSkills : ["Leadership"],
+            location: `${a.city || ''}, ${a.state || ''}`.replace(/^, |, $/g, '') || "Unknown",
+            availability: "immediate",
+            testPassed: true,
+            interviewPassed: (a.scores?.total || 0) > 60,
+            lastAssessment: a.createdAt || new Date().toISOString(),
+            userType: "student",
+            experienceYears: 0,
+            currentRole: a.careerRole || '',
+            industry: (a.likelyIndustries && a.likelyIndustries[0]) || 'IT',
+            cpsRaw: a.scores?.total || 50,
+            cpsFinalAdjusted: a.scores?.total || 50,
+            integrityMultiplier: 1.0,
+            trustBadgeStatus: "High Trust",
+            integrityPenaltiesTriggered: [],
+          };
+        });
+        setCandidates(mappedCandidates);
+      }).catch(console.error);
+    }
+  }, [recruiterUser]);
+
+  const [locationSearch, setLocationSearch] = useState("");
   const [cpsRange, setCpsRange] = useState([0, 100]);
-  const [selectedLevel, setSelectedLevel] = useState<string>("all");
-  const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
-  const [selectedDomain, setSelectedDomain] = useState("all");
-  const [selectedPool, setSelectedPool] = useState<string>("all");
-  const [selectedIndustry, setSelectedIndustry] = useState<string>("all");
-  const [expRange, setExpRange] = useState([0, 15]);
-  const [highTrustOnly, setHighTrustOnly] = useState(false);
   const [detailCandidate, setDetailCandidate] = useState<RankedCandidate | null>(null);
   const [saved, setSaved] = useState<string[]>(() => getSavedCandidates());
   const [shortlists, setShortlists] = useState<Shortlist[]>(() => getShortlists());
@@ -76,10 +120,6 @@ export default function RecruiterDashboard() {
   const [loading, setLoading] = useState(true);
   const [interestRefresh, setInterestRefresh] = useState(0);
 
-  useEffect(() => {
-    seedMockInterests(candidates.filter(c => c.cps >= 55).slice(0, 7).map(c => ({ id: c.id, name: c.name, cps: c.cps })));
-  }, [candidates]);
-
   useState(() => {
     setTimeout(() => setLoading(false), 800);
   });
@@ -87,106 +127,97 @@ export default function RecruiterDashboard() {
   const ranked = useMemo(() => {
     let filtered = candidates.filter(c => {
       if (c.cps < cpsRange[0] || c.cps > cpsRange[1]) return false;
-      if (!isCandidateDiscoverable(c.id, c.cps)) return false;
-      if (highTrustOnly && c.trustBadgeStatus !== "High Trust") return false;
-      if (selectedLevel !== "all") {
-        const level = getCandidateLevel(c);
-        if (level !== selectedLevel) return false;
-      }
-      if (selectedDomain !== "all" && c.domain !== selectedDomain) return false;
-      if (selectedPool !== "all" && getCandidatePool(c) !== selectedPool) return false;
-      if (selectedIndustry !== "all" && c.industry !== selectedIndustry) return false;
-      if (c.experienceYears < expRange[0] || c.experienceYears > expRange[1]) return false;
-      if (search) {
-        const q = search.toLowerCase();
-        const matches = c.domain.toLowerCase().includes(q) ||
-          c.topSkills.some(s => s.toLowerCase().includes(q)) ||
-          c.currentRole.toLowerCase().includes(q) ||
-          c.industry.toLowerCase().includes(q);
-        if (!matches) return false;
-      }
-      if (selectedSkills.length > 0 && !selectedSkills.some(s => c.topSkills.includes(s))) return false;
+      if (locationSearch && !c.location.toLowerCase().includes(locationSearch.toLowerCase())) return false;
       return true;
     });
-    return rankCandidates(filtered, selectedSkills, selectedDomain !== "all" ? selectedDomain : "");
-  }, [candidates, search, cpsRange, selectedLevel, selectedDomain, selectedSkills, selectedPool, selectedIndustry, expRange, highTrustOnly]);
+    return rankCandidates(filtered, [], "");
+  }, [candidates, locationSearch, cpsRange]);
 
-  const toggleSave = useCallback((id: string) => {
-    setSaved(prev => {
-      const next = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id];
-      saveSavedCandidates(next);
-      const a = { ...activity, candidatesSaved: next.length };
-      setActivity(a);
-      updateActivity(a);
-      return next;
-    });
-  }, [activity]);
+  const toggleSave = useCallback(async (id: string) => {
+    if (recruiterUser?.token) {
+      try {
+        const newSaved = await toggleSavedCandidate(id, recruiterUser.token);
+        setSaved(newSaved);
+        const a = { ...activity, candidatesSaved: newSaved.length };
+        setActivity(a);
+      } catch (e) {
+        console.error("Save candidate failed", e);
+      }
+    } else {
+      // Fallback if no token (shouldn't happen)
+      setSaved(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    }
+  }, [activity, recruiterUser]);
 
-  const viewCandidate = useCallback((c: RankedCandidate) => {
+  const viewCandidate = useCallback(async (c: RankedCandidate) => {
     setDetailCandidate(c);
     const a = { ...activity, candidatesViewed: activity.candidatesViewed + 1 };
     setActivity(a);
-    updateActivity(a);
-  }, [activity]);
-
-  const createShortlist = useCallback(() => {
-    if (!newListName.trim()) return;
-    const list: Shortlist = { id: `sl_${Date.now()}`, name: newListName.trim(), candidates: [], createdAt: new Date().toISOString() };
-    const next = [...shortlists, list];
-    setShortlists(next);
-    saveShortlists(next);
-    setNewListName("");
-  }, [newListName, shortlists]);
-
-  const addToShortlist = useCallback((listId: string, candidateId: string) => {
-    const cand = candidates.find(c => c.id === candidateId);
-    if (!cand) return;
-    const next = shortlists.map(sl => {
-      if (sl.id !== listId) return sl;
-      if (sl.candidates.some(c => c.candidateId === candidateId)) return sl;
-      return {
-        ...sl,
-        candidates: [...sl.candidates, {
-          candidateId,
-          fitScore: calcShortlistScore(cand, selectedSkills),
-          notes: "",
-          addedAt: new Date().toISOString(),
-        }],
-      };
-    });
-    setShortlists(next);
-    saveShortlists(next);
-    const a = { ...activity, candidatesShortlisted: activity.candidatesShortlisted + 1 };
-    setActivity(a);
-    updateActivity(a);
-  }, [shortlists, candidates, selectedSkills, activity]);
-
-  const removeFromShortlist = useCallback((listId: string, candidateId: string) => {
-    const next = shortlists.map(sl => {
-      if (sl.id !== listId) return sl;
-      return { ...sl, candidates: sl.candidates.filter(c => c.candidateId !== candidateId) };
-    });
-    setShortlists(next);
-    saveShortlists(next);
-  }, [shortlists]);
-
-  const handleInterest = useCallback((candidateId: string, candidateName: string, candidateCps: number) => {
-    expressInterest(RECRUITER_ID, candidateId, candidateName, candidateCps);
-    setInterestRefresh(p => p + 1);
-    toast({ title: "Interest Expressed", description: "Express interest to request candidate details" });
-  }, []);
-
-  const handleCVRequest = useCallback((candidateId: string) => {
-    const status = getInterestStatus(RECRUITER_ID, candidateId);
-    if (!status) return;
-    if (!isRevenueCleared(candidateId)) {
-      toast({ title: "Access Restricted", description: "This candidate's full profile requires payment clearance.", variant: "destructive" });
-      return;
+    if (recruiterUser?.token) {
+      apiTrackView(recruiterUser.token).catch(console.error);
     }
-    requestCV(RECRUITER_ID, candidateId);
-    setInterestRefresh(p => p + 1);
-    toast({ title: "CV Requested", description: "Request submitted to admin for approval" });
-  }, []);
+  }, [activity, recruiterUser]);
+
+  const createShortlist = useCallback(async () => {
+    if (!newListName.trim() || !recruiterUser?.token) return;
+    try {
+      const newList = await createRecruiterShortlist(newListName.trim(), recruiterUser.token);
+      setShortlists([...shortlists, newList]);
+      setNewListName("");
+    } catch (e) {
+      console.error("Create shortlist failed", e);
+    }
+  }, [newListName, shortlists, recruiterUser]);
+
+  const addToShortlist = useCallback(async (listId: string, candidateId: string) => {
+    const cand = candidates.find(c => c.id === candidateId);
+    if (!cand || !recruiterUser?.token) return;
+    try {
+      const fitScore = calcShortlistScore(cand, []);
+      const updatedList = await addToRecruiterShortlist(listId, { candidateId, fitScore, notes: "" }, recruiterUser.token);
+      setShortlists(shortlists.map(sl => sl._id === listId || sl.id === listId ? updatedList : sl));
+      const a = { ...activity, candidatesShortlisted: activity.candidatesShortlisted + 1 };
+      setActivity(a);
+    } catch (e) {
+      console.error("Add to shortlist failed", e);
+    }
+  }, [shortlists, candidates, activity, recruiterUser]);
+
+  const removeFromShortlist = useCallback(async (listId: string, candidateId: string) => {
+    if (!recruiterUser?.token) return;
+    try {
+      const updatedList = await removeFromRecruiterShortlist(listId, candidateId, recruiterUser.token);
+      setShortlists(shortlists.map(sl => sl._id === listId || sl.id === listId ? updatedList : sl));
+    } catch (e) {
+      console.error("Remove from shortlist failed", e);
+    }
+  }, [shortlists, recruiterUser]);
+
+  const handleInterest = useCallback(async (candidateId: string, candidateName: string, candidateCps: number) => {
+    if (!recruiterUser?.token) return;
+    try {
+      await expressRecruiterInterest({ candidateId, candidateName, candidateCps }, recruiterUser.token);
+      setInterestRefresh(p => p + 1);
+      toast({ title: "Interest Expressed", description: "Express interest to request candidate details" });
+      const interests = await getRecruiterInterests(recruiterUser.token);
+      setApiInterests(interests);
+    } catch (e) {
+      console.error("Express interest failed", e);
+    }
+  }, [recruiterUser]);
+
+  const handleCVRequest = useCallback(async (candidateId: string) => {
+    if (!recruiterUser?.token) return;
+    try {
+      await requestCandidateCV(candidateId, recruiterUser.token);
+      setInterestRefresh(p => p + 1);
+      toast({ title: "CV Requested", description: "Request submitted to admin for approval" });
+      const interests = await getRecruiterInterests(recruiterUser.token);
+      setApiInterests(interests);
+    } catch (e) {
+      console.error("CV request failed", e);
+    }
+  }, [recruiterUser]);
 
   const conversionRate = activity.candidatesViewed > 0
     ? Math.round((activity.candidatesShortlisted / activity.candidatesViewed) * 100)
@@ -197,8 +228,11 @@ export default function RecruiterDashboard() {
     [ranked, saved]
   );
 
-  const getStatus = (candidateId: string) => getInterestStatus(RECRUITER_ID, candidateId);
-  const isApproved = (candidateId: string) => isFullProfileVisible(candidateId, RECRUITER_ID);
+  const getStatus = (candidateId: string) => {
+    const interest = apiInterests.find(i => i.candidateId === candidateId);
+    return interest ? interest.status : null;
+  };
+  const isApproved = (candidateId: string) => getStatus(candidateId) === "approved";
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _refresh = interestRefresh;
@@ -207,8 +241,7 @@ export default function RecruiterDashboard() {
     const status = getStatus(c.id);
     const approved = isApproved(c.id);
     const revenueOk = isRevenueCleared(c.id);
-    const displayName = approved ? c.name : maskName(c.name);
-    const vis = getCandidateVisibility(c.id);
+    const displayName = c.name;
 
     return (
       <motion.div key={c.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.03 }}>
@@ -334,62 +367,20 @@ export default function RecruiterDashboard() {
           <TabsContent value="discover" className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search by skill or domain (e.g. Data Analyst, UI Designer)" value={search} onChange={e => setSearch(e.target.value)} className="pl-10" />
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Filter by location (e.g. Bangalore, Delhi)" value={locationSearch} onChange={e => setLocationSearch(e.target.value)} className="pl-10" />
               </div>
-              <Button
-                variant={highTrustOnly ? "default" : "outline"}
-                onClick={() => setHighTrustOnly(!highTrustOnly)}
-                className="gap-2"
-              >
-                <ShieldCheck className="h-4 w-4" />
-                {highTrustOnly ? "High Trust Only ✓" : "High Trust Only"}
-              </Button>
-              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2"><Filter className="h-4 w-4" />Quick Filters</Button>
+              <Button variant="outline" onClick={() => setShowFilters(!showFilters)} className="gap-2"><Filter className="h-4 w-4" />CPS Filter</Button>
             </div>
 
             <AnimatePresence>
               {showFilters && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <Card>
-                    <CardContent className="p-4 space-y-4">
+                    <CardContent className="p-4">
                       <div>
                         <label className="text-xs font-medium text-muted-foreground mb-2 block">CPS Range: {cpsRange[0]}–{cpsRange[1]}</label>
                         <Slider min={0} max={100} step={5} value={cpsRange} onValueChange={setCpsRange} />
-                      </div>
-                      <div>
-                        <label className="text-xs font-medium text-muted-foreground mb-2 block">Experience: {expRange[0]}–{expRange[1]} yrs</label>
-                        <Slider min={0} max={15} step={1} value={expRange} onValueChange={setExpRange} />
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <label className="text-xs font-medium text-muted-foreground w-full">Talent Pool</label>
-                        {["all", "Fresher Pool", "Entry-Level Pool", "Mid-Level Pool", "Senior Pool"].map(p => (
-                          <Badge key={p} variant={selectedPool === p ? "default" : "outline"} className="cursor-pointer" onClick={() => setSelectedPool(p)}>{p === "all" ? "All Pools" : p}</Badge>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <label className="text-xs font-medium text-muted-foreground w-full">Level</label>
-                        {["all", "CPS Qualified", "Interview Ready", "Pre-Screened"].map(l => (
-                          <Badge key={l} variant={selectedLevel === l ? "default" : "outline"} className="cursor-pointer" onClick={() => setSelectedLevel(l)}>{l === "all" ? "All Levels" : l}</Badge>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <label className="text-xs font-medium text-muted-foreground w-full">Domain</label>
-                        {["all", ...ALL_DOMAINS].map(d => (
-                          <Badge key={d} variant={selectedDomain === d ? "default" : "outline"} className="cursor-pointer" onClick={() => setSelectedDomain(d)}>{d === "all" ? "All Domains" : d}</Badge>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <label className="text-xs font-medium text-muted-foreground w-full">Industry</label>
-                        {["all", "IT / Software", "Banking / Finance", "Healthcare", "E-Commerce", "Manufacturing", "Consulting", "Education"].map(ind => (
-                          <Badge key={ind} variant={selectedIndustry === ind ? "default" : "outline"} className="cursor-pointer" onClick={() => setSelectedIndustry(ind)}>{ind === "all" ? "All Industries" : ind}</Badge>
-                        ))}
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <label className="text-xs font-medium text-muted-foreground w-full">Skills</label>
-                        {ALL_SKILLS.slice(0, 10).map(s => (
-                          <Badge key={s} variant={selectedSkills.includes(s) ? "default" : "outline"} className="cursor-pointer" onClick={() => setSelectedSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}>{s}</Badge>
-                        ))}
                       </div>
                     </CardContent>
                   </Card>
@@ -431,7 +422,7 @@ export default function RecruiterDashboard() {
             )}
 
             {shortlists.map(sl => (
-              <Card key={sl.id}>
+              <Card key={sl._id || sl.id}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg flex items-center gap-2"><ListChecks className="h-5 w-5 text-primary" />{sl.name}<Badge variant="secondary" className="ml-auto">{sl.candidates.length} candidates</Badge></CardTitle>
                 </CardHeader>
@@ -446,13 +437,13 @@ export default function RecruiterDashboard() {
                         <div className="flex items-center gap-3">
                           <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">{cand.name[0]}</div>
                           <div>
-                            <p className="text-sm font-medium text-foreground flex items-center gap-1">{approved ? cand.name : maskName(cand.name)} {!approved && <Lock className="h-3 w-3 text-muted-foreground" />}</p>
+                            <p className="text-sm font-medium text-foreground flex items-center gap-1">{cand.name} {!approved && <Lock className="h-3 w-3 text-muted-foreground" />}</p>
                             <p className="text-xs text-muted-foreground">CPS {cand.cps} · Fit Score: {sc.fitScore}%</p>
                           </div>
                         </div>
                         <div className="flex items-center gap-2">
                           <Badge variant={sc.fitScore >= 70 ? "default" : "secondary"} className="text-[10px]">{sc.fitScore >= 70 ? "Highly suitable" : "Moderate fit"}</Badge>
-                          <Button variant="ghost" size="icon" onClick={() => removeFromShortlist(sl.id, sc.candidateId)}><X className="h-4 w-4" /></Button>
+                          <Button variant="ghost" size="icon" onClick={() => removeFromShortlist(sl._id || sl.id, sc.candidateId)}><X className="h-4 w-4" /></Button>
                         </div>
                       </motion.div>
                     );
@@ -475,7 +466,7 @@ export default function RecruiterDashboard() {
                     <CardContent className="p-4 flex items-center gap-4">
                       <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-bold text-primary">{c.name[0]}</div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-foreground truncate flex items-center gap-1">{approved ? c.name : maskName(c.name)} {!approved && <Lock className="h-3 w-3 text-muted-foreground" />}</h3>
+                        <h3 className="font-semibold text-foreground truncate flex items-center gap-1">{c.name} {!approved && <Lock className="h-3 w-3 text-muted-foreground" />}</h3>
                         <p className="text-xs text-muted-foreground">{c.domain} · CPS {c.cps} · {c.level}</p>
                       </div>
                       <div className="text-right">
@@ -498,30 +489,9 @@ export default function RecruiterDashboard() {
                   <label className="text-sm font-medium text-foreground mb-2 block">CPS Range: {cpsRange[0]}–{cpsRange[1]}</label>
                   <Slider min={0} max={100} step={5} value={cpsRange} onValueChange={setCpsRange} />
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-3 block">Candidate Level</label>
-                  <div className="flex flex-wrap gap-2">
-                    {["all", "CPS Qualified", "Interview Ready", "Pre-Screened"].map(l => (
-                      <Badge key={l} variant={selectedLevel === l ? "default" : "outline"} className="cursor-pointer px-3 py-1.5" onClick={() => setSelectedLevel(l)}>{l === "all" ? "All Levels" : l}</Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-3 block">Preferred Domain</label>
-                  <div className="flex flex-wrap gap-2">
-                    {["all", ...ALL_DOMAINS].map(d => (
-                      <Badge key={d} variant={selectedDomain === d ? "default" : "outline"} className="cursor-pointer px-3 py-1.5" onClick={() => setSelectedDomain(d)}>{d === "all" ? "All" : d}</Badge>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-foreground mb-3 block">Required Skills</label>
-                  <div className="flex flex-wrap gap-2">
-                    {ALL_SKILLS.map(s => (
-                      <Badge key={s} variant={selectedSkills.includes(s) ? "default" : "outline"} className="cursor-pointer px-3 py-1.5" onClick={() => setSelectedSkills(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}>{s}</Badge>
-                    ))}
-                  </div>
-                </div>
+                <p className="text-sm text-muted-foreground">
+                  Only CPS score is used in filtering.
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -577,7 +547,7 @@ export default function RecruiterDashboard() {
               const status = getStatus(detailCandidate.id);
               const approved = isApproved(detailCandidate.id);
               const revenueOk = isRevenueCleared(detailCandidate.id);
-              const displayName = approved ? detailCandidate.name : maskName(detailCandidate.name);
+              const displayName = detailCandidate.name;
 
               return (
                 <>
@@ -702,7 +672,7 @@ export default function RecruiterDashboard() {
                       {shortlists.length > 0 && (
                         <div className="flex flex-wrap gap-2">
                           {shortlists.map(sl => (
-                            <Button key={sl.id} size="sm" variant="outline" className="text-xs gap-1" onClick={() => addToShortlist(sl.id, detailCandidate.id)} disabled={sl.candidates.some(c => c.candidateId === detailCandidate.id)}>
+                            <Button key={sl._id || sl.id} size="sm" variant="outline" className="text-xs gap-1" onClick={() => addToShortlist(sl._id || sl.id, detailCandidate.id)} disabled={sl.candidates.some(c => c.candidateId === detailCandidate.id)}>
                               <Plus className="h-3 w-3" />
                               {sl.candidates.some(c => c.candidateId === detailCandidate.id) ? `In ${sl.name}` : sl.name}
                             </Button>

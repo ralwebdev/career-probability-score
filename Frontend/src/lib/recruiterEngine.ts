@@ -49,6 +49,7 @@ export interface RankedCandidate extends Candidate {
 }
 
 export interface Shortlist {
+  _id?: string;
   id: string;
   name: string;
   candidates: ShortlistedCandidate[];
@@ -161,7 +162,6 @@ export function rankCandidates(
   requiredDomain: string = ""
 ): RankedCandidate[] {
   return candidates
-    .filter(c => c.cps >= CPS_THRESHOLD)
     .map(c => {
       const level = getCandidateLevel(c);
       const matchPercentage = calcMatchPercentage(c, requiredSkills, requiredDomain);

@@ -5,10 +5,7 @@ import { Briefcase, Lock, Mail, Eye, EyeOff, ShieldCheck, Building2, User, Alert
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import {
-  authenticateRecruiterAccount, registerRecruiter, seedDefaultRecruiters,
-  type RecruiterAccount,
-} from "@/lib/recruiterAccessEngine";
+import { registerRecruiterApi, loginRecruiterApi } from "@/lib/api";
 import { recordConsent } from "@/lib/recruiterTrustEngine";
 
 export type RecruiterRole = "recruiter" | "admin";
@@ -20,34 +17,10 @@ export interface RecruiterUser {
   company: string;
   role: RecruiterRole;
   verified: boolean;
+  token: string;
 }
 
-const ADMIN_CREDENTIALS = { email: "admin@cps.platform", password: "admin123" };
-
-export function authenticateRecruiter(email: string, password: string): { user: RecruiterUser | null; statusMessage?: string } {
-  if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
-    return { user: { id: "adm_1", email, name: "Platform Admin", company: "CPS Platform", role: "admin", verified: true } };
-  }
-  const account = authenticateRecruiterAccount(email, password);
-  if (!account) return { user: null };
-
-  if (account.status === "blacklisted") {
-    return { user: null, statusMessage: "Your account has been permanently restricted due to violation of platform policies." };
-  }
-  if (account.status === "rejected") {
-    return { user: null, statusMessage: "Your account has been temporarily restricted due to compliance concerns. Please contact support for resolution." };
-  }
-  if (account.status === "pending") {
-    return { user: null, statusMessage: "Your account is not yet activated. You will be notified upon approval." };
-  }
-
-  return {
-    user: {
-      id: account.id, email: account.email, name: account.name,
-      company: account.company, role: "recruiter", verified: true,
-    },
-  };
-}
+// Removed local mock authenticateRecruiter function
 
 export function getRecruiterSession(): RecruiterUser | null {
   try {
@@ -70,28 +43,37 @@ export default function RecruiterLogin() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  // Seed defaults on mount
-  useState(() => { seedDefaultRecruiters(); });
+  // No longer seed local defaults
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => {
-      const result = authenticateRecruiter(email, password);
-      if (result.statusMessage) {
-        toast({ title: "Access Denied", description: result.statusMessage, variant: "destructive" });
-      } else if (result.user) {
-        sessionStorage.setItem("recruiterUser", JSON.stringify(result.user));
-        toast({ title: "Login successful", description: `Welcome, ${result.user.name}` });
-        navigate("/recruiter-dashboard");
-      } else {
-        toast({ title: "Login failed", description: "Invalid email or password", variant: "destructive" });
-      }
+    try {
+
+
+      const result = await loginRecruiterApi({ email, password });
+      
+      const user = {
+        id: result._id,
+        email: result.email,
+        name: result.name,
+        company: result.company,
+        role: result.role,
+        verified: result.status === 'approved',
+        token: result.token
+      };
+
+      sessionStorage.setItem("recruiterUser", JSON.stringify(user));
+      toast({ title: "Login successful", description: `Welcome, ${user.name}` });
+      navigate("/recruiter-dashboard");
+    } catch (err: any) {
+      toast({ title: "Login failed", description: err.message || "Invalid email or password", variant: "destructive" });
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !company.trim()) {
       toast({ title: "Missing fields", description: "Please fill all fields", variant: "destructive" });
@@ -102,19 +84,18 @@ export default function RecruiterLogin() {
       return;
     }
     setLoading(true);
-    setTimeout(() => {
-      const account = registerRecruiter(name.trim(), company.trim(), email.trim(), password);
-      if (account) {
-        recordConsent(account.id, "recruiter", { terms: true, privacy: true, dataSharing: true, recruiterAgreement: true });
-        toast({ title: "Registration Submitted", description: "Your account is under review. You will be notified upon approval." });
-        setMode("login");
-        setName("");
-        setCompany("");
-      } else {
-        toast({ title: "Email already registered", description: "Try logging in instead", variant: "destructive" });
-      }
+    try {
+      const result = await registerRecruiterApi({ name: name.trim(), company: company.trim(), email: email.trim(), password });
+      recordConsent(result._id, "recruiter", { terms: true, privacy: true, dataSharing: true, recruiterAgreement: true });
+      toast({ title: "Registration Submitted", description: "Your account is under review. You will be notified upon approval." });
+      setMode("login");
+      setName("");
+      setCompany("");
+    } catch (err: any) {
+      toast({ title: "Registration failed", description: err.message || "Email already registered", variant: "destructive" });
+    } finally {
       setLoading(false);
-    }, 600);
+    }
   };
 
   return (
@@ -232,17 +213,7 @@ export default function RecruiterLogin() {
           </div>
         </form>
 
-        {mode === "login" && (
-          <div className="mt-6 rounded-xl border bg-muted/30 p-4">
-            <p className="text-xs font-semibold mb-2">Demo Credentials</p>
-            <div className="space-y-1.5 text-[11px] text-muted-foreground">
-              <p><span className="font-medium text-foreground">Recruiter:</span> recruiter@techcorp.com / recruiter123</p>
-              <p><span className="font-medium text-foreground">HR Lead:</span> hr@startupx.io / recruiter123</p>
-              <p><span className="font-medium text-foreground">Pending:</span> talent@globalinc.com / recruiter123</p>
-              <p><span className="font-medium text-foreground">Admin:</span> admin@cps.platform / admin123</p>
-            </div>
-          </div>
-        )}
+
       </motion.div>
     </div>
   );

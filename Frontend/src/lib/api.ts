@@ -417,3 +417,133 @@ export async function changeCollegePassword(passwordData: any, token: string) {
   }
   return response.json();
 }
+
+// Recruiter API
+export async function registerRecruiterApi(data: any) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Failed to register recruiter');
+  }
+  return response.json();
+}
+
+export async function loginRecruiterApi(credentials: any) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || 'Invalid credentials');
+  }
+  return response.json();
+}
+
+export async function getRecruiterCandidates(token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/candidates`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to fetch candidates');
+  return response.json();
+}
+
+export async function getRecruiterShortlists(token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/shortlists`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to fetch shortlists');
+  return response.json();
+}
+
+export async function createRecruiterShortlist(name: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/shortlists`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ name }),
+  });
+  if (!response.ok) throw new Error('Failed to create shortlist');
+  return response.json();
+}
+
+export async function addToRecruiterShortlist(listId: string, candidateData: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/shortlists/${listId}/add`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(candidateData),
+  });
+  if (!response.ok) throw new Error('Failed to add candidate to shortlist');
+  return response.json();
+}
+
+export async function removeFromRecruiterShortlist(listId: string, candidateId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/shortlists/${listId}/remove/${candidateId}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to remove candidate from shortlist');
+  return response.json();
+}
+
+export async function toggleSavedCandidate(candidateId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/saved/${candidateId}`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to toggle saved candidate');
+  return response.json();
+}
+
+export async function getRecruiterInterests(token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/interests`, {
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to fetch interests');
+  return response.json();
+}
+
+export async function expressRecruiterInterest(data: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/interests`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify(data),
+  });
+  if (!response.ok) throw new Error('Failed to express interest');
+  return response.json();
+}
+
+export async function requestCandidateCV(candidateId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/interests/cv`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`,
+    },
+    body: JSON.stringify({ candidateId }),
+  });
+  if (!response.ok) throw new Error('Failed to request CV');
+  return response.json();
+}
+
+export async function trackCandidateView(token: string) {
+  const response = await fetch(`${API_BASE_URL}/recruiter/activity/view`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error('Failed to track view');
+  return response.json();
+}
